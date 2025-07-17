@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CLIO – Chat</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="icon.ico">
+  <link rel="stylesheet" href="chat.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <canvas id="particles-bg"></canvas>
+  
+  <div class="chat-container">
+    <button class="menu-btn" id="menu-btn">☰</button>
+    
+    <nav class="sidebar" id="sidebar">
+      <button class="icon-btn active" title="New Chat">✨</button>
+      <button class="icon-btn" title="History">📚</button>
+      <button class="icon-btn" title="Assistant">
+        <img src="icon.ico" alt="CLIO" style="width: 24px; height: 24px; border-radius: 8px;">
+      </button>
+      <button class="icon-btn" title="Settings">⚙️</button>
+      <button class="icon-btn" title="Discover">🔮</button>
+    </nav>
+    
+    <main class="main-chat-ui">
+      <header class="chat-header">
+        <div class="persona-info">
+          <div class="persona-name">CLIO</div>
+          <div class="persona-status">
+            <span class="status-dot"></span>
+            <span>Ready to assist</span>
+          </div>
+        </div>
+      </header>
+      
+      <section class="chat-bubbles" id="chat-bubbles">
+        <!-- Messages will be appended here -->
+      </section>
+      
+      <form class="prompt-area" id="prompt-form">
+        <button type="button" class="prompt-btn" id="addfile-btn" title="Add file">📎</button>
+        <textarea class="prompt-input" id="prompt-input" rows="1" placeholder="Share your thoughts..."></textarea>
+        <button type="button" class="prompt-btn" id="voice-btn" title="Voice input">🎤</button>
+        <button type="submit" class="prompt-btn" id="send-btn" title="Send">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"/>
+          </svg>
+        </button>
+      </form>
+      
+      <div class="quick-bar">
+        <button class="quick-action" onclick="quickFill('Summarize this text')">
+          <span>📝</span> Summarize
+        </button>
+        <button class="quick-action" onclick="quickFill('Explain this concept')">
+          <span>💡</span> Explain
+        </button>
+        <button class="quick-action" onclick="quickFill('Write code for...')">
+          <span>💻</span> Code
+        </button>
+        <button class="quick-action" onclick="quickFill('Create a plan for...')">
+          <span>📊</span> Plan
+        </button>
+        <button class="quick-action" onclick="quickFill('Help me brainstorm...')">
+          <span>🧠</span> Brainstorm
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <script src="chat.js"></script>
+</body>
+</html>
