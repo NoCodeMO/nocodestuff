@@ -1,0 +1,1 @@
+(()=>{if('serviceWorker'in navigator){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){try{localStorage.setItem('afterlight_last_hide',Date.now())}catch{}}});})();
