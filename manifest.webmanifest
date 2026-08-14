@@ -1,1 +1,1 @@
-{"name":"Afterlight Bunker","short_name":"Afterlight","start_url":"./","scope":"./","display":"standalone","background_color":"#0b0d0a","theme_color":"#11130f","orientation":"any","description":"A cozy post-apocalyptic idle clicker and bunker builder."}
+{"name":"Afterlight Bunker","short_name":"Afterlight","start_url":"./","scope":"./","display":"fullscreen","display_override":["fullscreen","standalone"],"background_color":"#0b0d0a","theme_color":"#11130f","orientation":"any","description":"A post-apocalyptic idle clicker and bunker builder."}
