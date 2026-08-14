@@ -1,0 +1,36 @@
+/* Approved Afterlight sprite-sheet integration */
+#scene{position:relative;overflow:hidden;background:#161914!important}
+#game{opacity:0!important;pointer-events:none!important}
+#spriteStage{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none;image-rendering:pixelated}
+#spriteStage .worldFar,#spriteStage .worldMid,#spriteStage .worldFore{position:absolute;inset:0;background-repeat:no-repeat;background-size:cover;background-position:center bottom}
+#spriteStage .worldFar{opacity:.95;transform:scale(1.03);filter:saturate(.9) brightness(.72)}
+#spriteStage .worldMid{opacity:.55;background-position:center 64%;mix-blend-mode:screen}
+#spriteStage .worldFore{opacity:.72;background-position:center bottom}
+.bunkerDoor{position:absolute;left:-1%;bottom:13%;height:43%;max-width:28%;object-fit:contain;filter:drop-shadow(0 7px 7px #000b)}
+.survivorSprite,.enemySprite{position:absolute;bottom:10%;object-fit:contain;transform-origin:center bottom;filter:drop-shadow(0 8px 5px #000b)}
+.survivorSprite{left:23%;height:41%;animation:survivorIdle 1.5s steps(2,end) infinite}
+.enemySprite{right:19%;height:34%;animation:enemyIdle 1.05s ease-in-out infinite}
+.enemySprite[data-tier="1"]{height:36%}.enemySprite[data-tier="2"]{height:43%}.enemySprite[data-tier="3"]{height:39%}.enemySprite[data-tier="4"]{height:52%}.enemySprite[data-tier="5"]{height:63%;right:14%}
+.survivorSprite.shoot{animation:shootKick .16s ease-out}
+.enemySprite.hit{animation:enemyHit .16s ease-out}
+.enemySprite.spawn{animation:enemySpawn .28s ease-out}
+.muzzleFx{position:absolute;left:43%;bottom:31%;width:40px;height:18px;opacity:0;background:radial-gradient(ellipse at left,#fff 0 8%,#ffd64b 10% 28%,#ff7b1c 30% 50%,transparent 55%);filter:drop-shadow(0 0 8px #ffb52b)}
+.muzzleFx.fire{animation:muzzle .11s linear}
+.impactFx{position:absolute;right:23%;bottom:31%;width:24px;height:24px;opacity:0;background:radial-gradient(circle,#fff 0 8%,#ffcf47 12% 24%,#b32119 27% 38%,transparent 42%)}
+.impactFx.pop{animation:impact .2s ease-out}
+.roomArt{min-height:98px!important;background-color:#151914!important;image-rendering:pixelated}
+.roomArt:before,.roomArt:after{display:none!important}
+@keyframes survivorIdle{50%{transform:translateY(-2px)}}
+@keyframes shootKick{45%{transform:translateX(-5px) rotate(-1deg)}}
+@keyframes enemyIdle{50%{transform:translateY(-3px) rotate(.8deg)}}
+@keyframes enemyHit{45%{transform:translateX(11px) scale(.94);filter:brightness(2) drop-shadow(0 8px 5px #000b)}}
+@keyframes enemySpawn{from{opacity:0;transform:translateX(55px) scale(.7)}to{opacity:1;transform:none}}
+@keyframes muzzle{0%{opacity:1;transform:scale(.4)}50%{opacity:1;transform:scale(1.4)}100%{opacity:0;transform:scale(.7)}}
+@keyframes impact{0%{opacity:1;transform:scale(.3)}45%{opacity:1;transform:scale(1.6)}100%{opacity:0;transform:scale(2.2)}}
+@media(max-width:600px){
+ .bunkerDoor{height:34%;bottom:15%;left:-5%}
+ .survivorSprite{left:18%;height:34%;bottom:12%}
+ .enemySprite{right:11%;height:29%;bottom:12%}
+ .enemySprite[data-tier="4"]{height:43%}.enemySprite[data-tier="5"]{height:50%;right:4%}
+ .muzzleFx{left:40%;bottom:30%}.impactFx{right:18%;bottom:29%}
+}
