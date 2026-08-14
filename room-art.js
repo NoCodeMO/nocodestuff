@@ -1,6 +1,6 @@
 (()=>{'use strict';
-const direct={generator:'assets/generator-room.webp?v=7',workshop:'assets/workshop-room.webp?v=7'};
-const fallback={generator:'assets/generator-room.b64?v=7',workshop:'assets/workshop-room.b64?v=7',greenhouse:'assets/greenhouse-room.b64?v=7'};
+const direct={generator:'assets/generator-room.webp?v=8',workshop:'assets/workshop-room.webp?v=8'};
+const fallback={generator:'assets/generator-room.b64?v=8',workshop:'assets/workshop-room.b64?v=8',greenhouse:'assets/greenhouse-room.b64?v=8'};
 const images={};
 function applyOne(name){const img=images[name];if(!img)return;document.querySelectorAll('.roomArt.'+name).forEach(el=>{el.style.setProperty('background-image',img,'important');el.style.setProperty('background-size','100% 100%','important');el.style.setProperty('background-position','center center','important');el.style.setProperty('background-repeat','no-repeat','important');el.classList.add('realRoomArt')})}
 function apply(){Object.keys(images).forEach(applyOne)}
