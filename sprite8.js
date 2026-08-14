@@ -2,7 +2,7 @@
 const scene=document.getElementById('scene'),tap=document.getElementById('clickCore');if(!scene)return;
 const ASSETS=['survivor2','walker2','runner2','brute2','spitter2','tank2','boss2'];
 const urls={};
-async function load(name){try{const t=await fetch(`assets/${name}.b64?v=8`).then(r=>{if(!r.ok)throw Error(r.status);return r.text()});urls[name]=`data:image/webp;base64,${t.trim()}`}catch(e){console.warn('sprite load failed',name,e)}}
+async function load(name){try{const t=await fetch(`assets/${name}.b64?v=9`).then(r=>{if(!r.ok)throw Error(r.status);return r.text()});urls[name]=`data:image/webp;base64,${t.trim()}`}catch(e){console.warn('sprite load failed',name,e)}}
 const stage=document.createElement('div');stage.id='spriteStage';
 stage.innerHTML='<div class="worldSky"></div><div class="worldRuins far"></div><div class="worldRuins near"></div><div class="road"></div><div class="bunkerSilhouette"></div>';
 const survivor=document.createElement('img');survivor.className='survivorSprite';survivor.alt='Survivor';
