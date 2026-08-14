@@ -1,1 +1,33 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#11130f"><title>Afterlight Bunker</title><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="style.css?v=2"></head><body><main id="app"><header id="hud"><div class="brand"><b>AFTERLIGHT</b><span>BUNKER PROTOCOL</span></div><div class="resource"><i>◉</i><div><b id="coins">0</b><span id="cps">+0/s</span></div></div><div class="resource"><i>⚙</i><div><b id="scrap">0</b><span>SCRAP</span></div></div><div class="resource"><i>✦</i><div><b id="science">0</b><span>SCIENCE</span></div></div></header><section id="scene"><canvas id="game" width="480" height="520"></canvas><div id="enemyCard"><span id="enemyType">WALKER</span><b id="enemyLevel">LV. 1</b><div class="hp"><i id="enemyHp"></i></div><small id="enemyReward">REWARD 5</small></div><button id="clickCore"><span>TAP</span><b id="clickValue">+1</b></button></section><section id="bunker"><div class="sectionTitle"><span>YOUR BUNKER</span><small id="bunkerLevel">LEVEL 1</small></div><div id="rooms"></div></section><nav id="tabs"><button class="active" data-tab="base">⌂<span>BASE</span></button><button data-tab="build">🔨<span>BUILD</span></button><button data-tab="research">⚗<span>RESEARCH</span></button><button data-tab="garden">🌱<span>GARDEN</span></button><button data-tab="stats">☷<span>STATS</span></button></nav><section id="drawer" class="hidden"><div class="drawerHead"><b id="drawerTitle">BUILD</b><button id="closeDrawer">×</button></div><div id="drawerBody"></div></section><div id="offline" class="modal hidden"><div><span>☾</span><h2>THE BUNKER KEPT RUNNING</h2><p id="offlineText"></p><b id="offlineGain"></b><button id="offlineCollect">COLLECT</button></div></div><div id="toast"></div></main><script src="game.js?v=2"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#11100d">
+<title>Afterlight Bunker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+<div id="game">
+  <header id="topbar">
+    <div class="survivor"><span class="avatar">☣</span><div><b>AFTERLIGHT</b><small> BUNKER <span id="bunkerLv">1</span></small></div></div>
+    <div id="resources"></div>
+    <button id="soundBtn" class="square">🔊</button>
+  </header>
+  <main id="main">
+    <section id="combat">
+      <div class="battleArt" aria-hidden="true"></div><div class="sunTint"></div>
+      <div class="combatHud"><div class="waveLine"><span id="dayText">DAY 1</span><span id="waveText">WAVE 1</span></div><div class="enemyPanel"><div><b id="enemyName">WALKER</b><small id="enemyTier">COMMON</small></div><div class="hpbar"><i id="enemyHp"></i></div><div class="enemyMeta"><span id="hpText">10 / 10 HP</span><span id="rewardText">+5</span></div></div></div>
+      <button id="clickZone" aria-label="Attack zombie"><span id="zombieVisual">🧟</span><strong id="clickValue">+1</strong><small>TAP TO SCAVENGE & ATTACK</small></button><div id="floaters"></div>
+    </section>
+    <section id="base"><div class="baseHeader"><div><b>YOUR BUNKER</b><small id="incomeText">0 coins/s</small></div><button id="expandBtn">EXPAND</button></div><div id="roomGrid"></div></section>
+    <section id="drawer" class="hidden"><div class="drawerHead"><button id="closeDrawer">×</button><b id="drawerTitle">BUILD</b><span></span></div><div id="drawerBody"></div></section>
+  </main>
+  <nav id="nav"><button class="navBtn active" data-view="base">🏠<span>BASE</span></button><button class="navBtn" data-view="build">🔨<span>BUILD</span></button><button class="navBtn" data-view="research">🧪<span>RESEARCH</span></button><button class="navBtn" data-view="plants">🌱<span>PLANTS</span></button><button class="navBtn" data-view="zombies">☠️<span>ZOMBIES</span></button></nav>
+  <div id="offline" class="modal hidden"><div class="modalCard"><div class="moon">☾</div><h2>WELCOME BACK</h2><p id="offlineMsg"></p><strong id="offlineReward"></strong><button id="offlineCollect">COLLECT</button></div></div><div id="toast"></div>
+</div>
+<script src="game.js?v=3"></script>
+</body></html>
