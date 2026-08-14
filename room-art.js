@@ -1,0 +1,1 @@
+(()=>{const rooms={generator:'assets/generator-room.b64',workshop:'assets/workshop-room.b64'};for(const [name,url] of Object.entries(rooms)){fetch(url+'?v=1').then(r=>r.text()).then(b64=>{const el=document.querySelector('.roomArt.'+name);if(!el)return;el.style.backgroundImage=`url(data:image/webp;base64,${b64.trim()})`;el.classList.add('realRoomArt')}).catch(()=>{})}})();
