@@ -29,6 +29,7 @@ required=(
   'id="missionBox"'
   'specialMainCard'
   'id="musicToggle"'
+  'data-ui-audio="ready"'
 )
 
 for marker in "${required[@]}"; do
@@ -40,4 +41,4 @@ for marker in "${required[@]}"; do
   fi
 done
 
-echo "Afterlight browser smoke test passed: core game, visuals, missions, specialist rooms and audio UI rendered."
+echo "Afterlight browser smoke test passed: core game, visuals, missions, specialist rooms and user-gesture UI audio rendered."
