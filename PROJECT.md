@@ -145,7 +145,7 @@ Mission bonuses are consumed by the core economy. Current supported bonus keys:
 
 Special-room production is returned by `AfterlightSpecialRooms.rates()` and integrated into the core economy. Do not add another production interval that writes resources independently.
 
-Enemy encounters use one weighted table with an exact 100% total: Common 55%, Uncommon 25%, Rare 12%, Epic 5%, Legendary 2% and Brute 1%. A non-Brute encounter independently has a 12% horde chance. A horde renders three infected, but its HP, rewards and kill credit are a single x5 package.
+Enemy encounters use one weighted table with an exact 100% total: Common 55%, Uncommon 25%, Rare 12%, Epic 5%, Legendary 2% and Brute 1%. A non-Brute encounter independently has a 12% horde chance. A horde contains exactly three infected and grants exactly x3 HP, coins, scrap and kill credit compared with that same single infected. Brutes can never become hordes.
 
 The base zombie bounty is the greatest of a progression floor and 0.08% of actual hourly coin production. For example, a bunker producing 1,000,000 coins/hour gets an 800-coin Common base bounty before rarity, horde, research and mission multipliers. This keeps kills useful in both early and late game without letting combat replace the bunker economy. Brutes are outside the rarity glow system and always award one exclusive Brute Core.
 

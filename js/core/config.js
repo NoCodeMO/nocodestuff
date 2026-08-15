@@ -57,7 +57,7 @@ const ENEMIES=[
 const COMBAT=Object.freeze({
   hordeChance:.12,
   hordeVisualCount:3,
-  hordeMultiplier:5,
+  hordeMultiplier:3,
   bountyHourlyShare:.0008,
   minimumBaseBounty:6,
   minimumHits:6,

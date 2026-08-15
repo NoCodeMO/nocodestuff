@@ -18,7 +18,7 @@ for(const type of ENEMIES){
 if(ENEMIES.find(type=>type.id==='common').glow!=='transparent')fail('Common must not have a rarity glow');
 if(ENEMIES.find(type=>type.id==='brute').glow!=='transparent')fail('Brute must remain outside the rarity glow system');
 for(const id of ['uncommon','rare','epic','legendary'])if(ENEMIES.find(type=>type.id===id).glow==='transparent')fail(`${id} requires an in-game glow color`);
-if(COMBAT.hordeVisualCount!==3||COMBAT.hordeMultiplier!==5)fail('hordes must render three infected and pay/scale at x5');
+if(COMBAT.hordeVisualCount!==3||COMBAT.hordeMultiplier!==3)fail('hordes must contain at most three infected and pay/scale at exactly x3');
 if(!(COMBAT.hordeChance>0&&COMBAT.hordeChance<1))fail('horde chance must be a probability');
 const millionPerHourBounty=1_000_000*COMBAT.bountyHourlyShare;
 if(millionPerHourBounty!==800)fail(`1M/hour must produce an 800-coin Common base bounty, received ${millionPerHourBounty}`);
@@ -32,13 +32,14 @@ for(const [pattern,message] of [
   [/rates\(\)\.coins\*3600/,'bounties must scale from actual hourly coin production'],
   [/COMBAT\.bountyHourlyShare/,'bounties must use the documented hourly share'],
   [/horde=!type\.brute&&\(forcedHorde===null\?Math\.random\(\)<COMBAT\.hordeChance:/,'brutes must not become hordes'],
-  [/killCredit:horde\?COMBAT\.hordeMultiplier:1/,'hordes must award x5 kill credit'],
+  [/single\*\(horde\?COMBAT\.hordeMultiplier:1\)/,'horde HP and rewards must multiply the already-rounded single-zombie value exactly'],
+  [/killCredit:horde\?COMBAT\.hordeMultiplier:1/,'hordes must award x3 kill credit'],
   [/addCoins\(defeated\.reward,false\)/,'hourly-scaled bounties must not double-apply the coin bonus'],
   [/bruteCores/,'Brute kills must award their exclusive core drop']
 ])if(!pattern.test(game))fail(message);
 const visuals=fs.readFileSync(path.join(root,'js','ui','visuals.js'),'utf8');
 for(const [pattern,message] of [
-  [/detail\.visualCount/,'hordes must render their configured visual count'],
+  [/Math\.min\(maxHorde,Math\.max\(1,Number\(detail\.visualCount\)\|\|1\)\)/,'horde rendering must be hard-capped at the configured three zombies'],
   [/detail\.asset/,'spawn visuals must use the selected enemy asset'],
   [/--enemy-glow/,'rarity glow must be rendered by the game'],
   [/function shotFeedback\(\)\{clearSpawn\(\);/,'shots must clear the completed entrance state before hit feedback'],
