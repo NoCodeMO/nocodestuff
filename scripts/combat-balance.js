@@ -42,7 +42,7 @@ for(const [pattern,message] of [
   [/Math\.min\(maxHorde,Math\.max\(1,Number\(detail\.visualCount\)\|\|1\)\)/,'horde rendering must be hard-capped at the configured three zombies'],
   [/detail\.asset/,'spawn visuals must use the selected enemy asset'],
   [/--enemy-glow/,'rarity glow must be rendered by the game'],
-  [/function shotFeedback\(\)\{clearSpawn\(\);/,'shots must clear the completed entrance state before hit feedback'],
+  [/function shotFeedback\(event\)\{clearSpawn\(\);/,'shots must clear the completed entrance state before hit feedback'],
   [/spawnClearTimer=setTimeout\(clearSpawn,500\)/,'spawn state requires a fallback cleanup'],
   [/className='enemyUnit'/,'enemy visuals must use one coordinated encounter unit'],
   [/survivor\.src='assets\/survivor-ranger\.png'/,'combat must use the approved ranger survivor'],
@@ -51,6 +51,8 @@ for(const [pattern,message] of [
   [/dataset\.muzzleAnchor='77\.5% 20\.5%'/,'the rifle barrel needs one explicit normalized muzzle anchor']
 ])if(!pattern.test(visuals))fail(message);
 const css=fs.readFileSync(path.join(root,'app.css'),'utf8');
+if(!/float\.className='damageNumber'/.test(visuals)||!/if\(active\.length>8\)active\[0\]\.remove\(\)/.test(visuals))fail('per-shot damage feedback must exist and remain spam-safe');
+if(!/@keyframes damageNumberRise/.test(css))fail('floating damage animation is missing');
 if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \+ 100%\)/.test(css))fail('spawn entrance must start beyond the right edge');
 if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow must remain disabled');
 if(!/\.enemyUnit:is\([^}]+\) \.enemySprite\{filter:[^}]+var\(--enemy-glow\)/.test(css))fail('rarity glow must follow each sprite alpha instead of its layout container');
@@ -59,3 +61,4 @@ const survivorBuffer=fs.readFileSync(survivorAsset);if(!survivorBuffer.subarray(
 if(!/\.survivorUnit \.muzzleFx\{[^}]*left:77\.5%;top:20\.5%/.test(css))fail('muzzle effect must use the sprite-relative rifle barrel anchor');
 if(!/clip-path:polygon\(/.test(css))fail('muzzle flash must use a sharp pixel burst instead of the old fireball');
 console.log(`Afterlight combat balance passed: ${total}% rarity table, ${ENEMIES.length} sprites, 800 coins at 1M/hour, hordes x${COMBAT.hordeMultiplier}.`);
+
