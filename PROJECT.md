@@ -32,6 +32,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/command-center.js` - How to Play, persistent survivor roster, advanced Stats, official messages/rewards, settings and local Commander login/logout.
 - `js/systems/offline.js` - persisted, claimable offline production with permanent-rate math, Dealer exclusion and a 12-hour safety cap.
 - `js/systems/codex.js` - responsive Infected Codex, persistent first-sighting discovery, locked specimens and exact configured combat intelligence.
+- `js/systems/care-package.js` - persisted 90–150 second supply-drop scheduler, fall/landing lifecycle, five-second claims, economy-scaled loot and rare free Dealer activations.
 
 ### Presentation/platform
 - `js/ui/visuals.js` - configured survivor switching, enemy visuals, per-skin sprite-relative rifle flash, recoil/hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
@@ -47,6 +48,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/command-center-check.js` - Command Center tabs, schema migration, message rewards, account/settings persistence and large-number notation.
 - `scripts/offline-balance.js` - offline threshold/cap, efficiency, permanent-rate sourcing, pending-save safety and Uranium exclusion.
 - `scripts/codex-check.js` - discovery migration, spawn registration, all six entries, exact multipliers and responsive locked/unlocked archive checks.
+- `scripts/care-package-check.js` - transparent production assets, timing, economy scaling, scarce Uranium/Dealer odds, state migration, event/audio wiring and responsive UI guardrails.
 - `scripts/landscape-layout-check.js` and `scripts/landscape-probe.html` - static guardrails plus a real 844×390 computed-layout probe for the phone landscape command deck.
 - `scripts/survivor-roster-check.js` - starter/classified roster integrity, transparent assets, save migration, selection events and shared recoil/muzzle guardrails.
 - `scripts/architect-probe.html` - real-browser Level 100 save migration, permanent unlock, exact x1.5 production multiplier, roster selection and rifle-anchor probe.
@@ -73,14 +75,15 @@ The order in `index.html` is intentional:
 11. Infected Codex
 12. offline earnings
 13. missions
-14. audio
-15. platform
+14. care package
+15. audio
+16. platform
 
 Do not casually reorder these. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 13`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 14`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -94,7 +97,8 @@ missions: { claimed, bonuses }
 expeditions: { active, survivors, pending }
 specialRooms: { [roomId]: level }
 survivorSkins: { selected, unlocked }
-merchant: { active, purchases, spent, legacyMissionGrantDone }
+merchant: { active, purchases, spent, freeActivations, legacyMissionGrantDone }
+carePackage: { nextAt, active, opened, missed }
 offline: { pending, totalClaims, totalSeconds }
 command: { read, claimed, lastTab, account: { loggedIn, name, createdAt } }
 settings: { music, uiSfx, reducedEffects }
@@ -121,6 +125,7 @@ Do not create another persistent gameplay store unless there is a strong reason.
 - `window.AfterlightMerchant`
 - `window.AfterlightCommandCenter`
 - `window.AfterlightCodex`
+- `window.AfterlightCarePackage`
 - `window.AfterlightVisuals`
 - `window.AfterlightAudio`
 - `window.AfterlightPlatform`
@@ -145,6 +150,11 @@ Use events instead of adding duplicate click listeners across systems:
 - `afterlight:expedition-complete` - emitted exactly when the completion reveal is created; owns the expedition fanfare.
 - `afterlight:merchant-purchase` - emitted after Uranium is spent and the boost is active; owns the Dealer celebration and fanfare.
 - `afterlight:merchant-expired` - emitted when one or more persisted wall-clock boosts expire.
+- `afterlight:merchant-free-activated` - emitted when a care-package jackpot activates a no-cost five-minute Dealer contract without spending Uranium.
+- `afterlight:care-package-spawned` - emitted once when an economy-scaled drop begins descending.
+- `afterlight:care-package-landed` - emitted once on road impact and owns the dedicated landing thud.
+- `afterlight:care-package-opened` - emitted after its persisted reward is claimed and owns the long-form cache fanfare/reveal.
+- `afterlight:care-package-missed` - emitted when the five-second claim window expires without a penalty.
 - `afterlight:room-upgraded` - emitted after a successful normal-room upgrade; includes its exact level range, total cost and any newly reached milestone.
 - `afterlight:dev-reward-claimed` - emitted once after a Command Center supply reward is safely added to the unified save; owns its fanfare.
 - `afterlight:account` - local Commander login state changed.
@@ -184,6 +194,8 @@ The mission campaign contains exactly 200 missions. The original 50 IDs are immu
 
 Dealer boosts activate immediately and use persisted wall-clock deadlines. The 5x and 10x coin contracts share one channel and cannot stack with each other; different channels can stack. The intended maximum coin combination is the 10x coin contract with the expensive 3x everything contract, for a temporary 30x total. That everything contract also triples all other resource production, manual damage and infected bounties. Repurchasing the same active contract extends its remaining time rather than wasting it.
 
+Care packages arrive on a persisted randomized 90–150 second schedule while the game is visible. Their five-second claim window starts only after the 1.35-second parachute landing. Every claimed cache gives Coins, Scrap and one survival resource scaled from permanent production with early-game floors; temporary Dealer multipliers are divided out before reward calculation. Uranium is capped to a 10% one-crystal roll and a random free five-minute Dealer contract is a rare 4% jackpot (about 1.2 expected jackpots per perfect-attention hour). Free contracts use the shared Dealer channel rules, activate immediately and never spend Uranium. Missed drops simply schedule the next encounter.
+
 Normal-room production keeps the original 1.18 per-level growth and 1.62 cost growth. Levels 5, 10, 25 and 50 add derived permanent room multipliers of x1.25, x1.5, x2 and x3. These bonuses are calculated from room level, so old saves receive them automatically without migration. Bulk x10 costs are the exact sum of ten sequential upgrades; MAX buys only the levels the current coin balance can fully fund.
 
 Every four combined normal-room levels grant one Bunker Level. The Base screen exposes this exact 0–4 progression in a live accessible bar, driven by the same shared `bunkerLevelEvery` economy constant used by save normalization and core recalculation.
@@ -205,6 +217,7 @@ Only active assets remain in `assets/`:
 - `enemy-common-drifter.webp`, `enemy-uncommon-cinderback.webp`, `enemy-rare-blue-shield.webp`, `enemy-epic-bloater.webp`, `enemy-legendary-gilded-warden.webp`, `enemy-brute-breaker.webp` - transparent, left-facing enemy art with no baked rarity glow; glow is rendered by CSS at runtime
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
+- `care-package-airborne.png`, `care-package-crate.png` - true-alpha matching care-package states; the parachute is used only during descent and the closed crate receives its glow, dust, timer and reward effects at runtime
 
 `survivor-final.webp` and `walker-final.webp` are retained only as unused legacy assets so existing cached sessions cannot request missing files; new combat references neither one.
 
@@ -216,6 +229,7 @@ Only active assets remain in `assets/`:
 - Enemy movement is currently a fast offscreen-right entrance plus hit/death feedback. Full character-specific sprite-sheet animation is intentionally deferred.
 - Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
 - Commander login is a local profile stored inside the unified save. Secure cloud accounts and cross-device save sync require a future backend and are not simulated.
+- Care packages currently use one shared visual design and one fall/landing motion. Reward contents vary, but crate variants and opening sprite-sheet animation are intentionally deferred.
 - Prestige reset, Prestige bonuses and future survivor reveals are not implemented yet. Locked roster slots intentionally expose only their required Prestige level and no character artwork.
 - Background music uses the external CC0 Bio-Hazard OGG URL from OpenGameArt.
 - Normal rooms have a dedicated detail screen with live current/next output, per-minute/per-hour rates, contribution share, milestone status, affordability timing and x1/x10/MAX buying. Classified specialist rooms intentionally remain on their separate system for now.

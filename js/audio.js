@@ -43,6 +43,8 @@ function rewardSound(kind='mission'){
 }
 function researchSound(){tone(262,.22,.07,0,'sine',392);tone(392,.26,.075,.14,'triangle',523);tone(523,.3,.07,.3,'sine',784);tone(1047,.42,.05,.48,'sine',1319);noise(.42,.018,.22,6200);return true}
 function merchantSound(){tone(110,.2,.1,0,'sawtooth',165);noise(.16,.045,.02,900);tone(440,.16,.08,.1,'triangle',660);tone(660,.2,.075,.2,'sine',990);tone(990,.28,.065,.34,'sine',1480);tone(1480,.38,.045,.52,'sine',1975);noise(.52,.018,.22,6500);return true}
+function carePackageLandSound(){noise(.2,.16,0,720);tone(72,.22,.15,0,'sine',44);tone(185,.24,.055,.045,'triangle',112);noise(.08,.045,.12,2600);return true}
+function carePackageOpenSound(){noise(.09,.07,0,2100);tone(180,.12,.09,0,'square',260);tone(392,.18,.075,.08,'triangle',523);tone(523,.2,.075,.19,'sine',698);tone(698,.24,.07,.31,'sine',988);tone(1047,.34,.06,.47,'sine',1480);tone(1568,.45,.045,.67,'sine',2093);noise(.6,.022,.2,6200);return true}
 function roomMilestoneSound(event){if(!event.detail?.milestone)return false;tone(196,.18,.07,0,'triangle',294);tone(392,.2,.065,.1,'sine',523);tone(587,.24,.065,.22,'sine',784);tone(988,.34,.05,.36,'sine',1319);noise(.32,.014,.18,5200);return true}
 function buttonKind(target){if(target.matches('#closeDrawer,#missionClose,#appModeX,.installModal button'))return'close';if(target.closest('#tabs')||target.id==='missionNav')return'nav';return'tap'}
 function onUiPointer(event){const target=event.target.closest?.('button,[role="button"]');if(!target||target.disabled||target.closest('#scene'))return;unlockUi();uiSound(buttonKind(target))}
@@ -54,6 +56,8 @@ window.addEventListener('afterlight:mission-claimed',()=>rewardSound('mission'))
 window.addEventListener('afterlight:expedition-complete',()=>rewardSound('expedition'));
 window.addEventListener('afterlight:research-complete',researchSound);
 window.addEventListener('afterlight:merchant-purchase',merchantSound);
+window.addEventListener('afterlight:care-package-landed',carePackageLandSound);
+window.addEventListener('afterlight:care-package-opened',carePackageOpenSound);
 window.addEventListener('afterlight:room-upgraded',roomMilestoneSound);
 window.addEventListener('afterlight:dev-reward-claimed',()=>rewardSound('expedition'));
 document.body.dataset.uiAudio='ready';
@@ -61,5 +65,5 @@ document.body.dataset.uiAudio='ready';
 function unlockMusic(){if(musicUnlocked)return;if(enabled)play();if(musicUnlocked)removeMusicUnlock()}
 function removeMusicUnlock(){document.removeEventListener('pointerdown',unlockMusic,true);document.removeEventListener('touchstart',unlockMusic,true)}
 document.addEventListener('pointerdown',unlockMusic,true);document.addEventListener('touchstart',unlockMusic,{capture:true,passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else if(enabled)play()});
-window.AfterlightAudio={play,pause,isEnabled:()=>enabled,isEffectsEnabled:()=>effectsEnabled,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},setEffectsEnabled:value=>{effectsEnabled=!!value;if(S?.settings)S.settings.uiSfx=effectsEnabled;ST?.save?.();if(effectsEnabled)setTimeout(()=>uiSound('confirm'),0);return effectsEnabled},unlockUi,uiSound,gunshot,cashSound,rewardSound,researchSound,merchantSound,roomMilestoneSound};
+window.AfterlightAudio={play,pause,isEnabled:()=>enabled,isEffectsEnabled:()=>effectsEnabled,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},setEffectsEnabled:value=>{effectsEnabled=!!value;if(S?.settings)S.settings.uiSfx=effectsEnabled;ST?.save?.();if(effectsEnabled)setTimeout(()=>uiSound('confirm'),0);return effectsEnabled},unlockUi,uiSound,gunshot,cashSound,rewardSound,researchSound,merchantSound,carePackageLandSound,carePackageOpenSound,roomMilestoneSound};
 })();

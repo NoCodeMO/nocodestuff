@@ -22,7 +22,7 @@ if [[ -z "$CHROME" ]]; then
   exit 1
 fi
 
-"$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=2500 --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE" 2>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=2500 --dump-dom "http://127.0.0.1:${PORT}/?forceCarePackage=1" >"$DOM_FILE" 2>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,500 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/landscape-probe.html" >"$LANDSCAPE_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,700 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/architect-probe.html" >"$ARCHITECT_DOM_FILE" 2>>"$CHROME_LOG"
 
@@ -62,12 +62,17 @@ required=(
   'data-survivor-roster-system="ready"'
   'data-offline-system="ready"'
   'data-codex-system="ready"'
+  'data-care-package-system="ready"'
+  'id="carePackageDrop"'
+  'data-phase="landed"'
+  'assets/care-package-crate.png'
   'id="enemyCodexHint"'
   'id="hordeSignal"'
   'data-tab="command"'
   'id="commandBadge"'
   'js/core/numbers.js?build=1'
   'js/core/game.js?build=17'
+  'js/systems/care-package.js?build=1'
 )
 
 for marker in "${required[@]}"; do

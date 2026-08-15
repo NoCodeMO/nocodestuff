@@ -90,6 +90,19 @@ const COMBAT=Object.freeze({
   minimumHits:6,
   maximumHits:18
 });
+const CARE_PACKAGE=Object.freeze({
+  minimumIntervalMs:90000,
+  maximumIntervalMs:150000,
+  fallMs:1350,
+  visibleMs:5000,
+  coinSeconds:[35,65],
+  scrapSeconds:[20,40],
+  secondarySeconds:[18,36],
+  uraniumChance:.1,
+  uranium:[1,1],
+  dealerBoostChance:.04,
+  secondaryResources:['food','water','power','science']
+});
 const OFFLINE=Object.freeze({minimumAwayMs:60000,maximumAwayMs:43200000,baseEfficiency:.35,maximumEfficiency:.9});
-window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,SURVIVOR_SKINS,COMMAND_MESSAGES,ENEMIES,COMBAT,OFFLINE});
+window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,SURVIVOR_SKINS,COMMAND_MESSAGES,ENEMIES,COMBAT,CARE_PACKAGE,OFFLINE});
 })();
