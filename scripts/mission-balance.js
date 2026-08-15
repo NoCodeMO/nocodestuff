@@ -1,0 +1,27 @@
+'use strict';
+const fs=require('fs'),path=require('path'),vm=require('vm');
+const root=path.resolve(__dirname,'..'),read=file=>fs.readFileSync(path.join(root,file),'utf8'),fail=message=>{throw new Error(`Mission balance: ${message}`)};
+const state={coins:0,total:0,scrap:0,food:0,uranium:0,kills:0,bunker:1,rooms:{generator:1,workshop:0,greenhouse:0,purifier:0,lab:0,living:0,storage:0,turret:0},research:{tools:0,solar:0,hydro:0,filters:0,automation:0,walls:0},stats:{clicks:0,bosses:0,hordes:0,uraniumEarned:0,rarityKills:{}},missions:{claimed:[],bonuses:{}},merchant:{legacyMissionGrantDone:true}};
+const element=()=>({dataset:{},classList:{add(){},remove(){},toggle(){}},querySelector:()=>({}),querySelectorAll:()=>[],append(){},remove(){},innerHTML:'',id:'',className:''});
+const sandbox={window:{AfterlightState:{get:()=>state,update:(reason,fn)=>fn(state),save(){},notify(){}},addEventListener(){},dispatchEvent(){}},document:{body:{append(){}},getElementById:()=>null,querySelectorAll:()=>[],createElement:element},CustomEvent:function(){},setInterval(){},setTimeout(){},console};
+vm.runInNewContext(read('js/core/numbers.js'),sandbox,{filename:'numbers.js'});
+vm.runInNewContext(read('js/systems/missions.js'),sandbox,{filename:'missions.js'});
+const api=sandbox.window.AfterlightMissions,missions=api?.all?.()||[],operations=missions.filter(mission=>mission[0].startsWith('ops-'));
+if(missions.length!==200)fail(`expected exactly 200 total missions, received ${missions.length}`);
+if(operations.length!==150)fail(`expected exactly 150 new operations missions, received ${operations.length}`);
+if(new Set(missions.map(mission=>mission[0])).size!==200)fail('mission IDs must be unique');
+if(new Set(missions.map(mission=>mission[1])).size!==200)fail('mission titles must be unique');
+const chapters=new Map();for(const mission of operations)(chapters.get(mission[7])||chapters.set(mission[7],[]).get(mission[7])).push(mission);
+if(chapters.size!==15||[...chapters.values()].some(group=>group.length!==10))fail('new missions must form 15 chapters of exactly 10 objectives');
+const requiredMetrics=['kills','bunker','roomtotal','bosses','hordes','shots','researchtotal'];for(const metric of requiredMetrics)if(!operations.some(mission=>mission[2]===metric))fail(`missing ${metric} objectives`);
+if(!operations.some(mission=>mission[2].startsWith('rarity:')))fail('rarity hunt objectives are required');
+for(const mission of operations){if(!Number.isFinite(mission[3])||mission[3]<=0)fail(`${mission[0]} has an invalid target`);if(!Number.isFinite(mission[6])||mission[6]<10)fail(`${mission[0]} has an invalid unlock`)}
+const crystalRewards=missions.map(api.crystalReward);if(Math.max(...crystalRewards)!==6||Math.min(...crystalRewards)!==1)fail('mission crystals must stay between one and six');
+if(crystalRewards.reduce((sum,value)=>sum+value,0)>550)fail('the complete mission chain injects too many Uranium Crystals');
+const product=key=>operations.filter(mission=>mission[4]===key).reduce((value,mission)=>value*mission[5],1);
+if(product('prodMult')>1.46||product('zombieMult')>1.57||product('damageMult')>1.57||product('coinMult')>1.35||product('scienceMult')>1.46)fail('the 150-mission permanent bonus curve compounds too aggressively');
+if(product('costMult')<.92)fail('the mission chain makes room upgrades unfairly cheap');
+if(!operations.some(mission=>mission[4]==='coinCache')||!operations.some(mission=>mission[4]==='scrapCache'))fail('economy-scaled coin and scrap caches are required');
+const source=read('js/systems/missions.js');if(!/rate\/dealer/.test(source))fail('mission caches must exclude temporary Dealer multipliers');
+if(!/slice\(0,5\)/.test(source))fail('the expanded log must expose five active objectives');
+console.log('Afterlight mission balance passed: 150 new objectives, 15 chapters, 200 total missions and capped late-game rewards.');

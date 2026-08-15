@@ -33,6 +33,8 @@ required=(
   'assets/combat-bunker-clean.webp'
   'POWER GENERATOR'
   'id="missionBox"'
+  'data-mission-count="200"'
+  '200 AFTERLIGHT DIRECTIVES'
   'specialMainCard'
   'id="musicToggle"'
   'data-ui-audio="ready"'
