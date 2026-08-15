@@ -29,7 +29,7 @@ This file is the fastest entry point for any future development session. Read th
 
 ### Presentation/platform
 - `js/ui/visuals.js` - survivor/enemy visuals, hit feedback, resource pulses and room-art loading.
-- `js/audio.js` - background music plus short, delegated WebAudio UI feedback. Combat and reward SFX remain event-owned follow-up work.
+- `js/audio.js` - background music plus compressed WebAudio UI feedback and gunshots driven by `afterlight:shot`. Reward SFX remain separate follow-up work.
 - `js/platform.js` - standalone/fullscreen install helpers.
 
 ### Validation
@@ -109,7 +109,7 @@ Use events instead of adding duplicate click listeners across systems:
 - `afterlight:state` - important state mutation; `detail.reason` describes the change.
 - `afterlight:survivors` - specialist roster changed.
 
-UI button sounds are handled centrally in `audio.js`; do not add per-button audio listeners. Combat inside `#scene` is intentionally excluded and remains owned by `afterlight:shot`.
+UI button sounds are handled centrally in `audio.js`; do not add per-button audio listeners. Combat inside `#scene` is excluded from the button handler and its gunshot is driven by `afterlight:shot`.
 
 Example: future gun audio should listen to `afterlight:shot`, not attach another listener to the shoot button.
 
