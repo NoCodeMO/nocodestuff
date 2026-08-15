@@ -17,6 +17,10 @@ for(const [pattern,message] of [[/function renderRoomDetails\(k,celebrate=false\
 assert(/function bunkerProgress\(\)/.test(gameSource),'Bunker progress must derive from combined room levels');
 assert(/aria-valuetext/.test(gameSource),'Bunker progress needs accessible next-level context');
 assert(/id="bunkerProgress"/.test(html),'Bunker progress bar is missing from the live layout');
+assert(/function roomMilestoneCelebrate\(event\)/.test(visualSource),'Room milestone celebration renderer is missing');
+assert(/afterlight:room-upgraded',roomMilestoneCelebrate/.test(visualSource),'Milestone celebration must reuse the room-upgraded event');
+assert(/if\(!milestone\|\|!room\)return false/.test(visualSource),'Ordinary room upgrades must not trigger the milestone reveal');
+assert(css.includes('.roomMilestoneWin')&&css.includes('@keyframes roomMilestoneParticle'),'Tier celebration styling is missing');
 assert(!/\.b64|loadFallback|applyRoomArt/.test(visualSource),'Legacy room-art fallback loader must stay removed');
 for(const selector of ['.roomDetails','.roomDetailHero','.roomMilestones','.roomBuyActions','.roomUpgradeBurst'])assert(css.includes(selector),`Missing room UI style: ${selector}`);
 console.log('Afterlight room balance passed: 8 optimized room artworks, milestone curve, sequential bulk costs and live room intelligence UI.');
