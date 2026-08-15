@@ -14,7 +14,7 @@
   <link rel="preload" as="image" href="assets/combat-bunker-clean.webp" type="image/webp">
   <link rel="preload" as="image" href="assets/enemy-common-drifter.webp" type="image/webp">
   <link rel="preload" as="image" href="assets/room-generator.webp" type="image/webp">
-  <link rel="stylesheet" href="app.css?build=22">
+  <link rel="stylesheet" href="app.css?build=23">
 </head>
 <body>
   <main id="app">
@@ -30,6 +30,7 @@
     </header>
 
     <section id="scene">
+      <aside id="activeBoostHud" class="hidden" aria-live="polite" aria-label="Active Dealer boosts"></aside>
       <canvas id="game" width="480" height="520"></canvas>
       <div id="enemyCard">
         <span id="enemyType">WALKER</span><b id="enemyLevel">MUTATION 1</b>
@@ -70,7 +71,7 @@
   <script src="js/systems/expeditions.js?build=5"></script>
   <script src="js/systems/special-rooms.js?build=3"></script>
   <script src="js/systems/research.js?build=2"></script>
-  <script src="js/systems/merchant.js?build=2"></script>
+  <script src="js/systems/merchant.js?build=3"></script>
   <script src="js/systems/command-center.js?build=1"></script>
   <script src="js/ui/visuals.js?build=17"></script>
   <script src="js/core/game.js?build=14"></script>
