@@ -18,7 +18,7 @@ This file is the fastest entry point for any future development session. Read th
 - `manifest.webmanifest` - PWA/home-screen metadata.
 
 ### Core
-- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers, official Command Center transmissions and the complete enemy/rarity table.
+- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers, survivor skins, official Command Center transmissions and the complete enemy/rarity table.
 - `js/core/numbers.js` - one authoritative large-number formatter from K/M through B, T, Qa, Qi, Dc and beyond.
 - `js/core/state.js` - one authoritative persistent state object and save migration.
 - `js/core/game.js` - economy, combat, normal rooms, room intelligence/progression, HUD, tabs and drawer routing.
@@ -29,12 +29,12 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/special-rooms.js` - classified rooms unlocked by specialists.
 - `js/systems/research.js` - timed, scrap-funded research, completion badge and claiming.
 - `js/systems/merchant.js` - Uranium wallet, Dealer stock, temporary boost timers, purchase rules and runtime multipliers.
-- `js/systems/command-center.js` - How to Play, advanced Stats, official messages/rewards, settings and local Commander login/logout.
+- `js/systems/command-center.js` - How to Play, persistent survivor roster, advanced Stats, official messages/rewards, settings and local Commander login/logout.
 - `js/systems/offline.js` - persisted, claimable offline production with permanent-rate math, Dealer exclusion and a 12-hour safety cap.
 - `js/systems/codex.js` - responsive Infected Codex, persistent first-sighting discovery, locked specimens and exact configured combat intelligence.
 
 ### Presentation/platform
-- `js/ui/visuals.js` - survivor/enemy visuals, sprite-relative rifle flash, recoil/hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
+- `js/ui/visuals.js` - configured survivor switching, enemy visuals, per-skin sprite-relative rifle flash, recoil/hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
 - `js/audio.js` - background music plus compressed WebAudio UI, combat, reward and research-completion feedback.
 - `js/platform.js` - standalone/fullscreen install helpers.
 
@@ -48,6 +48,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/offline-balance.js` - offline threshold/cap, efficiency, permanent-rate sourcing, pending-save safety and Uranium exclusion.
 - `scripts/codex-check.js` - discovery migration, spawn registration, all six entries, exact multipliers and responsive locked/unlocked archive checks.
 - `scripts/landscape-layout-check.js` and `scripts/landscape-probe.html` - static guardrails plus a real 844×390 computed-layout probe for the phone landscape command deck.
+- `scripts/survivor-roster-check.js` - starter/classified roster integrity, transparent assets, save migration, selection events and shared recoil/muzzle guardrails.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
 - `npm run test:browser` - browser startup smoke test only.
@@ -78,7 +79,7 @@ Do not casually reorder these. Missions loads after game because it owns the cus
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 11`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 12`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -91,6 +92,7 @@ researchRuntime: { active, ready }
 missions: { claimed, bonuses }
 expeditions: { active, survivors, pending }
 specialRooms: { [roomId]: level }
+survivorSkins: { selected, unlocked }
 merchant: { active, purchases, spent, legacyMissionGrantDone }
 offline: { pending, totalClaims, totalSeconds }
 command: { read, claimed, lastTab, account: { loggedIn, name, createdAt } }
@@ -146,6 +148,7 @@ Use events instead of adding duplicate click listeners across systems:
 - `afterlight:dev-reward-claimed` - emitted once after a Command Center supply reward is safely added to the unified save; owns its fanfare.
 - `afterlight:account` - local Commander login state changed.
 - `afterlight:settings-changed` - visual accessibility settings changed and presentation systems should refresh.
+- `afterlight:survivor-selected` - persisted survivor selection changed; visuals swap art and its configured muzzle anchor without replacing combat logic.
 
 UI button sounds are handled centrally in `audio.js`; do not add per-button audio listeners. Combat inside `#scene` is excluded from the button handler and its gunshot is driven by `afterlight:shot`.
 
@@ -190,12 +193,14 @@ All production, price and reward UI uses `AfterlightNumbers`. Suffixes progress 
 
 Official Command Center messages are release-configured in `COMMAND_MESSAGES`. A message reward is always claim-once through `command.claimed`; its coin component can scale from current hourly production while fixed Uranium remains scarce. The current Commander login is explicitly local-device only and never claims to be cloud authentication.
 
+The Command survivor roster is configured once in `SURVIVOR_SKINS`. Both Ranger starters are permanently unlocked for new and old saves and are currently cosmetic/economically equal. Four future Prestige slots have stable IDs and level requirements but deliberately contain no asset, identity or appearance data. Selecting a starter persists in `survivorSkins.selected`; both share the same shot event, recoil and short muzzle animation while using per-skin normalized muzzle metadata.
+
 Offline production starts after one minute away and is capped at 12 hours per load. It uses the authoritative permanent room/special-room rates at 35% base efficiency, applies mission `offlineMult` up to a 90% hard cap, divides out temporary Dealer boosts and never generates Uranium. Calculated gains are persisted as a pending claim before the collection modal opens, so closing the game cannot lose them.
 
 ## Assets
 
 Only active assets remain in `assets/`:
-- `survivor-ranger.png` - active transparent survivor art. Its muzzle flash stays a separate short-lived game effect anchored at 77.5% / 20.5% inside the survivor unit, so recoil and responsive scaling cannot detach it from the rifle.
+- `survivor-ranger.png`, `survivor-ranger-female.webp` - selectable transparent starter survivor art. The female asset is game-resolution optimized for a fast first swap on mobile. Their muzzle flash stays a separate short-lived game effect anchored from each skin's normalized config metadata, so recoil and responsive scaling cannot detach it from the rifle.
 - `enemy-common-drifter.webp`, `enemy-uncommon-cinderback.webp`, `enemy-rare-blue-shield.webp`, `enemy-epic-bloater.webp`, `enemy-legendary-gilded-warden.webp`, `enemy-brute-breaker.webp` - transparent, left-facing enemy art with no baked rarity glow; glow is rendered by CSS at runtime
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
@@ -210,6 +215,7 @@ Only active assets remain in `assets/`:
 - Enemy movement is currently a fast offscreen-right entrance plus hit/death feedback. Full character-specific sprite-sheet animation is intentionally deferred.
 - Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
 - Commander login is a local profile stored inside the unified save. Secure cloud accounts and cross-device save sync require a future backend and are not simulated.
+- Prestige reset, Prestige bonuses and future survivor reveals are not implemented yet. Locked roster slots intentionally expose only their required Prestige level and no character artwork.
 - Background music uses the external CC0 Bio-Hazard OGG URL from OpenGameArt.
 - Normal rooms have a dedicated detail screen with live current/next output, per-minute/per-hour rates, contribution share, milestone status, affordability timing and x1/x10/MAX buying. Classified specialist rooms intentionally remain on their separate system for now.
 - No service worker is active during development. This is intentional because an earlier worker caused stale production builds.

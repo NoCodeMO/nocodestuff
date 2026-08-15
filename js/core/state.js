@@ -3,7 +3,7 @@ const CFG=window.AfterlightConfig;if(!CFG)throw new Error('AfterlightConfig must
 const KEY='afterlight_v4';
 const parse=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}};
 const defaults=()=>({
-  schema:11,coins:0,total:0,food:0,water:0,power:0,scrap:0,science:0,uranium:0,kills:0,level:1,bunker:1,
+  schema:12,coins:0,total:0,food:0,water:0,power:0,scrap:0,science:0,uranium:0,kills:0,level:1,bunker:1,
   rooms:{generator:1,workshop:0,greenhouse:0,purifier:0,lab:0,living:0,storage:0,turret:0},
   research:{tools:0,solar:0,hydro:0,filters:0,automation:0,walls:0},
   researchRuntime:{active:null,ready:null},
@@ -13,23 +13,26 @@ const defaults=()=>({
   missions:{claimed:[],bonuses:{}},
   expeditions:{active:null,survivors:[],pending:null},
   specialRooms:{},
+  survivorSkins:{selected:'ranger-male',unlocked:['ranger-male','ranger-female']},
   command:{read:[],claimed:[],lastTab:'guide',account:{loggedIn:false,name:'',createdAt:0}},
   settings:{music:true,uiSfx:true,reducedEffects:false},
   last:Date.now()
 });
 const loadedAt=Date.now(),base=defaults(),old=parse(KEY)||{},previousLast=Number(old.last)||loadedAt,offlineElapsedMs=Math.max(0,loadedAt-previousLast);
-const state={...base,...old,rooms:{...base.rooms,...(old.rooms||{})},research:{...base.research,...(old.research||{})},stats:{...base.stats,...(old.stats||{}),rarityKills:{...base.stats.rarityKills,...(old.stats?.rarityKills||{})}},merchant:{...base.merchant,...(old.merchant||{}),active:{...base.merchant.active,...(old.merchant?.active||{})},purchases:{...base.merchant.purchases,...(old.merchant?.purchases||{})}},offline:{...base.offline,...(old.offline||{})},command:{...base.command,...(old.command||{}),account:{...base.command.account,...(old.command?.account||{})}},settings:{...base.settings,...(old.settings||{})}};
+const state={...base,...old,rooms:{...base.rooms,...(old.rooms||{})},research:{...base.research,...(old.research||{})},stats:{...base.stats,...(old.stats||{}),rarityKills:{...base.stats.rarityKills,...(old.stats?.rarityKills||{})}},merchant:{...base.merchant,...(old.merchant||{}),active:{...base.merchant.active,...(old.merchant?.active||{})},purchases:{...base.merchant.purchases,...(old.merchant?.purchases||{})}},offline:{...base.offline,...(old.offline||{})},survivorSkins:{...base.survivorSkins,...(old.survivorSkins||{})},command:{...base.command,...(old.command||{}),account:{...base.command.account,...(old.command?.account||{})}},settings:{...base.settings,...(old.settings||{})}};
 if(!old.missions){const m=parse('afterlight_missions_v1');if(m)state.missions={claimed:Array.isArray(m.claimed)?m.claimed:[],bonuses:{...(m.bon||{})}}}
 if(!old.expeditions){const x=parse('afterlight_expedition_runtime_v1');if(x)state.expeditions={active:x.active||null,survivors:Array.isArray(x.survivors)?x.survivors:[],pending:x.pending||null}}
 if(!old.specialRooms){const r=parse('afterlight_special_rooms_v1');if(r?.rooms)state.specialRooms={...r.rooms}}
 if(old.settings?.music==null){const legacyMusic=localStorage.getItem('afterlight_music');if(legacyMusic)state.settings.music=legacyMusic!=='off'}
 function normalize(){
-  state.schema=11;
+  state.schema=12;
   state.rooms={...base.rooms,...(state.rooms||{})};state.research={...base.research,...(state.research||{})};state.stats={...base.stats,...(state.stats||{}),rarityKills:{...base.stats.rarityKills,...(state.stats?.rarityKills||{})}};state.stats.discovered=Array.isArray(state.stats.discovered)?[...new Set(state.stats.discovered.filter(id=>base.stats.rarityKills[id]!=null))]:[];for(const [id,count] of Object.entries(state.stats.rarityKills))if(Number(count)>0&&!state.stats.discovered.includes(id))state.stats.discovered.push(id);
   state.missions=state.missions||{claimed:[],bonuses:{}};state.missions.claimed=Array.isArray(state.missions.claimed)?state.missions.claimed:[];state.missions.bonuses=state.missions.bonuses||{};
   state.expeditions=state.expeditions||{active:null,survivors:[],pending:null};state.expeditions.survivors=Array.isArray(state.expeditions.survivors)?state.expeditions.survivors:[];
   if(Array.isArray(state.expeditions.pending?.found))state.expeditions.pending.found=state.expeditions.pending.found[0]||null;
-  state.specialRooms=state.specialRooms||{};state.researchRuntime=state.researchRuntime||{active:null,ready:null};state.merchant={...base.merchant,...(state.merchant||{}),active:{...base.merchant.active,...(state.merchant?.active||{})},purchases:{...base.merchant.purchases,...(state.merchant?.purchases||{})}};state.offline={...base.offline,...(state.offline||{})};state.command={...base.command,...(state.command||{}),account:{...base.command.account,...(state.command?.account||{})}};state.command.read=Array.isArray(state.command.read)?state.command.read:[];state.command.claimed=Array.isArray(state.command.claimed)?state.command.claimed:[];state.settings={...base.settings,...(state.settings||{})};
+  state.specialRooms=state.specialRooms||{};state.researchRuntime=state.researchRuntime||{active:null,ready:null};state.merchant={...base.merchant,...(state.merchant||{}),active:{...base.merchant.active,...(state.merchant?.active||{})},purchases:{...base.merchant.purchases,...(state.merchant?.purchases||{})}};state.offline={...base.offline,...(state.offline||{})};
+  const selectable=(CFG.SURVIVOR_SKINS||[]).filter(skin=>skin.asset).map(skin=>skin.id);state.survivorSkins={...base.survivorSkins,...(state.survivorSkins||{})};state.survivorSkins.unlocked=[...new Set([...base.survivorSkins.unlocked,...(Array.isArray(state.survivorSkins.unlocked)?state.survivorSkins.unlocked:[])])].filter(id=>selectable.includes(id));if(!state.survivorSkins.unlocked.includes(state.survivorSkins.selected))state.survivorSkins.selected='ranger-male';
+  state.command={...base.command,...(state.command||{}),account:{...base.command.account,...(state.command?.account||{})}};state.command.read=Array.isArray(state.command.read)?state.command.read:[];state.command.claimed=Array.isArray(state.command.claimed)?state.command.claimed:[];state.settings={...base.settings,...(state.settings||{})};
   for(const k of ['coins','total','food','water','power','scrap','science','uranium','kills'])if(!Number.isFinite(Number(state[k])))state[k]=0;
   const roomTotal=Object.values(state.rooms).reduce((a,b)=>a+(Number(b)||0),0),bunkerStep=CFG.ROOM_ECONOMY?.bunkerLevelEvery||4;state.bunker=1+Math.floor(roomTotal/bunkerStep);
 }

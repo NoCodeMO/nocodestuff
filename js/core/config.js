@@ -53,6 +53,14 @@ const MERCHANT_OFFERS=[
   {id:'hunter',group:'combat',tier:'EPIC',icon:'⌖',name:'REDLINE AMMO',tagline:'Hot rounds hit harder and increase every infected bounty.',value:'×3 DAMAGE · ×2 BOUNTY',cost:5,seconds:300,accent:'#a45bd8',effect:{damage:3,zombie:2}},
   {id:'lure',group:'lure',tier:'LEGENDARY',icon:'☣',name:'BLACKLIGHT LURE',tagline:'Pulls rarer infected and Brutes toward the bunker.',value:'BOOSTED RARITY ODDS',cost:8,seconds:300,accent:'#d8b643',effect:{rarityLuck:true}}
 ];
+const SURVIVOR_SKINS=[
+  {id:'ranger-male',order:1,name:'RANGER // MALE',callsign:'RANGER-01',tier:'STARTER',asset:'assets/survivor-ranger.png',muzzleAnchor:{x:77.5,y:20.5},description:'The original Afterlight perimeter ranger. A balanced cosmetic survivor with the standard combat rig.',starter:true},
+  {id:'ranger-female',order:2,name:'RANGER // FEMALE',callsign:'RANGER-02',tier:'STARTER',asset:'assets/survivor-ranger-female.webp',muzzleAnchor:{x:77.5,y:20.5},description:'A veteran scout rebuilt in the same responsive combat rig, with full recoil and muzzle feedback.',starter:true},
+  {id:'prestige-1',order:3,name:'CLASSIFIED SURVIVOR',tier:'CLASSIFIED',unlock:{type:'prestige',level:1}},
+  {id:'prestige-3',order:4,name:'CLASSIFIED SURVIVOR',tier:'CLASSIFIED',unlock:{type:'prestige',level:3}},
+  {id:'prestige-5',order:5,name:'CLASSIFIED SURVIVOR',tier:'CLASSIFIED',unlock:{type:'prestige',level:5}},
+  {id:'prestige-10',order:6,name:'CLASSIFIED SURVIVOR',tier:'CLASSIFIED',unlock:{type:'prestige',level:10}}
+];
 const COMMAND_MESSAGES=[
   {id:'command-center-launch',type:'UPDATE',date:'AUG 15 · BUILD 277',title:'COMMAND CENTER ONLINE',body:'The old Stats terminal has been rebuilt. Guides, statistics, settings, local Commander profiles and official Afterlight transmissions now share one secure hub.'},
   {id:'room-intelligence-release',type:'UPDATE',date:'AUG 15 · ROOM SYSTEMS',title:'ROOM INTELLIGENCE DEPLOYED',body:'Every normal bunker room now has unique art, live output intelligence, level milestones and exact x1, x10 and MAX upgrade quotes.'},
@@ -82,5 +90,5 @@ const COMBAT=Object.freeze({
   maximumHits:18
 });
 const OFFLINE=Object.freeze({minimumAwayMs:60000,maximumAwayMs:43200000,baseEfficiency:.35,maximumEfficiency:.9});
-window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,COMMAND_MESSAGES,ENEMIES,COMBAT,OFFLINE});
+window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,SURVIVOR_SKINS,COMMAND_MESSAGES,ENEMIES,COMBAT,OFFLINE});
 })();

@@ -1,0 +1,22 @@
+'use strict';
+const fs=require('fs'),path=require('path'),vm=require('vm'),root=path.resolve(__dirname,'..');
+const read=file=>fs.readFileSync(path.join(root,file),'utf8'),fail=message=>{throw new Error(`Survivor roster: ${message}`)},assert=(condition,message)=>{if(!condition)fail(message)};
+const context={window:{}};vm.runInNewContext(read('js/core/config.js'),context,{filename:'config.js'});const skins=context.window.AfterlightConfig?.SURVIVOR_SKINS;
+assert(Array.isArray(skins)&&skins.length===6,'exactly two starter and four classified survivor slots are required');
+const visible=skins.filter(skin=>skin.asset),locked=skins.filter(skin=>!skin.asset);
+assert(visible.length===2&&visible.every(skin=>skin.starter),'only the two starter survivors may reveal art for now');
+assert(visible.map(skin=>skin.id).join(',')==='ranger-male,ranger-female','male and female Rangers must be the starter pair');
+assert(locked.length===4&&locked.every(skin=>skin.name==='CLASSIFIED SURVIVOR'),'four future survivors must remain classified');
+assert(locked.map(skin=>skin.unlock?.level).join(',')==='1,3,5,10','classified slots need stable future Prestige requirements');
+assert(new Set(skins.map(skin=>skin.id)).size===skins.length,'survivor IDs must be unique');
+for(const skin of visible){const file=path.join(root,skin.asset);assert(fs.existsSync(file),`missing ${skin.asset}`);const image=fs.readFileSync(file),isPng=image.subarray(1,4).equals(Buffer.from('PNG'))&&image[25]===6,isWebp=image.subarray(0,4).toString('ascii')==='RIFF'&&image.subarray(8,12).toString('ascii')==='WEBP';assert(isPng||isWebp,`${skin.asset} must be a transparent web-ready sprite`);assert(skin.muzzleAnchor?.x===77.5&&skin.muzzleAnchor?.y===20.5,`${skin.id} needs the verified responsive rifle anchor`)}
+const female=fs.readFileSync(path.join(root,'assets','survivor-ranger-female.webp'));assert(female.length<200000,'female sprite must remain optimized for an instant mobile swap');
+const state=read('js/core/state.js'),command=read('js/systems/command-center.js'),visuals=read('js/ui/visuals.js'),css=read('app.css'),html=read('index.html');
+for(const [pattern,message] of [[/schema:12/,'save schema 12 is required'],[/survivorSkins:\{selected:'ranger-male',unlocked:\['ranger-male','ranger-female'\]\}/,'both starters must unlock for old and new saves'],[/state\.survivorSkins\.unlocked=\[\.\.\.new Set/,'survivor unlock migration must normalize safely'],[/state\.survivorSkins\.selected='ranger-male'/,'invalid old selections must fall back safely']])assert(pattern.test(state),message);
+for(const [pattern,message] of [[/data-survivor-roster="ready"/,'Command needs a rendered roster marker'],[/function selectSurvivor\(id\)/,'selection path is missing'],[/state\.survivorSkins\.selected=id/,'selection must persist in unified state'],[/afterlight:survivor-selected/,'selection event is missing'],[/Appearance and abilities remain hidden/,'classified cards must explicitly hide future designs'],[/tabButton\('survivors'/,'Command survivor tab is missing']])assert(pattern.test(command),message);
+assert(!/survivorCard\(skin\)[\s\S]{0,500}locked[\s\S]{0,500}<img/.test(command),'classified survivor branch may not render a hidden image');
+for(const [pattern,message] of [[/function applySurvivor\(source=selectedSkin\(\),animate=true\)/,'visual skin application is missing'],[/window\.addEventListener\('afterlight:survivor-selected'/,'visuals must react to roster selection'],[/restart\(survivorUnit,'shoot'\)/,'selected survivors must share recoil feedback'],[/restart\(muzzle,'fire'\)/,'selected survivors must share muzzle feedback'],[/dataset\.lastShotSurvivor/,'browser-verifiable shot metadata is missing']])assert(pattern.test(visuals),message);
+assert(/\.survivorRosterGrid\{/.test(css)&&/\.classifiedSurvivor\{/.test(css),'roster and classified card styling are missing');
+assert(/left:var\(--muzzle-x,77\.5%\);top:var\(--muzzle-y,20\.5%\)/.test(css),'responsive per-skin muzzle coordinates are missing');
+for(const marker of ['assets/survivor-ranger-female.webp','app.css?build=27','js/core/config.js?build=15','js/core/state.js?build=12','js/systems/command-center.js?build=2','js/ui/visuals.js?build=18'])assert(html.includes(marker),`cache/build marker missing: ${marker}`);
+console.log('Afterlight survivor roster passed: two selectable starter Rangers, four classified Prestige slots, persistence and shared combat feedback.');
