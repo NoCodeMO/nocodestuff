@@ -10,7 +10,7 @@ function pause(){audio.pause()}
 function persist(){if(S?.settings)S.settings.music=enabled;ST?.save?.();localStorage.setItem('afterlight_music',enabled?'on':'off')}
 button.onclick=async event=>{event.stopPropagation();enabled=!enabled;persist();label();if(enabled)await play();else pause()};document.body.append(button);label();
 
-let context=null,master=null,lastSound=0,lastShot=0;
+let context=null,master=null,lastSound=0,lastShot=0,lastVoice=0;
 const AudioContext=window.AudioContext||window.webkitAudioContext;
 function unlockUi(){if(!AudioContext)return null;if(!context){context=new AudioContext();master=context.createDynamicsCompressor();master.threshold.value=-12;master.knee.value=10;master.ratio.value=5;master.attack.value=.003;master.release.value=.12;master.connect(context.destination)}if(context.state==='suspended')context.resume().catch(()=>{});return context}
 function tone(frequency,duration=.055,volume=.07,delay=0,type='sine',endFrequency=frequency){
@@ -46,6 +46,7 @@ function merchantSound(){tone(110,.2,.1,0,'sawtooth',165);noise(.16,.045,.02,900
 function carePackageLandSound(){noise(.2,.16,0,720);tone(72,.22,.15,0,'sine',44);tone(185,.24,.055,.045,'triangle',112);noise(.08,.045,.12,2600);return true}
 function carePackageOpenSound(){noise(.09,.07,0,2100);tone(180,.12,.09,0,'square',260);tone(392,.18,.075,.08,'triangle',523);tone(523,.2,.075,.19,'sine',698);tone(698,.24,.07,.31,'sine',988);tone(1047,.34,.06,.47,'sine',1480);tone(1568,.45,.045,.67,'sine',2093);noise(.6,.022,.2,6200);return true}
 function roomMilestoneSound(event){if(!event.detail?.milestone)return false;tone(196,.18,.07,0,'triangle',294);tone(392,.2,.065,.1,'sine',523);tone(587,.24,.065,.22,'sine',784);tone(988,.34,.05,.36,'sine',1319);noise(.32,.014,.18,5200);return true}
+function survivorVoiceBleep(event){const now=performance.now(),detail=event.detail||{},voice=detail.voice||{};if(!effectsEnabled||!context||context.state!=='running'||now-lastVoice<42)return false;lastVoice=now;const base=Math.max(70,Number(voice.base)||170),spread=Math.max(1,Number(voice.spread)||50),code=String(detail.character||'A').charCodeAt(0)||65,index=Math.max(0,Number(detail.index)||0),frequency=base+(code*17+index*29)%spread,wave=['square','triangle','sine'].includes(voice.wave)?voice.wave:'square';return tone(frequency,.038,.021,0,wave,frequency*.91)}
 function buttonKind(target){if(target.matches('#closeDrawer,#missionClose,#appModeX,.installModal button'))return'close';if(target.closest('#tabs')||target.id==='missionNav')return'nav';return'tap'}
 function onUiPointer(event){const target=event.target.closest?.('button,[role="button"]');if(!target||target.disabled||target.closest('#scene'))return;unlockUi();uiSound(buttonKind(target))}
 document.addEventListener('pointerdown',onUiPointer,true);
@@ -60,10 +61,11 @@ window.addEventListener('afterlight:care-package-landed',carePackageLandSound);
 window.addEventListener('afterlight:care-package-opened',carePackageOpenSound);
 window.addEventListener('afterlight:room-upgraded',roomMilestoneSound);
 window.addEventListener('afterlight:dev-reward-claimed',()=>rewardSound('expedition'));
+window.addEventListener('afterlight:survivor-dialogue-letter',survivorVoiceBleep);
 document.body.dataset.uiAudio='ready';
 
 function unlockMusic(){if(musicUnlocked)return;if(enabled)play();if(musicUnlocked)removeMusicUnlock()}
 function removeMusicUnlock(){document.removeEventListener('pointerdown',unlockMusic,true);document.removeEventListener('touchstart',unlockMusic,true)}
 document.addEventListener('pointerdown',unlockMusic,true);document.addEventListener('touchstart',unlockMusic,{capture:true,passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else if(enabled)play()});
-window.AfterlightAudio={play,pause,isEnabled:()=>enabled,isEffectsEnabled:()=>effectsEnabled,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},setEffectsEnabled:value=>{effectsEnabled=!!value;if(S?.settings)S.settings.uiSfx=effectsEnabled;ST?.save?.();if(effectsEnabled)setTimeout(()=>uiSound('confirm'),0);return effectsEnabled},unlockUi,uiSound,gunshot,cashSound,rewardSound,researchSound,merchantSound,carePackageLandSound,carePackageOpenSound,roomMilestoneSound};
+window.AfterlightAudio={play,pause,isEnabled:()=>enabled,isEffectsEnabled:()=>effectsEnabled,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},setEffectsEnabled:value=>{effectsEnabled=!!value;if(S?.settings)S.settings.uiSfx=effectsEnabled;ST?.save?.();if(effectsEnabled)setTimeout(()=>uiSound('confirm'),0);return effectsEnabled},unlockUi,uiSound,gunshot,cashSound,rewardSound,researchSound,merchantSound,carePackageLandSound,carePackageOpenSound,roomMilestoneSound,survivorVoiceBleep};
 })();

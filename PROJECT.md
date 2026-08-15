@@ -18,7 +18,7 @@ This file is the fastest entry point for any future development session. Read th
 - `manifest.webmanifest` - PWA/home-screen metadata.
 
 ### Core
-- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers, survivor skins, official Command Center transmissions and the complete enemy/rarity table.
+- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers, survivor skins/dialogue, official Command Center transmissions and the complete enemy/rarity table.
 - `js/core/economy.js` - authoritative overflow-safe resource math, two-stage normal-room price curve, sequential bulk quotes and guarded purchase validation.
 - `js/core/numbers.js` - one authoritative large-number formatter from K/M through B, T, Qa, Qi, Dc and beyond.
 - `js/core/state.js` - one authoritative persistent state object and save migration.
@@ -34,10 +34,11 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/offline.js` - persisted, claimable offline production with permanent-rate math, Dealer exclusion and a 12-hour safety cap.
 - `js/systems/codex.js` - responsive Infected Codex, persistent first-sighting discovery, locked specimens and exact configured combat intelligence.
 - `js/systems/care-package.js` - persisted 90–150 second supply-drop scheduler, fall/landing lifecycle, five-second claims, economy-scaled loot and rare free Dealer activations.
+- `js/systems/survivor-dialogue.js` - survivor-specific idle, kill, streak, horde and Brute barks with contextual selection, typewriter timing and a single spam-safe scene bubble.
 
 ### Presentation/platform
 - `js/ui/visuals.js` - configured survivor switching, enemy visuals, per-skin sprite-relative rifle flash, recoil/hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
-- `js/audio.js` - background music plus compressed WebAudio UI, combat, reward and research-completion feedback.
+- `js/audio.js` - background music plus compressed WebAudio UI, combat, reward, research-completion and gesture-safe survivor voice feedback.
 - `js/platform.js` - standalone/fullscreen install helpers.
 
 ### Validation
@@ -53,6 +54,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/care-package-check.js` - transparent production assets, timing, economy scaling, scarce Uranium/Dealer odds, state migration, event/audio wiring and responsive UI guardrails.
 - `scripts/landscape-layout-check.js` and `scripts/landscape-probe.html` - static guardrails plus a real 844×390 computed-layout probe for the phone landscape command deck.
 - `scripts/survivor-roster-check.js` - starter/classified roster integrity, transparent assets, save migration, selection events and shared recoil/muzzle guardrails.
+- `scripts/survivor-dialogue-check.js` - all three survivor voices, contextual pools/odds, typewriter events, responsive bubble CSS, reduced-motion behavior and gesture-safe retro voice bleeps.
 - `scripts/architect-probe.html` - real-browser Level 100 save migration, permanent unlock, exact x1.5 production multiplier, roster selection and rifle-anchor probe.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
@@ -74,13 +76,14 @@ The order in `index.html` is intentional:
 8. merchant
 9. command center
 10. visuals
-11. game
-12. Infected Codex
-13. offline earnings
-14. missions
-15. care package
-16. audio
-17. platform
+11. survivor dialogue
+12. game
+13. Infected Codex
+14. offline earnings
+15. missions
+16. care package
+17. audio
+18. platform
 
 Do not casually reorder these. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
 
@@ -131,6 +134,7 @@ Do not create another persistent gameplay store unless there is a strong reason.
 - `window.AfterlightCodex`
 - `window.AfterlightCarePackage`
 - `window.AfterlightVisuals`
+- `window.AfterlightSurvivorDialogue`
 - `window.AfterlightAudio`
 - `window.AfterlightPlatform`
 
@@ -164,6 +168,9 @@ Use events instead of adding duplicate click listeners across systems:
 - `afterlight:account` - local Commander login state changed.
 - `afterlight:settings-changed` - visual accessibility settings changed and presentation systems should refresh.
 - `afterlight:survivor-selected` - persisted survivor selection changed; visuals swap art and its configured muzzle anchor without replacing combat logic.
+- `afterlight:survivor-dialogue-start` - a contextual/idle line begins; includes the survivor profile and dialogue context.
+- `afterlight:survivor-dialogue-letter` - one audible typewriter character appears; audio owns the short, profile-specific retro bleep.
+- `afterlight:survivor-dialogue-complete` - the complete line is visible and its hold timer has started.
 
 UI button sounds are handled centrally in `audio.js`; do not add per-button audio listeners. Combat inside `#scene` is excluded from the button handler and its gunshot is driven by `afterlight:shot`.
 
@@ -210,7 +217,7 @@ All production, price and reward UI uses `AfterlightNumbers`. Suffixes progress 
 
 Official Command Center messages are release-configured in `COMMAND_MESSAGES`. A message reward is always claim-once through `command.claimed`; its coin component can scale from current hourly production while fixed Uranium remains scarce. The current Commander login is explicitly local-device only and never claims to be cloud authentication.
 
-The Command survivor roster is configured once in `SURVIVOR_SKINS`. Both Ranger starters are permanently unlocked for new and old saves and are cosmetic/economically equal. Gideon Rook, The Architect, is permanently added to an old or new save at Bunker Level 100. While selected, he grants +0.5% all passive production per Bunker Level: exactly +50% at unlock, capped at +100% from Level 200 onward. The bonus uses the shared production path, so normal rooms, special rooms, live statistics and offline earnings agree; manual damage and one-time rewards are intentionally excluded. Four future Prestige slots retain stable IDs and level requirements but deliberately contain no asset, identity or appearance data. Every selectable survivor shares the same shot event, recoil and short muzzle animation while using per-skin normalized muzzle metadata.
+The Command survivor roster is configured once in `SURVIVOR_SKINS`. Both Ranger starters are permanently unlocked for new and old saves and are cosmetic/economically equal. Gideon Rook, The Architect, is permanently added to an old or new save at Bunker Level 100. While selected, he grants +0.5% all passive production per Bunker Level: exactly +50% at unlock, capped at +100% from Level 200 onward. The bonus uses the shared production path, so normal rooms, special rooms, live statistics and offline earnings agree; manual damage and one-time rewards are intentionally excluded. Four future Prestige slots retain stable IDs and level requirements but deliberately contain no asset, identity or appearance data. Every selectable survivor shares the same shot event, recoil and short muzzle animation while using per-skin normalized muzzle metadata. `SURVIVOR_DIALOGUE` gives each revealed character a distinct voice and short pools for idle, normal kill, streak, horde and Brute contexts; new lines belong in that config instead of the presentation or audio modules.
 
 Offline production starts after one minute away and is capped at 12 hours per load. It uses the authoritative permanent room/special-room rates at 35% base efficiency, applies mission `offlineMult` up to a 90% hard cap, divides out temporary Dealer boosts and never generates Uranium. Calculated gains are persisted as a pending claim before the collection modal opens, so closing the game cannot lose them.
 
@@ -230,6 +237,7 @@ Only active assets remain in `assets/`:
 - One research project can run at a time. It spends scrap up front, completes against a persisted wall-clock deadline and must be installed from the red Research notification.
 - Offline earnings are claimable and persisted; production beyond the 12-hour cap is intentionally discarded.
 - Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
+- Survivor dialogue uses original synthesized retro bleeps, follows the UI SFX setting and cannot unlock WebAudio without a user gesture. It is intentionally short-form ambient flavor rather than a branching conversation system.
 - Enemy movement is currently a fast offscreen-right entrance plus hit/death feedback. Full character-specific sprite-sheet animation is intentionally deferred.
 - Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
 - Commander login is a local profile stored inside the unified save. Secure cloud accounts and cross-device save sync require a future backend and are not simulated.

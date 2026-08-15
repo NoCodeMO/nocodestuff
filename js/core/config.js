@@ -62,6 +62,14 @@ const SURVIVOR_SKINS=[
   {id:'prestige-5',order:6,name:'CLASSIFIED SURVIVOR',tier:'CLASSIFIED',unlock:{type:'prestige',level:5}},
   {id:'prestige-10',order:7,name:'CLASSIFIED SURVIVOR',tier:'CLASSIFIED',unlock:{type:'prestige',level:10}}
 ];
+const SURVIVOR_DIALOGUE=Object.freeze({
+  killChance:.46,hordeChance:.82,streakChance:.68,killCooldownMs:7200,idleMinimumMs:24000,idleMaximumMs:42000,typeMs:31,holdMs:2100,killDelayMs:180,
+  profiles:Object.freeze({
+    'ranger-male':Object.freeze({accent:'#e3c468',voice:Object.freeze({base:164,spread:54,wave:'square'}),idle:Object.freeze(["Quiet road. I don't trust it.",'Keep the gate behind me.','Still here. Still loaded.',"Wind's carrying ash again.",'Command, eyes on the east.','Nothing moves for long.']),kill:Object.freeze(['Target down.','One less at the gate.','Back to the dirt.','Road stays ours.','Not getting past me.','Clean enough.','Stay down.','Next.']),streak:Object.freeze(['Keep them coming.',"Rhythm's good.",'One shot at a time.',"Don't blink."]),horde:Object.freeze(['Three down. Road clear.',"That's the whole pack.",'They came together. Left together.','More targets. Same result.']),brute:Object.freeze(['Big one down.',"That's for the bunker.",'Heavy target neutralized.','Even giants fall.'])}),
+    'ranger-female':Object.freeze({accent:'#79bde7',voice:Object.freeze({base:218,spread:66,wave:'square'}),idle:Object.freeze(['Too quiet. Watch the rooftops.','East road is clear. For now.','Check the mag. Check it twice.','Ash storm on the horizon.','Bunker lights are still on.','I can hear them out there.']),kill:Object.freeze(['Clean shot.','Dropped before the line.','You picked the wrong road.','Threat removed.','Not today.','Keep moving.','Stay down.','Got you.']),streak:Object.freeze(['Locked in.','Keep the tempo.','No wasted rounds.','Eyes up.']),horde:Object.freeze(['Pack erased.','Three targets. Zero problems.','Road is clear again.','Crowd control complete.']),brute:Object.freeze(["Armor didn't save it.",'Heavy down.','Tell Command the road is clear.','Size only makes a bigger target.'])}),
+    architect:Object.freeze({accent:'#e8a941',voice:Object.freeze({base:118,spread:38,wave:'square'}),idle:Object.freeze(['Every wall tells you where it will fail.','The bunker breathes. Listen.','Pressure is stable. For now.','Steel remembers every impact.','Measure twice. Fire once.','This road needs reinforcement.']),kill:Object.freeze(['Structural threat removed.','Failure point eliminated.','A predictable collapse.','Hostile load reduced.','Correction applied.','System stable.','Problem solved.','Next variable.']),streak:Object.freeze(['Efficiency rising.','Maintain the sequence.','Optimal cadence.','No deviation.']),horde:Object.freeze(['Multiple failures. One correction.','Three weak points removed.','Crowd load neutralized.','The equation balances.']),brute:Object.freeze(['Load-bearing problem solved.','Mass is not resilience.','Critical failure achieved.','Even giants have weak joints.'])})
+  })
+});
 const COMMAND_MESSAGES=[
   {id:'command-center-launch',type:'UPDATE',date:'AUG 15 · BUILD 277',title:'COMMAND CENTER ONLINE',body:'The old Stats terminal has been rebuilt. Guides, statistics, settings, local Commander profiles and official Afterlight transmissions now share one secure hub.'},
   {id:'room-intelligence-release',type:'UPDATE',date:'AUG 15 · ROOM SYSTEMS',title:'ROOM INTELLIGENCE DEPLOYED',body:'Every normal bunker room now has unique art, live output intelligence, level milestones and exact x1, x10 and MAX upgrade quotes.'},
@@ -104,5 +112,5 @@ const CARE_PACKAGE=Object.freeze({
   secondaryResources:['food','water','power','science']
 });
 const OFFLINE=Object.freeze({minimumAwayMs:60000,maximumAwayMs:43200000,baseEfficiency:.35,maximumEfficiency:.9});
-window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,SURVIVOR_SKINS,COMMAND_MESSAGES,ENEMIES,COMBAT,CARE_PACKAGE,OFFLINE});
+window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,SURVIVOR_SKINS,SURVIVOR_DIALOGUE,COMMAND_MESSAGES,ENEMIES,COMBAT,CARE_PACKAGE,OFFLINE});
 })();
