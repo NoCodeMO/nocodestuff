@@ -19,6 +19,7 @@ This file is the fastest entry point for any future development session. Read th
 
 ### Core
 - `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers, survivor skins, official Command Center transmissions and the complete enemy/rarity table.
+- `js/core/economy.js` - authoritative overflow-safe resource math, two-stage normal-room price curve, sequential bulk quotes and guarded purchase validation.
 - `js/core/numbers.js` - one authoritative large-number formatter from K/M through B, T, Qa, Qi, Dc and beyond.
 - `js/core/state.js` - one authoritative persistent state object and save migration.
 - `js/core/game.js` - economy, combat, normal rooms, room intelligence/progression, HUD, tabs and drawer routing.
@@ -44,6 +45,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/combat-balance.js` - deterministic enemy rarity, asset, horde, glow and income-scaled bounty checks.
 - `scripts/merchant-balance.js` - Dealer inventory, boost stacking, Uranium sources, timers and economy guardrails.
 - `scripts/room-balance.js` - all eight room artworks, milestone progression, bulk-upgrade costs and room-intelligence UI guardrails.
+- `scripts/late-game-economy-check.js` - reproduces the reported 5.63e152/LV 1979 save, verifies the post-quadrillion curve and proves repeated MAX purchases cannot create unlimited money.
 - `scripts/mission-balance.js` - exact mission count, unique chapter objectives, permanent multiplier caps, economy-scaled caches and Uranium budget.
 - `scripts/command-center-check.js` - Command Center tabs, schema migration, message rewards, account/settings persistence and large-number notation.
 - `scripts/offline-balance.js` - offline threshold/cap, efficiency, permanent-rate sourcing, pending-save safety and Uranium exclusion.
@@ -63,27 +65,28 @@ This file is the fastest entry point for any future development session. Read th
 The order in `index.html` is intentional:
 
 1. config
-2. numbers
-3. state
-4. expeditions
-5. special rooms
-6. research
-7. merchant
-8. command center
-9. visuals
-10. game
-11. Infected Codex
-12. offline earnings
-13. missions
-14. care package
-15. audio
-16. platform
+2. economy
+3. numbers
+4. state
+5. expeditions
+6. special rooms
+7. research
+8. merchant
+9. command center
+10. visuals
+11. game
+12. Infected Codex
+13. offline earnings
+14. missions
+15. care package
+16. audio
+17. platform
 
 Do not casually reorder these. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 14`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 15`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -115,6 +118,7 @@ Do not create another persistent gameplay store unless there is a strong reason.
 ## Public runtime APIs
 
 - `window.AfterlightConfig`
+- `window.AfterlightEconomy`
 - `window.AfterlightNumbers`
 - `window.AfterlightState`
 - `window.AfterlightGame`
@@ -196,7 +200,7 @@ Dealer boosts activate immediately and use persisted wall-clock deadlines. The 5
 
 Care packages arrive on a persisted randomized 90–150 second schedule while the game is visible. Their five-second claim window starts only after the 1.35-second parachute landing. Every claimed cache gives Coins, Scrap and one survival resource scaled from permanent production with early-game floors; temporary Dealer multipliers are divided out before reward calculation. Uranium is capped to a 10% one-crystal roll and a random free five-minute Dealer contract is a rare 4% jackpot (about 1.2 expected jackpots per perfect-attention hour). Free contracts use the shared Dealer channel rules, activate immediately and never spend Uranium. Missed drops simply schedule the next encounter.
 
-Normal-room production keeps the original 1.18 per-level growth and 1.62 cost growth. Levels 5, 10, 25 and 50 add derived permanent room multipliers of x1.25, x1.5, x2 and x3. These bonuses are calculated from room level, so old saves receive them automatically without migration. Bulk x10 costs are the exact sum of ten sequential upgrades; MAX buys only the levels the current coin balance can fully fund.
+Normal-room production keeps the original 1.18 per-level growth. Room costs keep the original 1.62 growth through the early game, then transition continuously near one quadrillion to 1.18 late-game growth so prices remain meaningful and finite for established saves instead of freezing at the old 9.01Qa JavaScript limit. Levels 5, 10, 25 and 50 add derived permanent room multipliers of x1.25, x1.5, x2 and x3. These bonuses are calculated from room level, so old saves receive them automatically without migration. Bulk x10 costs are the exact sum of sequential upgrades; MAX buys only the levels the current coin balance can fully fund. Every quote is validated again inside the state transaction, invalid/overflowed prices are rejected and all resources use a finite 1e300 ceiling. The explicit room-level ceiling is 3500 so the Number-based economy can never silently enter `Infinity`.
 
 Every four combined normal-room levels grant one Bunker Level. The Base screen exposes this exact 0–4 progression in a live accessible bar, driven by the same shared `bunkerLevelEvery` economy constant used by save normalization and core recalculation.
 

@@ -70,8 +70,11 @@ required=(
   'id="hordeSignal"'
   'data-tab="command"'
   'id="commandBadge"'
+  'js/core/config.js?build=19'
+  'js/core/economy.js?build=1'
   'js/core/numbers.js?build=1'
-  'js/core/game.js?build=17'
+  'js/core/state.js?build=16'
+  'js/core/game.js?build=18'
   'js/systems/care-package.js?build=1'
 )
 
