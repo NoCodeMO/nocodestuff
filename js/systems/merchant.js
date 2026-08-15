@@ -1,13 +1,13 @@
 (()=>{'use strict';
 const CFG=window.AfterlightConfig,ST=window.AfterlightState;if(!CFG||!ST)throw new Error('Merchant dependencies missing');
-const S=ST.get(),OFFERS=CFG.MERCHANT_OFFERS||[],PRODUCTION_KEYS=new Set(['coins','food','water','power','scrap','science']);
+const S=ST.get(),OFFERS=CFG.MERCHANT_OFFERS||[];
 const byId=id=>OFFERS.find(offer=>offer.id===id)||null;
 const now=()=>Date.now();
 const time=ms=>{const seconds=Math.max(0,Math.ceil(ms/1000)),minutes=Math.floor(seconds/60);return `${String(minutes).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`};
 const remaining=id=>Math.max(0,Number(S.merchant?.active?.[id]||0)-now());
 const active=id=>remaining(id)>0;
 const activeOffers=()=>OFFERS.filter(offer=>active(offer.id));
-function multiplier(key){let value=1;for(const offer of activeOffers()){if(PRODUCTION_KEYS.has(key)&&Number(offer.effect?.allProduction)>0)value*=offer.effect.allProduction;if(Number(offer.effect?.[key])>0)value*=offer.effect[key]}return value}
+function multiplier(key){let value=1;for(const offer of activeOffers()){if(Number(offer.effect?.all)>0)value*=offer.effect.all;if(Number(offer.effect?.[key])>0)value*=offer.effect[key]}return value}
 function rarityWeights(){return active('lure')?{common:30,uncommon:30,rare:20,epic:10,legendary:6,brute:4}:null}
 function testDuration(offer){if(!['localhost','127.0.0.1'].includes(location.hostname))return offer.seconds*1000;const requested=Number(new URLSearchParams(location.search).get('merchantSeconds'));return Number.isFinite(requested)&&requested>0?Math.min(offer.seconds,requested)*1000:offer.seconds*1000}
 function conflict(offer){return OFFERS.find(other=>other.group===offer.group&&other.id!==offer.id&&active(other.id))||null}

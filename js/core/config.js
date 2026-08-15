@@ -41,7 +41,7 @@ const SPECIAL_ROOMS=[
 const MERCHANT_OFFERS=[
   {id:'gold5',group:'coins',tier:'UNCOMMON',icon:'◉',name:'GILDED MINUTES',tagline:'Five minutes of accelerated bunker trade.',value:'×5 COINS',cost:3,seconds:300,accent:'#c88738',effect:{coins:5}},
   {id:'gold10',group:'coins',tier:'RARE',icon:'◆',name:'KINGMAKER CONTRACT',tagline:'The Dealer opens his highest-value routes.',value:'×10 COINS',cost:7,seconds:300,accent:'#4f9ee8',effect:{coins:10}},
-  {id:'all3',group:'production',tier:'LEGENDARY',icon:'☢',name:'REACTOR BLACKOUT',tagline:'Every bunker production line runs beyond safe limits.',value:'×3 ALL PRODUCTION',cost:10,seconds:300,accent:'#dfb744',effect:{allProduction:3}},
+  {id:'all3',group:'everything',tier:'LEGENDARY',icon:'☢',name:'REACTOR BLACKOUT',tagline:'Production, damage and infected bounties all surge at once.',value:'×3 EVERYTHING',cost:10,seconds:300,accent:'#dfb744',effect:{all:3}},
   {id:'scrap5',group:'scrap',tier:'UNCOMMON',icon:'⚙',name:'SALVAGE MAGNET',tagline:'Priority access to the Dealer’s salvage crews.',value:'×5 SCRAP',cost:4,seconds:300,accent:'#bd7137',effect:{scrap:5}},
   {id:'hunter',group:'combat',tier:'EPIC',icon:'⌖',name:'REDLINE AMMO',tagline:'Hot rounds hit harder and increase every infected bounty.',value:'×3 DAMAGE · ×2 BOUNTY',cost:5,seconds:300,accent:'#a45bd8',effect:{damage:3,zombie:2}},
   {id:'lure',group:'lure',tier:'LEGENDARY',icon:'☣',name:'BLACKLIGHT LURE',tagline:'Pulls rarer infected and Brutes toward the bunker.',value:'BOOSTED RARITY ODDS',cost:8,seconds:300,accent:'#d8b643',effect:{rarityLuck:true}}
