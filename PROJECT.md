@@ -8,7 +8,7 @@ This file is the fastest entry point for any future development session. Read th
 - Production: `https://nocodemo.github.io/nocodestuff/`
 - Platform: static HTML/CSS/JavaScript on GitHub Pages
 - No framework, bundler or runtime dependencies.
-- `npm test` is zero-dependency and must pass before deployment.
+- `npm run test:all` is the full pre-deploy test command.
 
 ## Architecture
 
@@ -33,8 +33,12 @@ This file is the fastest entry point for any future development session. Read th
 - `js/platform.js` - standalone/fullscreen install helpers.
 
 ### Validation
-- `scripts/validate.js` - syntax + static reference + legacy-file checks.
-- `.github/workflows/pages.yml` - runs validation before GitHub Pages deployment.
+- `scripts/validate.js` - zero-dependency JS syntax, local reference and legacy-file checks.
+- `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
+- `npm test` - static validation only.
+- `npm run test:browser` - browser startup smoke test only.
+- `npm run test:all` - both test layers.
+- `.github/workflows/pages.yml` - runs static and browser tests before GitHub Pages deployment. A failed test blocks deployment.
 
 ## Script load order
 
@@ -109,7 +113,7 @@ Example: future gun audio should listen to `afterlight:shot`, not attach another
 
 ## Economy rules
 
-Mission bonuses are now consumed by the core economy. Current supported bonus keys:
+Mission bonuses are consumed by the core economy. Current supported bonus keys:
 - `coinMult`
 - `zombieMult`
 - `prodMult`
@@ -154,7 +158,7 @@ The `-final` names are historical binary asset names and are intentionally left 
 6. Delete replaced code after the replacement is verified.
 7. Keep `index.html` readable and keep production CSS in `app.css` unless CSS becomes large enough to justify clear feature files.
 8. Preserve old save compatibility or add an explicit migration in `state.js`.
-9. Run `npm test` after structural changes.
+9. Run `npm run test:all` after structural or cross-system changes. At minimum run `npm test` after small code changes.
 10. Do not reintroduce a service worker during rapid development without an explicit cache/version strategy.
 
 ## Fast workflow for a future session
@@ -163,7 +167,7 @@ The `-final` names are historical binary asset names and are intentionally left 
 2. Read `index.html` only if load order/layout entry points matter.
 3. Read the one owning JS module and the relevant section of `app.css`.
 4. Implement the feature using existing config/state/APIs/events.
-5. Run/verify `npm test` or the GitHub validation workflow.
-6. Confirm the Pages deployment before saying the change is live.
+5. Verify the relevant tests. Use `npm run test:all` for structural or major changes.
+6. Confirm the GitHub Pages workflow and deployment succeeded before saying a change is live.
 
 This structure is deliberately optimized for rapid AI-assisted iteration and large changes without needing to rediscover the project each session.
