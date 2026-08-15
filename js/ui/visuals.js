@@ -4,7 +4,7 @@ const WORLD_LAYERS=[
   ['worldSky','assets/combat-sky.webp'],
   ['worldClouds','assets/combat-clouds.webp'],
   ['worldCity','assets/combat-city.webp'],
-  ['worldBunker','assets/combat-bunker.webp'],
+  ['worldBunker','assets/combat-bunker-opaque.webp'],
   ['worldGround','assets/combat-ground.webp']
 ];
 const stage=document.createElement('div');stage.id='spriteStage';stage.dataset.parallaxLayers=String(WORLD_LAYERS.length);

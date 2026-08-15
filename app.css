@@ -45,7 +45,7 @@ html,body{overscroll-behavior:none;background:#0b0d0a;margin:0}html.standalone-a
 .worldClouds img{mix-blend-mode:normal;opacity:.47;filter:saturate(.7) brightness(.72);animation:cloudDrift 48s ease-in-out infinite alternate}
 .worldCity{z-index:2;mix-blend-mode:multiply;transform:translate3d(calc(var(--parallax-x) * -8px),calc(var(--parallax-y) * -3px),0) scale(1.055)}
 .worldCity img{mix-blend-mode:normal;opacity:.88;filter:saturate(.9) contrast(1.06)}
-.worldBunker{z-index:3;mix-blend-mode:darken;transform:translate3d(calc(var(--parallax-x) * -4px),calc(var(--parallax-y) * -1.5px),0) scale(1.025)}
+.worldBunker{z-index:3;mix-blend-mode:normal;transform:translate3d(calc(var(--parallax-x) * -4px),calc(var(--parallax-y) * -1.5px),0) scale(1.025)}
 .worldBunker img{mix-blend-mode:normal;filter:saturate(.82) brightness(.95) contrast(1.08)}
 .worldGround{z-index:4;mix-blend-mode:darken;transform:translate3d(calc(var(--parallax-x) * -1.5px),calc(var(--parallax-y) * -.5px),0) scale(1.015)}
 .worldGround img{mix-blend-mode:normal;filter:saturate(.8) brightness(.92) contrast(1.08)}

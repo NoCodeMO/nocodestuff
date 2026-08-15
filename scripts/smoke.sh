@@ -27,6 +27,7 @@ required=(
   'id="spriteStage"'
   'data-parallax-layers="5"'
   'assets/combat-clouds.webp'
+  'assets/combat-bunker-opaque.webp'
   'POWER GENERATOR'
   'id="missionBox"'
   'specialMainCard'
