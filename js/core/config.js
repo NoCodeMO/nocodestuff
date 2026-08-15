@@ -10,12 +10,12 @@ const ROOMS={
   turret:{name:'AUTO TURRET',icon:'⌖',base:3600,unlock:7,prod:{coins:12},desc:'Damages infected automatically.'}
 };
 const RESEARCH=[
-  {id:'tools',icon:'🔧',name:'BETTER TOOLS',desc:'+30% manual damage',cost:4},
-  {id:'solar',icon:'☀',name:'MICROGRID',desc:'+12% room production',cost:6},
-  {id:'hydro',icon:'🌿',name:'HYDROPONICS',desc:'+20% food production',cost:7},
-  {id:'filters',icon:'💧',name:'FILTRATION',desc:'+20% water production',cost:8},
-  {id:'automation',icon:'🤖',name:'AUTOMATION AI',desc:'Improves turret damage',cost:10},
-  {id:'walls',icon:'🧱',name:'REINFORCED WALLS',desc:'+15% zombie bounty',cost:13}
+  {id:'tools',icon:'🔧',name:'KINETIC TOOLING',desc:'+18% manual damage per level',baseCost:8,baseSeconds:25,costGrowth:1.58,timeGrowth:1.3,effect:1.18},
+  {id:'solar',icon:'☀',name:'MICROGRID THEORY',desc:'+8% all passive production per level',baseCost:12,baseSeconds:35,costGrowth:1.6,timeGrowth:1.31,effect:1.08},
+  {id:'hydro',icon:'🌿',name:'HYDROPONIC YIELDS',desc:'+15% food production per level',baseCost:10,baseSeconds:30,costGrowth:1.57,timeGrowth:1.29,effect:1.15},
+  {id:'filters',icon:'💧',name:'MOLECULAR FILTRATION',desc:'+15% water production per level',baseCost:11,baseSeconds:32,costGrowth:1.57,timeGrowth:1.29,effect:1.15},
+  {id:'automation',icon:'🤖',name:'BUNKER AUTOMATION',desc:'+10% passive coin production per level',baseCost:16,baseSeconds:45,costGrowth:1.61,timeGrowth:1.32,effect:1.1},
+  {id:'walls',icon:'🧱',name:'THREAT ANALYSIS',desc:'+12% infected bounty per level',baseCost:14,baseSeconds:40,costGrowth:1.59,timeGrowth:1.31,effect:1.12}
 ];
 const EXPEDITIONS={
   store:{id:'store',icon:'🏪',name:'ABANDONED STORE',seconds:60,unlock:1,coins:[75,140],scrap:[8,18],specialistChance:.22},
