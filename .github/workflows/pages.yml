@@ -32,6 +32,9 @@ jobs:
       - name: Validate project
         run: npm test
 
+      - name: Browser smoke test
+        run: npm run test:browser
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
