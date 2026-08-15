@@ -25,6 +25,8 @@ fi
 required=(
   '<title>Afterlight Bunker</title>'
   'id="spriteStage"'
+  'data-parallax-layers="5"'
+  'assets/combat-clouds.webp'
   'POWER GENERATOR'
   'id="missionBox"'
   'specialMainCard'

@@ -33,6 +33,31 @@ html,body{overscroll-behavior:none;background:#0b0d0a;margin:0}html.standalone-a
 @media(min-width:700px){#app{max-width:1100px;margin:auto;border-left:1px solid #30352b;border-right:1px solid #30352b}#scene{top:72px!important;height:48%!important}#bunker{top:calc(72px + 48%)}#rooms{grid-template-columns:repeat(3,1fr)}.room{min-height:122px}}
 @media(min-width:900px){#app{max-width:1100px}#rooms{grid-template-columns:repeat(3,1fr);max-width:1000px;margin:auto}.room{min-height:138px}.roomHead b{font-size:10px}.roomFoot span,.roomFoot button{font-size:8px}}
 
+/* ===== 10. LAYERED PARALLAX COMBAT WORLD ===== */
+#spriteStage{--parallax-x:0;--parallax-y:0;background:linear-gradient(135deg,#201d23,#6e392f 58%,#171813);contain:layout paint;perspective:900px}
+.parallaxWorld{position:absolute;inset:0;z-index:0;overflow:hidden;background:#242027;isolation:isolate}
+.parallaxLayer{position:absolute;inset:-3%;overflow:hidden;opacity:0;transition:opacity .35s ease;will-change:transform}
+.worldReady .parallaxLayer{opacity:1}
+.parallaxLayer img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;user-select:none;-webkit-user-drag:none;image-rendering:auto}
+.worldSky{z-index:0;background:none;transform:translate3d(calc(var(--parallax-x) * -2px),calc(var(--parallax-y) * -1px),0) scale(1.035)}
+.worldSky img{filter:saturate(.88) brightness(.83) contrast(1.08)}
+.worldClouds{z-index:1;mix-blend-mode:screen;transform:translate3d(calc(var(--parallax-x) * -12px),calc(var(--parallax-y) * -5px),0) scale(1.075)}
+.worldClouds img{mix-blend-mode:normal;opacity:.47;filter:saturate(.7) brightness(.72);animation:cloudDrift 48s ease-in-out infinite alternate}
+.worldCity{z-index:2;mix-blend-mode:multiply;transform:translate3d(calc(var(--parallax-x) * -8px),calc(var(--parallax-y) * -3px),0) scale(1.055)}
+.worldCity img{mix-blend-mode:normal;opacity:.88;filter:saturate(.9) contrast(1.06)}
+.worldBunker{z-index:3;mix-blend-mode:darken;transform:translate3d(calc(var(--parallax-x) * -4px),calc(var(--parallax-y) * -1.5px),0) scale(1.025)}
+.worldBunker img{mix-blend-mode:normal;filter:saturate(.82) brightness(.95) contrast(1.08)}
+.worldGround{z-index:4;mix-blend-mode:darken;transform:translate3d(calc(var(--parallax-x) * -1.5px),calc(var(--parallax-y) * -.5px),0) scale(1.015)}
+.worldGround img{mix-blend-mode:normal;filter:saturate(.8) brightness(.92) contrast(1.08)}
+.survivorSprite,.enemySprite{z-index:7}
+.muzzleFx,.impactFx{z-index:9}
+.survivorSprite{bottom:13%}
+.enemySprite{bottom:13%}
+@keyframes cloudDrift{from{transform:translate3d(-1.8%,.2%,0) scale(1.035)}to{transform:translate3d(1.8%,-.35%,0) scale(1.055)}}
+@media(max-width:699px){.parallaxLayer{inset:-2.5% -15%}.parallaxLayer img{object-position:47% center}.worldBunker img{object-position:30% center}.worldGround img{object-position:54% center}.survivorSprite{bottom:27%}.enemySprite{bottom:27%}.muzzleFx{bottom:43%}.impactFx{bottom:41%}.killRewards{bottom:46%}}
+@media(min-width:700px){.parallaxLayer img{object-position:center 47%}.survivorSprite,.enemySprite{bottom:10%}}
+@media(prefers-reduced-motion:reduce){.parallaxLayer{transform:none!important}.parallaxLayer img{animation:none!important}.worldClouds img{opacity:.4}}
+
 /* Resource intelligence */
 .resource[data-resource]{cursor:pointer;touch-action:manipulation;transition:border-color .12s,filter .12s}.resource[data-resource]:active{filter:brightness(1.35);border-color:#b89a48}.resource[data-resource]:focus-visible{outline:2px solid #d5b65b;outline-offset:-2px}.resourceStats{position:absolute;z-index:85;inset:0;display:grid;place-items:center;padding:18px;background:#050705e8;backdrop-filter:blur(3px)}.resourceStatsCard{width:min(430px,100%);max-height:min(720px,90dvh);overflow:auto;background:linear-gradient(180deg,#20251b,#11140f);border:2px solid #6c603b;box-shadow:0 18px 60px #000;padding:14px}.resourceStatsCard>header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #454839;padding-bottom:11px}.resourceStatsCard>header>div{display:flex;gap:11px;align-items:center}.resourceStatsCard>header i{width:44px;height:44px;display:grid;place-items:center;background:#2b3022;border:1px solid #67603d;color:#e1bd56;font-style:normal;font-size:23px}.resourceStatsCard>header span small,.resourceStock small,.resourceRates small{display:block;color:#81906f;font-size:7px;letter-spacing:1.3px}.resourceStatsCard>header span b{display:block;color:#f1d179;font-size:17px;margin-top:3px}.resourceStatsCard>header button{width:34px;height:34px;border:1px solid #555b48;background:#292d24;font-size:20px}.resourceStatsCard>p{font-size:9px;line-height:1.55;color:#aeb5a1;margin:13px 2px}.resourceStock{padding:11px 13px;background:#151912;border:1px solid #3b4233}.resourceStock b{display:block;color:#f4edcf;font-size:25px;margin-top:4px}.resourceRates{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:7px 0 14px}.resourceRates>div{padding:10px 6px;text-align:center;background:#252a1f;border:1px solid #454b39}.resourceRates b{display:block;color:#d9bd65;font-size:13px;margin-top:5px}.resourceSources h3{font-size:8px;letter-spacing:1.4px;color:#aeb592;margin:0 0 7px}.resourceSources article{display:flex;align-items:center;gap:9px;padding:9px;margin-top:5px;background:#171b15;border:1px solid #343a2d}.resourceSources article>i{width:30px;text-align:center;font-style:normal;font-size:18px}.resourceSources article span b{display:block;font-size:9px;color:#e5e1cd}.resourceSources article span small{display:block;font-size:7px;color:#8fa276;margin-top:3px}.resourceEmpty{padding:18px;text-align:center;border:1px dashed #41473a;color:#717a68;font-size:8px}.resourceNote{display:block;margin-top:12px;color:#6f7868;font-size:7px;line-height:1.5}
 

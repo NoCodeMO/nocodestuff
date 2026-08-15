@@ -142,6 +142,7 @@ Special-room production is returned by `AfterlightSpecialRooms.rates()` and inte
 Only active assets remain in `assets/`:
 - `survivor-final.webp`
 - `walker-final.webp`
+- `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker.webp`, `combat-ground.webp` - aligned responsive combat parallax layers
 - `generator-room.webp`
 - `workshop-room.webp`
 - `.b64` room-art fallbacks, including the current greenhouse art.
