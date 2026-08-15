@@ -30,6 +30,7 @@ required=(
   'specialMainCard'
   'id="musicToggle"'
   'data-ui-audio="ready"'
+  'data-resource="coins"'
 )
 
 for marker in "${required[@]}"; do
