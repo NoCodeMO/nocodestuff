@@ -29,7 +29,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/research.js` - timed, scrap-funded research, completion badge and claiming.
 
 ### Presentation/platform
-- `js/ui/visuals.js` - survivor/enemy visuals, hit feedback, resource pulses and room-art loading.
+- `js/ui/visuals.js` - survivor/enemy visuals, hit/death feedback, floating kill rewards, resource pulses and room-art loading.
 - `js/audio.js` - background music plus compressed WebAudio UI, combat, reward and research-completion feedback.
 - `js/platform.js` - standalone/fullscreen install helpers.
 
