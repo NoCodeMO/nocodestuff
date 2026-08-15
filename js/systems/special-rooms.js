@@ -1,8 +1,8 @@
 (()=>{'use strict';
-const CFG=window.AfterlightConfig,ST=window.AfterlightState;if(!CFG||!ST)throw new Error('Special room dependencies missing');
+const CFG=window.AfterlightConfig,ST=window.AfterlightState,NUM=window.AfterlightNumbers;if(!CFG||!ST||!NUM)throw new Error('Special room dependencies missing');
 const S=ST.get(),ROOMS=CFG.SPECIAL_ROOMS;
 const found=()=>window.AfterlightExpeditions?.survivors?.()||S.expeditions?.survivors||[];
-const fmt=n=>n<1000?Math.floor(n)+'':(n/1000).toFixed(1)+'K';
+const fmt=NUM.format;
 const level=r=>Number(S.specialRooms[r.id]||0);
 const unlocked=r=>found().includes(r.specialist)&&S.bunker>=r.unlock;
 const cost=r=>Math.max(1,Math.floor(r.baseCost*Math.pow(1.7,level(r))*ST.bonus('costMult')));

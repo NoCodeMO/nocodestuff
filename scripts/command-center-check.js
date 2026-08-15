@@ -1,0 +1,15 @@
+'use strict';
+const fs=require('fs'),path=require('path'),vm=require('vm'),root=path.resolve(__dirname,'..');
+const read=file=>fs.readFileSync(path.join(root,file),'utf8'),assert=(condition,message)=>{if(!condition)throw new Error(message)};
+const numbersContext={window:{}};vm.runInNewContext(read('js/core/numbers.js'),numbersContext);const numbers=numbersContext.window.AfterlightNumbers;
+for(const [value,expected] of [[999,'999'],[1e3,'1K'],[1e6,'1M'],[1e9,'1B'],[1e12,'1T'],[1e15,'1Qa'],[1e18,'1Qi'],[1e21,'1Sx'],[1e24,'1Sp'],[1e27,'1Oc'],[1e30,'1No'],[1e33,'1Dc'],[-1e12,'-1T']])assert(numbers.format(value)===expected,`${value} must format as ${expected}, got ${numbers.format(value)}`);
+assert(numbers.format(1.234e15)==='1.23Qa','Quadrillion values need readable precision');
+const configContext={window:{}};vm.runInNewContext(read('js/core/config.js'),configContext);const messages=configContext.window.AfterlightConfig.COMMAND_MESSAGES;
+assert(messages.length>=3,'Command Center needs update, event and reward transmissions');assert(messages.some(message=>message.type==='UPDATE'),'Command Center needs game update messages');assert(messages.some(message=>message.type==='EVENT'&&message.reward?.uranium>0),'Command Center needs a claimable event reward');
+const state=read('js/core/state.js'),command=read('js/systems/command-center.js'),audio=read('js/audio.js'),html=read('index.html'),allJs=fs.readdirSync(path.join(root,'js'),{recursive:true}).filter(file=>String(file).endsWith('.js')).map(file=>read(path.join('js',String(file)))).join('\n');
+for(const [pattern,message] of [[/schema:9/,'Save schema must migrate to version 9'],[/command:\{read:\[\],claimed:\[\],lastTab:'guide'/,'Command Center state defaults are missing'],[/uiSfx:true,reducedEffects:false/,'Settings defaults are missing']])assert(pattern.test(state),message);
+for(const [pattern,message] of [[/TABS=\['guide','stats','messages','settings','account'\]/,'All five Command Center tabs are required'],[/function claimReward\(id\)/,'Developer rewards need a claim-once path'],[/state\.command\.claimed\.push\(id\)/,'Claimed developer rewards must persist'],[/function login\(rawName\)/,'Local Commander login is missing'],[/function logout\(\)/,'Local Commander logout is missing'],[/data-command-setting/,'Settings controls are missing'],[/data-command-center='ready'|dataset\.commandCenter='ready'/,'Command Center must expose its rendered smoke marker']])assert(pattern.test(command),message);
+assert(/setEffectsEnabled/.test(audio)&&/afterlight:dev-reward-claimed/.test(audio),'Sound settings and reward fanfare must use the audio system');
+assert(/data-tab="command"/.test(html)&&!/data-tab="stats"/.test(html),'Bottom Stats tab must be replaced by Command');assert(/js\/core\/numbers\.js/.test(html)&&/js\/systems\/command-center\.js/.test(html),'New modules must load explicitly');
+assert(!/const (?:fmt|rewardFmt)=n=>/.test(allJs),'Legacy per-module large-number formatters must stay removed');
+console.log('Afterlight Command Center passed: five-tab hub, local account, persisted transmissions/settings and B–Dc number notation.');

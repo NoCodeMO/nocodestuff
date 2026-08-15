@@ -2,7 +2,7 @@
 const ST=window.AfterlightState,S=ST?.get?.();
 const SRC='https://opengameart.org/sites/default/files/biohazardsextended.ogg';
 const audio=new Audio(SRC);audio.loop=true;audio.preload='auto';audio.volume=.18;audio.playsInline=true;
-let enabled=S?.settings?.music!==false,musicUnlocked=false;
+let enabled=S?.settings?.music!==false,effectsEnabled=S?.settings?.uiSfx!==false,musicUnlocked=false;
 const button=document.createElement('button');button.id='musicToggle';button.type='button';
 function label(){button.textContent=enabled?'♫ MUSIC ON':'♫ MUSIC OFF';button.classList.toggle('off',!enabled)}
 async function play(){if(!enabled)return false;try{await audio.play();musicUnlocked=true;return true}catch{return false}}
@@ -14,13 +14,14 @@ let context=null,master=null,lastSound=0,lastShot=0;
 const AudioContext=window.AudioContext||window.webkitAudioContext;
 function unlockUi(){if(!AudioContext)return null;if(!context){context=new AudioContext();master=context.createDynamicsCompressor();master.threshold.value=-12;master.knee.value=10;master.ratio.value=5;master.attack.value=.003;master.release.value=.12;master.connect(context.destination)}if(context.state==='suspended')context.resume().catch(()=>{});return context}
 function tone(frequency,duration=.055,volume=.07,delay=0,type='sine',endFrequency=frequency){
+  if(!effectsEnabled)return false;
   const ctx=unlockUi();if(!ctx)return false;
   const start=ctx.currentTime+delay,osc=ctx.createOscillator(),gain=ctx.createGain();
   osc.type=type;osc.frequency.setValueAtTime(frequency,start);osc.frequency.exponentialRampToValueAtTime(Math.max(20,endFrequency),start+duration);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(volume,start+.004);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
   osc.connect(gain).connect(master);osc.start(start);osc.stop(start+duration+.01);return true;
 }
 function noise(duration=.09,volume=.16,delay=0,cutoff=1800){
-  const ctx=unlockUi();if(!ctx)return false;const length=Math.ceil(ctx.sampleRate*duration),buffer=ctx.createBuffer(1,length,ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*(1-i/length);
+  if(!effectsEnabled)return false;const ctx=unlockUi();if(!ctx)return false;const length=Math.ceil(ctx.sampleRate*duration),buffer=ctx.createBuffer(1,length,ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*(1-i/length);
   const start=ctx.currentTime+delay,source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();source.buffer=buffer;filter.type='lowpass';filter.frequency.value=cutoff;gain.gain.setValueAtTime(volume,start);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);source.connect(filter).connect(gain).connect(master);source.start(start);return true;
 }
 const UI_VOLUME=1.1;
@@ -54,10 +55,11 @@ window.addEventListener('afterlight:expedition-complete',()=>rewardSound('expedi
 window.addEventListener('afterlight:research-complete',researchSound);
 window.addEventListener('afterlight:merchant-purchase',merchantSound);
 window.addEventListener('afterlight:room-upgraded',roomMilestoneSound);
+window.addEventListener('afterlight:dev-reward-claimed',()=>rewardSound('expedition'));
 document.body.dataset.uiAudio='ready';
 
 function unlockMusic(){if(musicUnlocked)return;if(enabled)play();if(musicUnlocked)removeMusicUnlock()}
 function removeMusicUnlock(){document.removeEventListener('pointerdown',unlockMusic,true);document.removeEventListener('touchstart',unlockMusic,true)}
 document.addEventListener('pointerdown',unlockMusic,true);document.addEventListener('touchstart',unlockMusic,{capture:true,passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else if(enabled)play()});
-window.AfterlightAudio={play,pause,isEnabled:()=>enabled,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},unlockUi,uiSound,gunshot,cashSound,rewardSound,researchSound,merchantSound,roomMilestoneSound};
+window.AfterlightAudio={play,pause,isEnabled:()=>enabled,isEffectsEnabled:()=>effectsEnabled,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},setEffectsEnabled:value=>{effectsEnabled=!!value;if(S?.settings)S.settings.uiSfx=effectsEnabled;ST?.save?.();if(effectsEnabled)setTimeout(()=>uiSound('confirm'),0);return effectsEnabled},unlockUi,uiSound,gunshot,cashSound,rewardSound,researchSound,merchantSound,roomMilestoneSound};
 })();

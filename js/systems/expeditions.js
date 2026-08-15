@@ -1,8 +1,8 @@
 (()=>{'use strict';
-const CFG=window.AfterlightConfig,ST=window.AfterlightState;if(!CFG||!ST)throw new Error('Expedition dependencies missing');
+const CFG=window.AfterlightConfig,ST=window.AfterlightState,NUM=window.AfterlightNumbers;if(!CFG||!ST||!NUM)throw new Error('Expedition dependencies missing');
 const S=ST.get(),X=S.expeditions,Z=CFG.EXPEDITIONS,P=CFG.SPECIALISTS;
 const pick=a=>Math.floor(a[0]+Math.random()*(a[1]-a[0]+1));
-const fmt=n=>n<1000?Math.floor(n)+'':n<1e6?(n/1000).toFixed(1)+'K':(n/1e6).toFixed(1)+'M';
+const fmt=NUM.format;
 const time=n=>{n=Math.max(0,Math.ceil(n));const h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=n%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${m}:${String(s).padStart(2,'0')}`};
 const duration=sec=>sec>=3600?(sec/3600)+' HOUR':sec>=60?(sec/60)+' MIN':'1 MIN';
 const specialist=id=>P.find(p=>p.id===id)||null;

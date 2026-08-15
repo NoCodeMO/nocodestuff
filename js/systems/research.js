@@ -1,11 +1,11 @@
 (()=>{'use strict';
-const CFG=window.AfterlightConfig,ST=window.AfterlightState;if(!CFG||!ST)throw new Error('Research dependencies missing');
+const CFG=window.AfterlightConfig,ST=window.AfterlightState,NUM=window.AfterlightNumbers;if(!CFG||!ST||!NUM)throw new Error('Research dependencies missing');
 const S=ST.get(),R=S.researchRuntime,DEFS=CFG.RESEARCH;
 const def=id=>DEFS.find(item=>item.id===id)||null;
 const level=id=>Math.max(0,Number(S.research[id]||0));
 const cost=item=>Math.max(1,Math.round(item.baseCost*Math.pow(item.costGrowth,level(item.id))));
 const seconds=item=>Math.min(21600,Math.round(item.baseSeconds*Math.pow(item.timeGrowth,level(item.id))));
-const fmt=n=>n<1000?Math.floor(n)+'':n<1e6?(n/1e3).toFixed(1)+'K':(n/1e6).toFixed(1)+'M';
+const fmt=NUM.format;
 function duration(value){value=Math.max(0,Math.ceil(value));const h=Math.floor(value/3600),m=Math.floor(value%3600/60),s=value%60;return h?`${h}h ${String(m).padStart(2,'0')}m`:m?`${m}m ${String(s).padStart(2,'0')}s`:`${s}s`}
 function effect(item,lv=level(item.id)){const total=(Math.pow(item.effect,lv)-1)*100,next=(item.effect-1)*100;return lv?`CURRENT +${total.toFixed(total<10?1:0)}% · NEXT +${next.toFixed(0)}%`:`NEXT LEVEL +${next.toFixed(0)}%`}
 function start(id){const item=def(id);if(!item||R.active||R.ready)return false;const price=cost(item);if(S.scrap<price)return false;const now=Date.now(),time=seconds(item);ST.update('research-start',state=>{state.scrap-=price;R.active={id,start:now,end:now+time*1000,cost:price}});render();window.AfterlightGame?.hud?.();return true}

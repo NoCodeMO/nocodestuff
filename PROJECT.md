@@ -18,7 +18,8 @@ This file is the fastest entry point for any future development session. Read th
 - `manifest.webmanifest` - PWA/home-screen metadata.
 
 ### Core
-- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers and the complete enemy/rarity table.
+- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers, official Command Center transmissions and the complete enemy/rarity table.
+- `js/core/numbers.js` - one authoritative large-number formatter from K/M through B, T, Qa, Qi, Dc and beyond.
 - `js/core/state.js` - one authoritative persistent state object and save migration.
 - `js/core/game.js` - economy, combat, normal rooms, room intelligence/progression, HUD, tabs and drawer routing.
 
@@ -28,6 +29,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/special-rooms.js` - classified rooms unlocked by specialists.
 - `js/systems/research.js` - timed, scrap-funded research, completion badge and claiming.
 - `js/systems/merchant.js` - Uranium wallet, Dealer stock, temporary boost timers, purchase rules and runtime multipliers.
+- `js/systems/command-center.js` - How to Play, advanced Stats, official messages/rewards, settings and local Commander login/logout.
 
 ### Presentation/platform
 - `js/ui/visuals.js` - survivor/enemy visuals, hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
@@ -39,6 +41,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/combat-balance.js` - deterministic enemy rarity, asset, horde, glow and income-scaled bounty checks.
 - `scripts/merchant-balance.js` - Dealer inventory, boost stacking, Uranium sources, timers and economy guardrails.
 - `scripts/room-balance.js` - all eight room artworks, milestone progression, bulk-upgrade costs and room-intelligence UI guardrails.
+- `scripts/command-center-check.js` - Command Center tabs, schema migration, message rewards, account/settings persistence and large-number notation.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
 - `npm run test:browser` - browser startup smoke test only.
@@ -50,22 +53,24 @@ This file is the fastest entry point for any future development session. Read th
 The order in `index.html` is intentional:
 
 1. config
-2. state
-3. expeditions
-4. special rooms
-5. research
-6. merchant
-7. visuals
-8. game
-9. missions
-10. audio
-11. platform
+2. numbers
+3. state
+4. expeditions
+5. special rooms
+6. research
+7. merchant
+8. command center
+9. visuals
+10. game
+11. missions
+12. audio
+13. platform
 
 Do not casually reorder these. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 8`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 9`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -79,7 +84,8 @@ missions: { claimed, bonuses }
 expeditions: { active, survivors, pending }
 specialRooms: { [roomId]: level }
 merchant: { active, purchases, spent, legacyMissionGrantDone }
-settings: { music }
+command: { read, claimed, lastTab, account: { loggedIn, name, createdAt } }
+settings: { music, uiSfx, reducedEffects }
 ```
 
 `state.js` automatically imports legacy data from:
@@ -93,6 +99,7 @@ Do not create another persistent gameplay store unless there is a strong reason.
 ## Public runtime APIs
 
 - `window.AfterlightConfig`
+- `window.AfterlightNumbers`
 - `window.AfterlightState`
 - `window.AfterlightGame`
 - `window.AfterlightMissions`
@@ -100,6 +107,7 @@ Do not create another persistent gameplay store unless there is a strong reason.
 - `window.AfterlightSpecialRooms`
 - `window.AfterlightResearch`
 - `window.AfterlightMerchant`
+- `window.AfterlightCommandCenter`
 - `window.AfterlightVisuals`
 - `window.AfterlightAudio`
 - `window.AfterlightPlatform`
@@ -125,6 +133,9 @@ Use events instead of adding duplicate click listeners across systems:
 - `afterlight:merchant-purchase` - emitted after Uranium is spent and the boost is active; owns the Dealer celebration and fanfare.
 - `afterlight:merchant-expired` - emitted when one or more persisted wall-clock boosts expire.
 - `afterlight:room-upgraded` - emitted after a successful normal-room upgrade; includes its exact level range, total cost and any newly reached milestone.
+- `afterlight:dev-reward-claimed` - emitted once after a Command Center supply reward is safely added to the unified save; owns its fanfare.
+- `afterlight:account` - local Commander login state changed.
+- `afterlight:settings-changed` - visual accessibility settings changed and presentation systems should refresh.
 
 UI button sounds are handled centrally in `audio.js`; do not add per-button audio listeners. Combat inside `#scene` is excluded from the button handler and its gunshot is driven by `afterlight:shot`.
 
@@ -157,6 +168,10 @@ Dealer boosts activate immediately and use persisted wall-clock deadlines. The 5
 
 Normal-room production keeps the original 1.18 per-level growth and 1.62 cost growth. Levels 5, 10, 25 and 50 add derived permanent room multipliers of x1.25, x1.5, x2 and x3. These bonuses are calculated from room level, so old saves receive them automatically without migration. Bulk x10 costs are the exact sum of ten sequential upgrades; MAX buys only the levels the current coin balance can fully fund.
 
+All production, price and reward UI uses `AfterlightNumbers`. Suffixes progress through K, M, B, T, Qa, Qi, Sx, Sp, Oc, No and Dc before continuing into higher tiers and scientific notation. Do not reintroduce local `fmt` implementations in individual systems.
+
+Official Command Center messages are release-configured in `COMMAND_MESSAGES`. A message reward is always claim-once through `command.claimed`; its coin component can scale from current hourly production while fixed Uranium remains scarce. The current Commander login is explicitly local-device only and never claims to be cloud authentication.
+
 ## Assets
 
 Only active assets remain in `assets/`:
@@ -174,6 +189,7 @@ The survivor `-final` name is a historical binary asset name and is intentionall
 - Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
 - Enemy movement is currently a fast offscreen-right entrance plus hit/death feedback. Full character-specific sprite-sheet animation is intentionally deferred.
 - Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
+- Commander login is a local profile stored inside the unified save. Secure cloud accounts and cross-device save sync require a future backend and are not simulated.
 - Background music uses the external CC0 Bio-Hazard OGG URL from OpenGameArt.
 - Normal rooms have a dedicated detail screen with live current/next output, per-minute/per-hour rates, contribution share, milestone status, affordability timing and x1/x10/MAX buying. Classified specialist rooms intentionally remain on their separate system for now.
 - No service worker is active during development. This is intentional because an earlier worker caused stale production builds.

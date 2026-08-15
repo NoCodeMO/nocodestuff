@@ -14,7 +14,7 @@
   <link rel="preload" as="image" href="assets/combat-bunker-clean.webp" type="image/webp">
   <link rel="preload" as="image" href="assets/enemy-common-drifter.webp" type="image/webp">
   <link rel="preload" as="image" href="assets/room-generator.webp" type="image/webp">
-  <link rel="stylesheet" href="app.css?build=12">
+  <link rel="stylesheet" href="app.css?build=13">
 </head>
 <body>
   <main id="app">
@@ -49,7 +49,7 @@
       <button data-tab="research">⚗<span>RESEARCH</span><em id="researchBadge"></em></button>
       <button data-tab="expeditions">☣<span>EXPEDITIONS</span></button>
       <button id="missionNav" type="button">✦<span>MISSIONS</span><em id="missionBadge"></em></button>
-      <button data-tab="stats">☷<span>STATS</span></button>
+      <button data-tab="command">!<span>COMMAND</span><em id="commandBadge"></em></button>
     </nav>
 
     <section id="drawer" class="hidden">
@@ -64,16 +64,18 @@
   </main>
 
   <!-- Load order is documented in PROJECT.md. -->
-  <script src="js/core/config.js?build=8"></script>
-  <script src="js/core/state.js?build=5"></script>
-  <script src="js/systems/expeditions.js?build=4"></script>
-  <script src="js/systems/special-rooms.js?build=2"></script>
-  <script src="js/systems/research.js?build=1"></script>
+  <script src="js/core/config.js?build=9"></script>
+  <script src="js/core/numbers.js?build=1"></script>
+  <script src="js/core/state.js?build=6"></script>
+  <script src="js/systems/expeditions.js?build=5"></script>
+  <script src="js/systems/special-rooms.js?build=3"></script>
+  <script src="js/systems/research.js?build=2"></script>
   <script src="js/systems/merchant.js?build=2"></script>
-  <script src="js/ui/visuals.js?build=11"></script>
-  <script src="js/core/game.js?build=10"></script>
-  <script src="js/systems/missions.js?build=4"></script>
-  <script src="js/audio.js?build=9"></script>
-  <script src="js/platform.js?build=2"></script>
+  <script src="js/systems/command-center.js?build=1"></script>
+  <script src="js/ui/visuals.js?build=12"></script>
+  <script src="js/core/game.js?build=11"></script>
+  <script src="js/systems/missions.js?build=5"></script>
+  <script src="js/audio.js?build=10"></script>
+  <script src="js/platform.js?build=3"></script>
 </body>
 </html>

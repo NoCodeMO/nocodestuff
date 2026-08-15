@@ -45,6 +45,10 @@ required=(
   'data-room-details-system="ready"'
   'data-room-id="generator"'
   'assets/room-generator.webp'
+  'data-command-center-system="ready"'
+  'data-tab="command"'
+  'id="commandBadge"'
+  'js/core/numbers.js?build=1'
 )
 
 for marker in "${required[@]}"; do

@@ -53,6 +53,11 @@ const MERCHANT_OFFERS=[
   {id:'hunter',group:'combat',tier:'EPIC',icon:'⌖',name:'REDLINE AMMO',tagline:'Hot rounds hit harder and increase every infected bounty.',value:'×3 DAMAGE · ×2 BOUNTY',cost:5,seconds:300,accent:'#a45bd8',effect:{damage:3,zombie:2}},
   {id:'lure',group:'lure',tier:'LEGENDARY',icon:'☣',name:'BLACKLIGHT LURE',tagline:'Pulls rarer infected and Brutes toward the bunker.',value:'BOOSTED RARITY ODDS',cost:8,seconds:300,accent:'#d8b643',effect:{rarityLuck:true}}
 ];
+const COMMAND_MESSAGES=[
+  {id:'command-center-launch',type:'UPDATE',date:'AUG 15 · BUILD 277',title:'COMMAND CENTER ONLINE',body:'The old Stats terminal has been rebuilt. Guides, statistics, settings, local Commander profiles and official Afterlight transmissions now share one secure hub.'},
+  {id:'room-intelligence-release',type:'UPDATE',date:'AUG 15 · ROOM SYSTEMS',title:'ROOM INTELLIGENCE DEPLOYED',body:'Every normal bunker room now has unique art, live output intelligence, level milestones and exact x1, x10 and MAX upgrade quotes.'},
+  {id:'founder-supply-cache',type:'EVENT',date:'FOUNDING SIGNAL · ONE-TIME',title:'AFTERLIGHT FOUNDERS CACHE',body:'Command recovered a sealed launch cache for every active bunker. Claim it once; the coin portion scales with your current bunker economy.',reward:{minimumCoins:500,coinHours:.2,scrap:50,uranium:2}}
+];
 const ENEMIES=[
   {id:'common',rarity:'COMMON',name:'THE DRIFTER',chance:55,asset:'assets/enemy-common-drifter.webp',hpMultiplier:1,bountyMultiplier:1,scrapMultiplier:1,glow:'transparent',accent:'#b7b4a5'},
   {id:'uncommon',rarity:'UNCOMMON',name:'CINDERBACK',chance:25,asset:'assets/enemy-uncommon-cinderback.webp',hpMultiplier:1.4,bountyMultiplier:1.6,scrapMultiplier:1.35,glow:'#a75d26',accent:'#c57a32'},
@@ -70,5 +75,5 @@ const COMBAT=Object.freeze({
   minimumHits:6,
   maximumHits:18
 });
-window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,ENEMIES,COMBAT});
+window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,COMMAND_MESSAGES,ENEMIES,COMBAT});
 })();
