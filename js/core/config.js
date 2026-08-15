@@ -69,6 +69,9 @@ const ENEMIES=[
 const COMBAT=Object.freeze({
   criticalChance:.08,
   criticalMultiplier:2,
+  streakWindowMs:12000,
+  streakStep:.25,
+  streakMaximum:3,
   hordeChance:.12,
   hordeVisualCount:3,
   hordeMultiplier:3,
