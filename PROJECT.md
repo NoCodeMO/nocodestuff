@@ -32,7 +32,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/command-center.js` - How to Play, advanced Stats, official messages/rewards, settings and local Commander login/logout.
 
 ### Presentation/platform
-- `js/ui/visuals.js` - survivor/enemy visuals, hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
+- `js/ui/visuals.js` - survivor/enemy visuals, sprite-relative rifle flash, recoil/hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
 - `js/audio.js` - background music plus compressed WebAudio UI, combat, reward and research-completion feedback.
 - `js/platform.js` - standalone/fullscreen install helpers.
 
@@ -178,12 +178,12 @@ Official Command Center messages are release-configured in `COMMAND_MESSAGES`. A
 ## Assets
 
 Only active assets remain in `assets/`:
-- `survivor-final.webp`
+- `survivor-ranger.png` - active transparent survivor art. Its muzzle flash stays a separate short-lived game effect anchored at 77.5% / 20.5% inside the survivor unit, so recoil and responsive scaling cannot detach it from the rifle.
 - `enemy-common-drifter.webp`, `enemy-uncommon-cinderback.webp`, `enemy-rare-blue-shield.webp`, `enemy-epic-bloater.webp`, `enemy-legendary-gilded-warden.webp`, `enemy-brute-breaker.webp` - transparent, left-facing enemy art with no baked rarity glow; glow is rendered by CSS at runtime
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
 
-The survivor `-final` name is a historical binary asset name and is intentionally left alone. `walker-final.webp` is retained only as an unused legacy asset so existing cached sessions cannot request a missing file; new combat never references it.
+`survivor-final.webp` and `walker-final.webp` are retained only as unused legacy assets so existing cached sessions cannot request missing files; new combat references neither one.
 
 ## Current intentional limitations
 

@@ -44,10 +44,18 @@ for(const [pattern,message] of [
   [/--enemy-glow/,'rarity glow must be rendered by the game'],
   [/function shotFeedback\(\)\{clearSpawn\(\);/,'shots must clear the completed entrance state before hit feedback'],
   [/spawnClearTimer=setTimeout\(clearSpawn,500\)/,'spawn state requires a fallback cleanup'],
-  [/className='enemyUnit'/,'enemy visuals must use one coordinated encounter unit']
+  [/className='enemyUnit'/,'enemy visuals must use one coordinated encounter unit'],
+  [/survivor\.src='assets\/survivor-ranger\.png'/,'combat must use the approved ranger survivor'],
+  [/survivorUnit\.append\(survivor,muzzle\)/,'muzzle flash must be anchored inside the survivor coordinate system'],
+  [/restart\(survivorUnit,'shoot'\)/,'recoil must move the survivor and muzzle together'],
+  [/dataset\.muzzleAnchor='77\.5% 20\.5%'/,'the rifle barrel needs one explicit normalized muzzle anchor']
 ])if(!pattern.test(visuals))fail(message);
 const css=fs.readFileSync(path.join(root,'app.css'),'utf8');
 if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \+ 100%\)/.test(css))fail('spawn entrance must start beyond the right edge');
 if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow must remain disabled');
 if(!/\.enemyUnit:is\([^}]+\) \.enemySprite\{filter:[^}]+var\(--enemy-glow\)/.test(css))fail('rarity glow must follow each sprite alpha instead of its layout container');
+const survivorAsset=path.join(root,'assets','survivor-ranger.png');if(!fs.existsSync(survivorAsset))fail('missing approved survivor-ranger.png');
+const survivorBuffer=fs.readFileSync(survivorAsset);if(!survivorBuffer.subarray(1,4).equals(Buffer.from('PNG'))||survivorBuffer[25]!==6)fail('survivor-ranger.png must be a real RGBA PNG');
+if(!/\.survivorUnit \.muzzleFx\{[^}]*left:77\.5%;top:20\.5%/.test(css))fail('muzzle effect must use the sprite-relative rifle barrel anchor');
+if(!/clip-path:polygon\(/.test(css))fail('muzzle flash must use a sharp pixel burst instead of the old fireball');
 console.log(`Afterlight combat balance passed: ${total}% rarity table, ${ENEMIES.length} sprites, 800 coins at 1M/hour, hordes x${COMBAT.hordeMultiplier}.`);

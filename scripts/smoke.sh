@@ -25,6 +25,9 @@ fi
 required=(
   '<title>Afterlight Bunker</title>'
   'id="spriteStage"'
+  'data-survivor-asset="survivor-ranger.png"'
+  'data-muzzle-anchor="77.5% 20.5%"'
+  'assets/survivor-ranger.png'
   'data-parallax-layers="5"'
   'data-enemy-rarity='
   'class="enemyUnit'

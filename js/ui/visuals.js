@@ -11,11 +11,13 @@ const stage=document.createElement('div');stage.id='spriteStage';stage.dataset.p
 const world=document.createElement('div');world.className='parallaxWorld';world.setAttribute('aria-hidden','true');
 for(const [className,src] of WORLD_LAYERS){const layer=document.createElement('div');layer.className='parallaxLayer '+className;const image=document.createElement('img');image.src=src;image.alt='';image.decoding='async';image.draggable=false;layer.append(image);world.append(layer)}
 stage.append(world);
-const survivor=document.createElement('img');survivor.className='survivorSprite';survivor.alt='Survivor';survivor.src='assets/survivor-final.webp';
+const survivorUnit=document.createElement('div');survivorUnit.className='survivorUnit';survivorUnit.dataset.muzzleAnchor='77.5% 20.5%';
+const survivor=document.createElement('img');survivor.className='survivorSprite';survivor.alt='Survivor';survivor.src='assets/survivor-ranger.png';survivor.decoding='async';survivor.draggable=false;
 const enemyUnit=document.createElement('div');enemyUnit.className='enemyUnit';enemyUnit.setAttribute('aria-live','polite');
 const enemyGlow=document.createElement('i');enemyGlow.className='enemyGlow';enemyGlow.setAttribute('aria-hidden','true');
 const enemyStack=document.createElement('div');enemyStack.className='enemyStack';enemyUnit.append(enemyGlow,enemyStack);
-const muzzle=document.createElement('i');muzzle.className='muzzleFx';const impact=document.createElement('i');impact.className='impactFx';stage.append(survivor,enemyUnit,muzzle,impact);scene.prepend(stage);
+const muzzle=document.createElement('i');muzzle.className='muzzleFx';muzzle.setAttribute('aria-hidden','true');survivorUnit.append(survivor,muzzle);const impact=document.createElement('i');impact.className='impactFx';stage.append(survivorUnit,enemyUnit,impact);scene.prepend(stage);
+stage.dataset.survivorAsset='survivor-ranger.png';
 const layerImages=[...world.querySelectorAll('img')];Promise.allSettled(layerImages.map(image=>image.decode?.()||Promise.resolve())).then(()=>stage.classList.add('worldReady'));
 for(const type of CFG.ENEMIES||[]){const preload=new Image();preload.src=type.asset}
 
@@ -30,7 +32,7 @@ function restart(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classLi
 let spawnClearTimer=0;
 function clearSpawn(){clearTimeout(spawnClearTimer);spawnClearTimer=0;enemyUnit.classList.remove('spawn')}
 enemyUnit.addEventListener('animationend',event=>{if(event.target===enemyUnit&&event.animationName.startsWith('enemyEnter'))clearSpawn()});
-function shotFeedback(){clearSpawn();restart(survivor,'shoot');restart(enemyUnit,'hit');restart(muzzle,'fire');restart(impact,'pop');setTimeout(()=>{survivor.classList.remove('shoot');enemyUnit.classList.remove('hit')},180)}
+function shotFeedback(){clearSpawn();restart(survivorUnit,'shoot');restart(enemyUnit,'hit');restart(muzzle,'fire');restart(impact,'pop');setTimeout(()=>{survivorUnit.classList.remove('shoot');enemyUnit.classList.remove('hit')},180)}
 const rewardFmt=NUM.format;
 function killRewards(event){const detail=event.detail||{};stage.querySelector('.killRewards')?.remove();enemyUnit.classList.remove('hit');restart(enemyUnit,'dead');const rewards=document.createElement('div');rewards.className='killRewards';rewards.innerHTML=`<b>+${rewardFmt(detail.coins||0)} COINS</b><span>+${rewardFmt(detail.scrap||0)} SCRAP</span>${detail.uranium?`<em class="uraniumDrop">+${detail.uranium} URANIUM CRYSTAL</em>`:''}${detail.core?'<em class="coreDrop">+1 BRUTE CORE</em>':''}`;stage.append(rewards);setTimeout(()=>rewards.remove(),1700)}
 function renderEnemy(event){const detail=event.detail||{},maxHorde=CFG.COMBAT?.hordeVisualCount||3,count=Math.min(maxHorde,Math.max(1,Number(detail.visualCount)||1));enemyUnit.dataset.rarity=detail.id||'common';enemyUnit.classList.toggle('horde',!!detail.horde);enemyUnit.classList.toggle('brute',!!detail.brute);enemyUnit.style.setProperty('--enemy-glow',detail.glow||'transparent');enemyUnit.style.setProperty('--enemy-accent',detail.accent||'#b7b4a5');enemyStack.replaceChildren();for(let index=0;index<count;index++){const image=document.createElement('img');image.className='enemySprite';image.src=detail.asset||'assets/enemy-common-drifter.webp';image.alt=index?'':detail.name||'Infected';image.decoding='async';image.draggable=false;enemyStack.append(image)}enemyUnit.dataset.enemyCount=String(count);enemyUnit.classList.remove('dead','hit');restart(enemyUnit,'spawn');clearTimeout(spawnClearTimer);spawnClearTimer=setTimeout(clearSpawn,500);stage.dataset.enemyRarity=detail.id||'common';stage.dataset.enemyHorde=detail.horde?'true':'false';const card=document.getElementById('enemyCard');if(card){card.dataset.rarity=detail.id||'common';card.style.setProperty('--enemy-accent',detail.accent||'#b7b4a5');card.classList.toggle('bossGlow',!!detail.brute)}}
@@ -41,5 +43,5 @@ function rateFrom(id){const el=document.getElementById(id);if(!el)return 0;const
 function pulse(valueId,rateId){const value=document.getElementById(valueId),rate=rateFrom(rateId),card=value?.closest('.resource');if(!card||!(rate>0))return;restart(card,'resourcePulse');setTimeout(()=>card.classList.remove('resourcePulse'),160);const pop=document.createElement('span');pop.className='gainPop';pop.textContent='+'+(rate<10?rate.toFixed(1):Math.round(rate));card.append(pop);setTimeout(()=>pop.remove(),900)}
 setInterval(()=>pulsePairs.forEach(pair=>pulse(...pair)),1000);
 
-window.AfterlightVisuals={shotFeedback,killRewards,renderEnemy,enemyUnit:()=>enemyUnit,parallaxLayers:()=>WORLD_LAYERS.map(([name,src])=>({name,src}))};
+window.AfterlightVisuals={shotFeedback,killRewards,renderEnemy,enemyUnit:()=>enemyUnit,survivorUnit:()=>survivorUnit,parallaxLayers:()=>WORLD_LAYERS.map(([name,src])=>({name,src}))};
 })();
