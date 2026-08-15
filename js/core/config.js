@@ -73,6 +73,7 @@ const COMBAT=Object.freeze({
   streakStep:.25,
   streakMaximum:3,
   hordeChance:.12,
+  hordePityEncounters:8,
   hordeVisualCount:3,
   hordeMultiplier:3,
   bountyHourlyShare:.0008,
@@ -83,4 +84,3 @@ const COMBAT=Object.freeze({
 const OFFLINE=Object.freeze({minimumAwayMs:60000,maximumAwayMs:43200000,baseEfficiency:.35,maximumEfficiency:.9});
 window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,COMMAND_MESSAGES,ENEMIES,COMBAT,OFFLINE});
 })();
-

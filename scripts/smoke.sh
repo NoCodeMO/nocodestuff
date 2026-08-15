@@ -55,6 +55,7 @@ required=(
   'data-offline-system="ready"'
   'data-codex-system="ready"'
   'id="enemyCodexHint"'
+  'id="hordeSignal"'
   'data-tab="command"'
   'id="commandBadge"'
   'js/core/numbers.js?build=1'

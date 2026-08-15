@@ -167,7 +167,7 @@ Mission bonuses are consumed by the core economy. Current supported bonus keys:
 
 Special-room production is returned by `AfterlightSpecialRooms.rates()` and integrated into the core economy. Do not add another production interval that writes resources independently.
 
-Enemy encounters use one weighted table with an exact 100% total: Common 55%, Uncommon 25%, Rare 12%, Epic 5%, Legendary 2% and Brute 1%. A non-Brute encounter independently has a 12% horde chance. A horde contains exactly three infected and grants exactly x3 HP, coins, scrap and kill credit compared with that same single infected. Brutes can never become hordes.
+Enemy encounters use one weighted table with an exact 100% total: Common 55%, Uncommon 25%, Rare 12%, Epic 5%, Legendary 2% and Brute 1%. Every non-Brute encounter has a 12% base horde chance, with a persisted pity counter guaranteeing a horde by the eighth eligible encounter. Brutes can never become hordes and neither advance nor reset that counter. A horde contains exactly three infected and grants exactly x3 HP, coins, scrap and kill credit compared with that same single infected.
 
 The first actual spawn of each configured enemy is persisted through `stats.discovered`; old saves automatically unlock entries backed by existing rarity kills. Clicking the enemy status card opens the Infected Codex. Locked entries remain silhouettes while discovered entries show the shared configured sprite, base chance, lifetime kills, HP multiplier, Coin multiplier, Scrap multiplier and encounter notes.
 
@@ -234,4 +234,3 @@ Only active assets remain in `assets/`:
 6. Confirm the GitHub Pages workflow and deployment succeeded before saying a change is live.
 
 This structure is deliberately optimized for rapid AI-assisted iteration and large changes without needing to rediscover the project each session.
-

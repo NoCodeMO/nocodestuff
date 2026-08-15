@@ -20,6 +20,10 @@ if(ENEMIES.find(type=>type.id==='brute').glow!=='transparent')fail('Brute must r
 for(const id of ['uncommon','rare','epic','legendary'])if(ENEMIES.find(type=>type.id===id).glow==='transparent')fail(`${id} requires an in-game glow color`);
 if(COMBAT.hordeVisualCount!==3||COMBAT.hordeMultiplier!==3)fail('hordes must contain at most three infected and pay/scale at exactly x3');
 if(!(COMBAT.hordeChance>0&&COMBAT.hordeChance<1))fail('horde chance must be a probability');
+if(COMBAT.hordePityEncounters!==8)fail('a horde must be guaranteed by the eighth eligible encounter');
+let hordeMisses=0,guaranteedAt=0;
+for(let encounter=1;encounter<=COMBAT.hordePityEncounters;encounter++){const horde=hordeMisses>=COMBAT.hordePityEncounters-1||.999999<COMBAT.hordeChance;if(horde){guaranteedAt=encounter;hordeMisses=0;break}hordeMisses++}
+if(guaranteedAt!==COMBAT.hordePityEncounters)fail(`maximum-roll pity simulation spawned at ${guaranteedAt||'never'}, expected encounter ${COMBAT.hordePityEncounters}`);
 if(COMBAT.criticalChance!==.08||COMBAT.criticalMultiplier!==2)fail('critical hits must stay at a balanced 8% chance and x2 damage');
 if(COMBAT.streakWindowMs!==12000||COMBAT.streakStep!==.25||COMBAT.streakMaximum!==3)fail('kill streaks must use the approved 12-second, +25%, x3 cap');
 const millionPerHourBounty=1_000_000*COMBAT.bountyHourlyShare;
@@ -33,7 +37,11 @@ for(const [pattern,message] of [
   [/function pickEnemy\(roll=Math\.random\(\)\)/,'game must use the configured weighted rarity picker'],
   [/rates\(\)\.coins\*3600/,'bounties must scale from actual hourly coin production'],
   [/COMBAT\.bountyHourlyShare/,'bounties must use the documented hourly share'],
-  [/horde=!type\.brute&&\(forcedHorde===null\?Math\.random\(\)<COMBAT\.hordeChance:/,'brutes must not become hordes'],
+  [/function rollHorde\(type,forcedHorde=null,roll=Math\.random\(\)\)\{if\(type\.brute\)return false;if\(forcedHorde!==null\)return!!forcedHorde;/,'brutes and local forced encounters must bypass persisted pity updates'],
+  [/status\.misses>=status\.threshold-1\|\|Math\.max\(0,Math\.min\(\.999999,Number\(roll\)\|\|0\)\)<COMBAT\.hordeChance/,'hordes must use both the base chance and the configured guarantee'],
+  [/state\.stats\.hordePity=horde\?0:status\.misses\+1/,'eligible horde misses must persist and successful hordes must reset the counter'],
+  [/horde=rollHorde\(type,forcedHorde,override\.hordeRoll\?\?Math\.random\(\)\)/,'every spawned encounter must pass through the reliable horde roller'],
+  [/resetHordePity:params\.get\('resetHordePity'\)==='1'/,'localhost must expose a deterministic pity reset for browser regression tests'],
   [/single\*\(horde\?COMBAT\.hordeMultiplier:1\)/,'horde HP and rewards must multiply the already-rounded single-zombie value exactly'],
   [/killCredit:horde\?COMBAT\.hordeMultiplier:1/,'hordes must award x3 kill credit'],
   [/addCoins\(Math\.max\(1,Math\.floor\(baseCoins\*streak\.multiplier\)\),false\)/,'hourly-scaled bounties must not double-apply the coin bonus'],
@@ -60,6 +68,8 @@ for(const [pattern,message] of [
 const css=fs.readFileSync(path.join(root,'app.css'),'utf8');
 if(!/float\.className='damageNumber'\+\(detail\.critical/.test(visuals)||!/if\(active\.length>8\)active\[0\]\.remove\(\)/.test(visuals))fail('per-shot damage feedback must exist and remain spam-safe');
 if(!/@keyframes damageNumberRise/.test(css))fail('floating damage animation is missing');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+if(!/id="hordeSignal"/.test(html)||!/GUARANTEED IN/.test(game)||!/#hordeSignal\.detected/.test(css))fail('players need a visible horde signal and a distinct detected state');
 if(!/@keyframes criticalNumberRise/.test(css)||!/CRIT -/.test(visuals))fail('critical hits need distinct visual feedback');
 if(!/id='combatStreak'/.test(visuals)||!/afterlight:streak/.test(visuals)||!/@keyframes streakDrain/.test(css))fail('kill streak HUD and timer feedback are missing');
 if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \+ 100%\)/.test(css))fail('spawn entrance must start beyond the right edge');
@@ -70,4 +80,3 @@ const survivorBuffer=fs.readFileSync(survivorAsset);if(!survivorBuffer.subarray(
 if(!/\.survivorUnit \.muzzleFx\{[^}]*left:77\.5%;top:20\.5%/.test(css))fail('muzzle effect must use the sprite-relative rifle barrel anchor');
 if(!/clip-path:polygon\(/.test(css))fail('muzzle flash must use a sharp pixel burst instead of the old fireball');
 console.log(`Afterlight combat balance passed: ${total}% rarity table, ${ENEMIES.length} sprites, 800 coins at 1M/hour, hordes x${COMBAT.hordeMultiplier}.`);
-
