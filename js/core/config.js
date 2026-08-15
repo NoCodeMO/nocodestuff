@@ -18,11 +18,11 @@ const RESEARCH=[
   {id:'walls',icon:'🧱',name:'THREAT ANALYSIS',desc:'+12% infected bounty per level',baseCost:14,baseSeconds:40,costGrowth:1.59,timeGrowth:1.31,effect:1.12}
 ];
 const EXPEDITIONS={
-  store:{id:'store',icon:'🏪',name:'ABANDONED STORE',seconds:60,unlock:1,coins:[75,140],scrap:[8,18],specialistChance:.22},
-  blocks:{id:'blocks',icon:'🏚',name:'RUINED BLOCKS',seconds:180,unlock:2,coins:[180,350],scrap:[20,42],specialistChance:.28},
-  clinic:{id:'clinic',icon:'🏥',name:'FIELD HOSPITAL',seconds:600,unlock:3,coins:[500,900],scrap:[55,100],specialistChance:.36},
-  metro:{id:'metro',icon:'🚇',name:'UNDERGROUND METRO',seconds:1800,unlock:5,coins:[1500,2600],scrap:[140,260],specialistChance:.44},
-  checkpoint:{id:'checkpoint',icon:'☣',name:'MILITARY CHECKPOINT',seconds:3600,unlock:7,coins:[4000,7000],scrap:[350,600],specialistChance:.55}
+  store:{id:'store',icon:'🏪',name:'ABANDONED STORE',seconds:60,unlock:1,coins:[75,140],scrap:[8,18],uranium:[1,1],uraniumChance:.2,specialistChance:.22},
+  blocks:{id:'blocks',icon:'🏚',name:'RUINED BLOCKS',seconds:180,unlock:2,coins:[180,350],scrap:[20,42],uranium:[1,1],uraniumChance:.35,specialistChance:.28},
+  clinic:{id:'clinic',icon:'🏥',name:'FIELD HOSPITAL',seconds:600,unlock:3,coins:[500,900],scrap:[55,100],uranium:[1,2],uraniumChance:.6,specialistChance:.36},
+  metro:{id:'metro',icon:'🚇',name:'UNDERGROUND METRO',seconds:1800,unlock:5,coins:[1500,2600],scrap:[140,260],uranium:[2,3],uraniumChance:.8,specialistChance:.44},
+  checkpoint:{id:'checkpoint',icon:'☣',name:'MILITARY CHECKPOINT',seconds:3600,unlock:7,coins:[4000,7000],scrap:[350,600],uranium:[4,6],uraniumChance:1,specialistChance:.55}
 };
 const SPECIALISTS=[
   {id:'maya',name:'MAYA REYES',role:'REACTOR ENGINEER',icon:'☢',unlocks:'NUCLEAR REACTOR'},
@@ -37,6 +37,14 @@ const SPECIAL_ROOMS=[
   {id:'comms',icon:'◉',name:'LONG-RANGE COMMS',specialist:'sam',unlock:7,baseCost:9000,desc:'Coordinates distant salvage teams. Requires a Signals Officer.',prod:{coins:30,scrap:1.8}},
   {id:'armory',icon:'⌖',name:'HEAVY ARMORY',specialist:'cole',unlock:9,baseCost:16000,desc:'Military-grade weapon systems. Requires an Ordnance Specialist.',prod:{coins:25}},
   {id:'quantum',icon:'✦',name:'EXPERIMENTAL LAB',specialist:'elias',unlock:12,baseCost:30000,desc:'High-risk science wing. Requires an Experimental Physicist.',prod:{science:1.5,coins:40}}
+];
+const MERCHANT_OFFERS=[
+  {id:'gold5',group:'coins',tier:'UNCOMMON',icon:'◉',name:'GILDED MINUTES',tagline:'Five minutes of accelerated bunker trade.',value:'×5 COINS',cost:3,seconds:300,accent:'#c88738',effect:{coins:5}},
+  {id:'gold10',group:'coins',tier:'RARE',icon:'◆',name:'KINGMAKER CONTRACT',tagline:'The Dealer opens his highest-value routes.',value:'×10 COINS',cost:7,seconds:300,accent:'#4f9ee8',effect:{coins:10}},
+  {id:'all3',group:'production',tier:'LEGENDARY',icon:'☢',name:'REACTOR BLACKOUT',tagline:'Every bunker production line runs beyond safe limits.',value:'×3 ALL PRODUCTION',cost:10,seconds:300,accent:'#dfb744',effect:{allProduction:3}},
+  {id:'scrap5',group:'scrap',tier:'UNCOMMON',icon:'⚙',name:'SALVAGE MAGNET',tagline:'Priority access to the Dealer’s salvage crews.',value:'×5 SCRAP',cost:4,seconds:300,accent:'#bd7137',effect:{scrap:5}},
+  {id:'hunter',group:'combat',tier:'EPIC',icon:'⌖',name:'REDLINE AMMO',tagline:'Hot rounds hit harder and increase every infected bounty.',value:'×3 DAMAGE · ×2 BOUNTY',cost:5,seconds:300,accent:'#a45bd8',effect:{damage:3,zombie:2}},
+  {id:'lure',group:'lure',tier:'LEGENDARY',icon:'☣',name:'BLACKLIGHT LURE',tagline:'Pulls rarer infected and Brutes toward the bunker.',value:'BOOSTED RARITY ODDS',cost:8,seconds:300,accent:'#d8b643',effect:{rarityLuck:true}}
 ];
 const ENEMIES=[
   {id:'common',rarity:'COMMON',name:'THE DRIFTER',chance:55,asset:'assets/enemy-common-drifter.webp',hpMultiplier:1,bountyMultiplier:1,scrapMultiplier:1,glow:'transparent',accent:'#b7b4a5'},
@@ -55,5 +63,5 @@ const COMBAT=Object.freeze({
   minimumHits:6,
   maximumHits:18
 });
-window.AfterlightConfig=Object.freeze({ROOMS,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,ENEMIES,COMBAT});
+window.AfterlightConfig=Object.freeze({ROOMS,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,ENEMIES,COMBAT});
 })();

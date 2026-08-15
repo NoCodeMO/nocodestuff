@@ -18,7 +18,7 @@ This file is the fastest entry point for any future development session. Read th
 - `manifest.webmanifest` - PWA/home-screen metadata.
 
 ### Core
-- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms and the complete enemy/rarity table.
+- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers and the complete enemy/rarity table.
 - `js/core/state.js` - one authoritative persistent state object and save migration.
 - `js/core/game.js` - economy, combat, normal rooms, HUD, tabs and drawer routing.
 
@@ -27,6 +27,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/expeditions.js` - expedition timers, rewards and specialist discovery.
 - `js/systems/special-rooms.js` - classified rooms unlocked by specialists.
 - `js/systems/research.js` - timed, scrap-funded research, completion badge and claiming.
+- `js/systems/merchant.js` - Uranium wallet, Dealer stock, temporary boost timers, purchase rules and runtime multipliers.
 
 ### Presentation/platform
 - `js/ui/visuals.js` - survivor/enemy visuals, hit/death feedback, floating kill rewards, resource pulses and room-art loading.
@@ -36,6 +37,7 @@ This file is the fastest entry point for any future development session. Read th
 ### Validation
 - `scripts/validate.js` - zero-dependency JS syntax, local reference and legacy-file checks.
 - `scripts/combat-balance.js` - deterministic enemy rarity, asset, horde, glow and income-scaled bounty checks.
+- `scripts/merchant-balance.js` - Dealer inventory, boost stacking, Uranium sources, timers and economy guardrails.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
 - `npm run test:browser` - browser startup smoke test only.
@@ -51,29 +53,31 @@ The order in `index.html` is intentional:
 3. expeditions
 4. special rooms
 5. research
-6. visuals
-7. game
-8. missions
-9. audio
-10. platform
+6. merchant
+7. visuals
+8. game
+9. missions
+10. audio
+11. platform
 
 Do not casually reorder these. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 7`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 8`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
 Main shape:
 
 ```text
-resources: coins, total, food, water, power, scrap, science
-progress: kills, bunker, rooms, research, stats (including rarity kills, hordes and Brute Cores)
+resources: coins, total, food, water, power, scrap, science, uranium
+progress: kills, bunker, rooms, research, stats (including rarity kills, hordes, Brute Cores and Uranium earned/spent)
 researchRuntime: { active, ready }
 missions: { claimed, bonuses }
 expeditions: { active, survivors, pending }
 specialRooms: { [roomId]: level }
+merchant: { active, purchases, spent, legacyMissionGrantDone }
 settings: { music }
 ```
 
@@ -94,6 +98,7 @@ Do not create another persistent gameplay store unless there is a strong reason.
 - `window.AfterlightExpeditions`
 - `window.AfterlightSpecialRooms`
 - `window.AfterlightResearch`
+- `window.AfterlightMerchant`
 - `window.AfterlightVisuals`
 - `window.AfterlightAudio`
 - `window.AfterlightPlatform`
@@ -116,6 +121,8 @@ Use events instead of adding duplicate click listeners across systems:
 - `afterlight:survivors` - specialist roster changed.
 - `afterlight:mission-claimed` - emitted after a successful claim; owns the mission reward fanfare.
 - `afterlight:expedition-complete` - emitted exactly when the completion reveal is created; owns the expedition fanfare.
+- `afterlight:merchant-purchase` - emitted after Uranium is spent and the boost is active; owns the Dealer celebration and fanfare.
+- `afterlight:merchant-expired` - emitted when one or more persisted wall-clock boosts expire.
 
 UI button sounds are handled centrally in `audio.js`; do not add per-button audio listeners. Combat inside `#scene` is excluded from the button handler and its gunshot is driven by `afterlight:shot`.
 
@@ -142,6 +149,10 @@ Enemy encounters use one weighted table with an exact 100% total: Common 55%, Un
 
 The base zombie bounty is the greatest of a progression floor and 0.08% of actual hourly coin production. For example, a bunker producing 1,000,000 coins/hour gets an 800-coin Common base bounty before rarity, horde, research and mission multipliers. This keeps kills useful in both early and late game without letting combat replace the bunker economy. Brutes are outside the rarity glow system and always award one exclusive Brute Core.
 
+Uranium Crystals are a deliberately scarce non-passive currency. Every claimed mission awards a tier-scaled amount, expeditions use visible zone-specific crystal chances and every Brute awards exactly one. Existing saves receive a one-time crystal grant for missions already claimed. Uranium is only spent at the Dealer and is never generated by room production or offline income.
+
+Dealer boosts activate immediately and use persisted wall-clock deadlines. The 5x and 10x coin contracts share one channel and cannot stack with each other; different channels can stack. The intended maximum coin combination is the 10x coin contract with the expensive 3x all-production contract, for a temporary 30x total. Repurchasing the same active contract extends its remaining time rather than wasting it.
+
 ## Assets
 
 Only active assets remain in `assets/`:
@@ -160,6 +171,7 @@ The survivor `-final` name is a historical binary asset name and is intentionall
 - Offline earnings modal exists in HTML but offline calculation/collection is not wired yet.
 - Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
 - Enemy movement is currently a fast offscreen-right entrance plus hit/death feedback. Full character-specific sprite-sheet animation is intentionally deferred.
+- Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
 - Background music uses the external CC0 Bio-Hazard OGG URL from OpenGameArt.
 - Generator and Workshop use direct WebP room art. Greenhouse uses a base64 WebP fallback loader. Other normal rooms currently use stylized backgrounds.
 - No service worker is active during development. This is intentional because an earlier worker caused stale production builds.

@@ -39,6 +39,9 @@ required=(
   'data-resource="coins"'
   'data-research-system="ready"'
   'id="researchBadge"'
+  'id="uranium"'
+  'data-tab="merchant"'
+  'data-merchant-system="ready"'
 )
 
 for marker in "${required[@]}"; do
