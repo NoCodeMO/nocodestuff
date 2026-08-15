@@ -105,9 +105,12 @@ Compatibility globals used by inline UI:
 Use events instead of adding duplicate click listeners across systems:
 
 - `afterlight:shot` - emitted by core combat; visuals/SFX can react.
+- `afterlight:enemy-killed` - emitted once after a kill reward is granted; owns the cash SFX trigger.
 - `afterlight:enemy` - emitted when a new enemy spawns.
 - `afterlight:state` - important state mutation; `detail.reason` describes the change.
 - `afterlight:survivors` - specialist roster changed.
+- `afterlight:mission-claimed` - emitted after a successful claim; owns the mission reward fanfare.
+- `afterlight:expedition-complete` - emitted exactly when the completion reveal is created; owns the expedition fanfare.
 
 UI button sounds are handled centrally in `audio.js`; do not add per-button audio listeners. Combat inside `#scene` is excluded from the button handler and its gunshot is driven by `afterlight:shot`.
 
@@ -173,4 +176,3 @@ The `-final` names are historical binary asset names and are intentionally left 
 6. Confirm the GitHub Pages workflow and deployment succeeded before saying a change is live.
 
 This structure is deliberately optimized for rapid AI-assisted iteration and large changes without needing to rediscover the project each session.
-
