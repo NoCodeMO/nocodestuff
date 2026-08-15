@@ -40,6 +40,7 @@ function rewardSound(kind='mission'){
   if(kind==='expedition'){tone(130,.32,.11,0,'triangle',195);tone(392,.28,.075,.12,'sine',523);tone(523,.3,.075,.3,'sine',659);tone(659,.38,.08,.48,'sine',880);tone(988,.46,.055,.68,'sine',1320);noise(.7,.025,.18,5200);return true}
   tone(330,.2,.085,0,'triangle',440);tone(440,.22,.075,.12,'sine',554);tone(554,.26,.08,.25,'sine',659);tone(740,.38,.065,.4,'sine',988);noise(.38,.02,.18,4600);return true;
 }
+function researchSound(){tone(262,.22,.07,0,'sine',392);tone(392,.26,.075,.14,'triangle',523);tone(523,.3,.07,.3,'sine',784);tone(1047,.42,.05,.48,'sine',1319);noise(.42,.018,.22,6200);return true}
 function buttonKind(target){if(target.matches('#closeDrawer,#missionClose,#appModeX,.installModal button'))return'close';if(target.closest('#tabs')||target.id==='missionNav')return'nav';return'tap'}
 function onUiPointer(event){const target=event.target.closest?.('button,[role="button"]');if(!target||target.disabled||target.closest('#scene'))return;unlockUi();uiSound(buttonKind(target))}
 document.addEventListener('pointerdown',onUiPointer,true);
@@ -48,10 +49,11 @@ window.addEventListener('afterlight:shot',gunshot);
 window.addEventListener('afterlight:enemy-killed',cashSound);
 window.addEventListener('afterlight:mission-claimed',()=>rewardSound('mission'));
 window.addEventListener('afterlight:expedition-complete',()=>rewardSound('expedition'));
+window.addEventListener('afterlight:research-complete',researchSound);
 document.body.dataset.uiAudio='ready';
 
 function unlockMusic(){if(musicUnlocked)return;if(enabled)play();if(musicUnlocked)removeMusicUnlock()}
 function removeMusicUnlock(){document.removeEventListener('pointerdown',unlockMusic,true);document.removeEventListener('touchstart',unlockMusic,true)}
 document.addEventListener('pointerdown',unlockMusic,true);document.addEventListener('touchstart',unlockMusic,{capture:true,passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else if(enabled)play()});
-window.AfterlightAudio={play,pause,isEnabled:()=>enabled,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},unlockUi,uiSound,gunshot,cashSound,rewardSound};
+window.AfterlightAudio={play,pause,isEnabled:()=>enabled,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},unlockUi,uiSound,gunshot,cashSound,rewardSound,researchSound};
 })();
