@@ -42,6 +42,9 @@ required=(
   'id="uranium"'
   'data-tab="merchant"'
   'data-merchant-system="ready"'
+  'data-room-details-system="ready"'
+  'data-room-id="generator"'
+  'assets/room-generator.webp'
 )
 
 for marker in "${required[@]}"; do

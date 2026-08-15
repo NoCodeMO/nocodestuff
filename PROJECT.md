@@ -20,7 +20,7 @@ This file is the fastest entry point for any future development session. Read th
 ### Core
 - `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers and the complete enemy/rarity table.
 - `js/core/state.js` - one authoritative persistent state object and save migration.
-- `js/core/game.js` - economy, combat, normal rooms, HUD, tabs and drawer routing.
+- `js/core/game.js` - economy, combat, normal rooms, room intelligence/progression, HUD, tabs and drawer routing.
 
 ### Systems
 - `js/systems/missions.js` - 50 mission chain and permanent bonuses.
@@ -30,7 +30,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/merchant.js` - Uranium wallet, Dealer stock, temporary boost timers, purchase rules and runtime multipliers.
 
 ### Presentation/platform
-- `js/ui/visuals.js` - survivor/enemy visuals, hit/death feedback, floating kill rewards, resource pulses and room-art loading.
+- `js/ui/visuals.js` - survivor/enemy visuals, hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
 - `js/audio.js` - background music plus compressed WebAudio UI, combat, reward and research-completion feedback.
 - `js/platform.js` - standalone/fullscreen install helpers.
 
@@ -38,6 +38,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/validate.js` - zero-dependency JS syntax, local reference and legacy-file checks.
 - `scripts/combat-balance.js` - deterministic enemy rarity, asset, horde, glow and income-scaled bounty checks.
 - `scripts/merchant-balance.js` - Dealer inventory, boost stacking, Uranium sources, timers and economy guardrails.
+- `scripts/room-balance.js` - all eight room artworks, milestone progression, bulk-upgrade costs and room-intelligence UI guardrails.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
 - `npm run test:browser` - browser startup smoke test only.
@@ -123,6 +124,7 @@ Use events instead of adding duplicate click listeners across systems:
 - `afterlight:expedition-complete` - emitted exactly when the completion reveal is created; owns the expedition fanfare.
 - `afterlight:merchant-purchase` - emitted after Uranium is spent and the boost is active; owns the Dealer celebration and fanfare.
 - `afterlight:merchant-expired` - emitted when one or more persisted wall-clock boosts expire.
+- `afterlight:room-upgraded` - emitted after a successful normal-room upgrade; includes its exact level range, total cost and any newly reached milestone.
 
 UI button sounds are handled centrally in `audio.js`; do not add per-button audio listeners. Combat inside `#scene` is excluded from the button handler and its gunshot is driven by `afterlight:shot`.
 
@@ -153,15 +155,15 @@ Uranium Crystals are a deliberately scarce non-passive currency. Every claimed m
 
 Dealer boosts activate immediately and use persisted wall-clock deadlines. The 5x and 10x coin contracts share one channel and cannot stack with each other; different channels can stack. The intended maximum coin combination is the 10x coin contract with the expensive 3x everything contract, for a temporary 30x total. That everything contract also triples all other resource production, manual damage and infected bounties. Repurchasing the same active contract extends its remaining time rather than wasting it.
 
+Normal-room production keeps the original 1.18 per-level growth and 1.62 cost growth. Levels 5, 10, 25 and 50 add derived permanent room multipliers of x1.25, x1.5, x2 and x3. These bonuses are calculated from room level, so old saves receive them automatically without migration. Bulk x10 costs are the exact sum of ten sequential upgrades; MAX buys only the levels the current coin balance can fully fund.
+
 ## Assets
 
 Only active assets remain in `assets/`:
 - `survivor-final.webp`
 - `enemy-common-drifter.webp`, `enemy-uncommon-cinderback.webp`, `enemy-rare-blue-shield.webp`, `enemy-epic-bloater.webp`, `enemy-legendary-gilded-warden.webp`, `enemy-brute-breaker.webp` - transparent, left-facing enemy art with no baked rarity glow; glow is rendered by CSS at runtime
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
-- `generator-room.webp`
-- `workshop-room.webp`
-- `.b64` room-art fallbacks, including the current greenhouse art.
+- `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
 
 The survivor `-final` name is a historical binary asset name and is intentionally left alone. `walker-final.webp` is retained only as an unused legacy asset so existing cached sessions cannot request a missing file; new combat never references it.
 
@@ -173,7 +175,7 @@ The survivor `-final` name is a historical binary asset name and is intentionall
 - Enemy movement is currently a fast offscreen-right entrance plus hit/death feedback. Full character-specific sprite-sheet animation is intentionally deferred.
 - Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
 - Background music uses the external CC0 Bio-Hazard OGG URL from OpenGameArt.
-- Generator and Workshop use direct WebP room art. Greenhouse uses a base64 WebP fallback loader. Other normal rooms currently use stylized backgrounds.
+- Normal rooms have a dedicated detail screen with live current/next output, per-minute/per-hour rates, contribution share, milestone status, affordability timing and x1/x10/MAX buying. Classified specialist rooms intentionally remain on their separate system for now.
 - No service worker is active during development. This is intentional because an earlier worker caused stale production builds.
 
 ## Rules for future changes

@@ -42,6 +42,7 @@ function rewardSound(kind='mission'){
 }
 function researchSound(){tone(262,.22,.07,0,'sine',392);tone(392,.26,.075,.14,'triangle',523);tone(523,.3,.07,.3,'sine',784);tone(1047,.42,.05,.48,'sine',1319);noise(.42,.018,.22,6200);return true}
 function merchantSound(){tone(110,.2,.1,0,'sawtooth',165);noise(.16,.045,.02,900);tone(440,.16,.08,.1,'triangle',660);tone(660,.2,.075,.2,'sine',990);tone(990,.28,.065,.34,'sine',1480);tone(1480,.38,.045,.52,'sine',1975);noise(.52,.018,.22,6500);return true}
+function roomMilestoneSound(event){if(!event.detail?.milestone)return false;tone(196,.18,.07,0,'triangle',294);tone(392,.2,.065,.1,'sine',523);tone(587,.24,.065,.22,'sine',784);tone(988,.34,.05,.36,'sine',1319);noise(.32,.014,.18,5200);return true}
 function buttonKind(target){if(target.matches('#closeDrawer,#missionClose,#appModeX,.installModal button'))return'close';if(target.closest('#tabs')||target.id==='missionNav')return'nav';return'tap'}
 function onUiPointer(event){const target=event.target.closest?.('button,[role="button"]');if(!target||target.disabled||target.closest('#scene'))return;unlockUi();uiSound(buttonKind(target))}
 document.addEventListener('pointerdown',onUiPointer,true);
@@ -52,10 +53,11 @@ window.addEventListener('afterlight:mission-claimed',()=>rewardSound('mission'))
 window.addEventListener('afterlight:expedition-complete',()=>rewardSound('expedition'));
 window.addEventListener('afterlight:research-complete',researchSound);
 window.addEventListener('afterlight:merchant-purchase',merchantSound);
+window.addEventListener('afterlight:room-upgraded',roomMilestoneSound);
 document.body.dataset.uiAudio='ready';
 
 function unlockMusic(){if(musicUnlocked)return;if(enabled)play();if(musicUnlocked)removeMusicUnlock()}
 function removeMusicUnlock(){document.removeEventListener('pointerdown',unlockMusic,true);document.removeEventListener('touchstart',unlockMusic,true)}
 document.addEventListener('pointerdown',unlockMusic,true);document.addEventListener('touchstart',unlockMusic,{capture:true,passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else if(enabled)play()});
-window.AfterlightAudio={play,pause,isEnabled:()=>enabled,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},unlockUi,uiSound,gunshot,cashSound,rewardSound,researchSound,merchantSound};
+window.AfterlightAudio={play,pause,isEnabled:()=>enabled,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},unlockUi,uiSound,gunshot,cashSound,rewardSound,researchSound,merchantSound,roomMilestoneSound};
 })();

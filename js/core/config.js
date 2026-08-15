@@ -1,13 +1,20 @@
 (()=>{'use strict';
+const ROOM_ECONOMY=Object.freeze({costGrowth:1.62,rateGrowth:1.18,maximumBulk:500});
+const ROOM_MILESTONES=Object.freeze([
+  Object.freeze({level:5,multiplier:1.25,tier:'CALIBRATED'}),
+  Object.freeze({level:10,multiplier:1.5,tier:'INDUSTRIAL'}),
+  Object.freeze({level:25,multiplier:2,tier:'FORTIFIED'}),
+  Object.freeze({level:50,multiplier:3,tier:'MASTERWORK'})
+]);
 const ROOMS={
-  generator:{name:'POWER GENERATOR',icon:'⚡',base:35,unlock:1,prod:{power:1.5,coins:.4},desc:'Keeps the bunker alive and sells spare charge.'},
-  workshop:{name:'WORKSHOP',icon:'⚙',base:85,unlock:1,prod:{scrap:.32,coins:1.8},desc:'Turns salvage into parts and trade goods.'},
-  greenhouse:{name:'GREENHOUSE',icon:'🌱',base:190,unlock:2,prod:{food:1.2,coins:2.8},desc:'Fresh food underground.'},
-  purifier:{name:'WATER PURIFIER',icon:'💧',base:420,unlock:3,prod:{water:1.35,coins:4.2},desc:'Produces clean water.'},
-  lab:{name:'RESEARCH LAB',icon:'⚗',base:850,unlock:4,prod:{science:.14,coins:5},desc:'Generates science.'},
-  living:{name:'LIVING QUARTERS',icon:'🛏',base:1350,unlock:5,prod:{coins:11},desc:'Houses survivors.'},
-  storage:{name:'STORAGE',icon:'📦',base:2200,unlock:6,prod:{coins:17,scrap:.5},desc:'Stores salvage.'},
-  turret:{name:'AUTO TURRET',icon:'⌖',base:3600,unlock:7,prod:{coins:12},desc:'Damages infected automatically.'}
+  generator:{name:'POWER GENERATOR',icon:'⚡',base:35,unlock:1,art:'assets/room-generator.webp',prod:{power:1.5,coins:.4},desc:'The mechanical heart of Afterlight. It keeps every bunker system powered and sells surplus charge to nearby settlements.'},
+  workshop:{name:'WORKSHOP',icon:'⚙',base:85,unlock:1,art:'assets/room-workshop.webp',prod:{scrap:.32,coins:1.8},desc:'A hard-used fabrication bay where salvage becomes repair parts, ammunition and valuable trade goods.'},
+  greenhouse:{name:'GREENHOUSE',icon:'🌱',base:190,unlock:2,art:'assets/room-greenhouse.webp',prod:{food:1.2,coins:2.8},desc:'Protected hydroponic racks keep the bunker fed and turn rare fresh produce into dependable trade income.'},
+  purifier:{name:'WATER PURIFIER',icon:'💧',base:420,unlock:3,art:'assets/room-purifier.webp',prod:{water:1.35,coins:4.2},desc:'Industrial filters strip poison and radiation from groundwater, producing clean reserves and sealed water rations.'},
+  lab:{name:'RESEARCH LAB',icon:'⚗',base:850,unlock:4,art:'assets/room-lab.webp',prod:{science:.14,coins:5},desc:'Recovered instruments and protected sample chambers generate the science needed to push the bunker forward.'},
+  living:{name:'LIVING QUARTERS',icon:'🛏',base:1350,unlock:5,art:'assets/room-living.webp',prod:{coins:11},desc:'Safe bunks, lockers and a warm mess area attract skilled survivors who strengthen the bunker economy.'},
+  storage:{name:'STORAGE',icon:'📦',base:2200,unlock:6,art:'assets/room-storage.webp',prod:{coins:17,scrap:.5},desc:'A guarded logistics vault that sorts high-value salvage and keeps profitable supply routes running smoothly.'},
+  turret:{name:'AUTO TURRET',icon:'⌖',base:3600,unlock:7,art:'assets/room-turret.webp',prod:{coins:12},desc:'A rebuilt sentry cannon protects the perimeter and earns security contracts from settlements under Afterlight protection.'}
 };
 const RESEARCH=[
   {id:'tools',icon:'🔧',name:'KINETIC TOOLING',desc:'+18% manual damage per level',baseCost:8,baseSeconds:25,costGrowth:1.58,timeGrowth:1.3,effect:1.18},
@@ -63,5 +70,5 @@ const COMBAT=Object.freeze({
   minimumHits:6,
   maximumHits:18
 });
-window.AfterlightConfig=Object.freeze({ROOMS,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,ENEMIES,COMBAT});
+window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,ENEMIES,COMBAT});
 })();
