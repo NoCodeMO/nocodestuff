@@ -30,6 +30,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/research.js` - timed, scrap-funded research, completion badge and claiming.
 - `js/systems/merchant.js` - Uranium wallet, Dealer stock, temporary boost timers, purchase rules and runtime multipliers.
 - `js/systems/command-center.js` - How to Play, advanced Stats, official messages/rewards, settings and local Commander login/logout.
+- `js/systems/offline.js` - persisted, claimable offline production with permanent-rate math, Dealer exclusion and a 12-hour safety cap.
 
 ### Presentation/platform
 - `js/ui/visuals.js` - survivor/enemy visuals, sprite-relative rifle flash, recoil/hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
@@ -43,6 +44,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/room-balance.js` - all eight room artworks, milestone progression, bulk-upgrade costs and room-intelligence UI guardrails.
 - `scripts/mission-balance.js` - exact mission count, unique chapter objectives, permanent multiplier caps, economy-scaled caches and Uranium budget.
 - `scripts/command-center-check.js` - Command Center tabs, schema migration, message rewards, account/settings persistence and large-number notation.
+- `scripts/offline-balance.js` - offline threshold/cap, efficiency, permanent-rate sourcing, pending-save safety and Uranium exclusion.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
 - `npm run test:browser` - browser startup smoke test only.
@@ -63,15 +65,16 @@ The order in `index.html` is intentional:
 8. command center
 9. visuals
 10. game
-11. missions
-12. audio
-13. platform
+11. offline earnings
+12. missions
+13. audio
+14. platform
 
 Do not casually reorder these. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 9`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 10`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -85,6 +88,7 @@ missions: { claimed, bonuses }
 expeditions: { active, survivors, pending }
 specialRooms: { [roomId]: level }
 merchant: { active, purchases, spent, legacyMissionGrantDone }
+offline: { pending, totalClaims, totalSeconds }
 command: { read, claimed, lastTab, account: { loggedIn, name, createdAt } }
 settings: { music, uiSfx, reducedEffects }
 ```
@@ -155,7 +159,7 @@ Mission bonuses are consumed by the core economy. Current supported bonus keys:
 - `scienceMult`
 - `damageMult`
 - `costMult`
-- `offlineMult` is stored but offline earnings are not implemented yet.
+- `offlineMult` increases the 35% offline efficiency, with a hard 90% safety cap.
 
 Special-room production is returned by `AfterlightSpecialRooms.rates()` and integrated into the core economy. Do not add another production interval that writes resources independently.
 
@@ -175,6 +179,8 @@ All production, price and reward UI uses `AfterlightNumbers`. Suffixes progress 
 
 Official Command Center messages are release-configured in `COMMAND_MESSAGES`. A message reward is always claim-once through `command.claimed`; its coin component can scale from current hourly production while fixed Uranium remains scarce. The current Commander login is explicitly local-device only and never claims to be cloud authentication.
 
+Offline production starts after one minute away and is capped at 12 hours per load. It uses the authoritative permanent room/special-room rates at 35% base efficiency, applies mission `offlineMult` up to a 90% hard cap, divides out temporary Dealer boosts and never generates Uranium. Calculated gains are persisted as a pending claim before the collection modal opens, so closing the game cannot lose them.
+
 ## Assets
 
 Only active assets remain in `assets/`:
@@ -188,7 +194,7 @@ Only active assets remain in `assets/`:
 ## Current intentional limitations
 
 - One research project can run at a time. It spends scrap up front, completes against a persisted wall-clock deadline and must be installed from the red Research notification.
-- Offline earnings modal exists in HTML but offline calculation/collection is not wired yet.
+- Offline earnings are claimable and persisted; production beyond the 12-hour cap is intentionally discarded.
 - Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
 - Enemy movement is currently a fast offscreen-right entrance plus hit/death feedback. Full character-specific sprite-sheet animation is intentionally deferred.
 - Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
@@ -220,3 +226,4 @@ Only active assets remain in `assets/`:
 6. Confirm the GitHub Pages workflow and deployment succeeded before saying a change is live.
 
 This structure is deliberately optimized for rapid AI-assisted iteration and large changes without needing to rediscover the project each session.
+

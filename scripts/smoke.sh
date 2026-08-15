@@ -51,6 +51,7 @@ required=(
   'data-room-id="generator"'
   'assets/room-generator.webp'
   'data-command-center-system="ready"'
+  'data-offline-system="ready"'
   'data-tab="command"'
   'id="commandBadge"'
   'js/core/numbers.js?build=1'
@@ -66,3 +67,4 @@ for marker in "${required[@]}"; do
 done
 
 echo "Afterlight browser smoke test passed: core game, layered combat world, missions, specialist rooms and user-gesture UI audio rendered."
+
