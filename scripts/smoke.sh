@@ -4,6 +4,7 @@ set -euo pipefail
 PORT="${PORT:-4173}"
 DOM_FILE="${TMPDIR:-/tmp}/afterlight-dom.html"
 LANDSCAPE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-landscape-dom.html"
+ARCHITECT_DOM_FILE="${TMPDIR:-/tmp}/afterlight-architect-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/afterlight-chrome.log"
 
 python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/afterlight-server.log" 2>&1 &
@@ -23,6 +24,7 @@ fi
 
 "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=2500 --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE" 2>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,500 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/landscape-probe.html" >"$LANDSCAPE_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,700 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/architect-probe.html" >"$ARCHITECT_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Afterlight Bunker</title>'
@@ -32,6 +34,7 @@ required=(
   'data-muzzle-anchor="77.5% 20.5%"'
   'assets/survivor-ranger.png'
   'assets/survivor-ranger-female.webp'
+  'assets/survivor-architect.webp'
   'data-parallax-layers="5"'
   'data-enemy-rarity='
   'class="enemyUnit'
@@ -64,6 +67,7 @@ required=(
   'data-tab="command"'
   'id="commandBadge"'
   'js/core/numbers.js?build=1'
+  'js/core/game.js?build=17'
 )
 
 for marker in "${required[@]}"; do
@@ -83,4 +87,12 @@ if ! grep -Fq 'data-landscape-layout="passed"' "$LANDSCAPE_DOM_FILE"; then
   exit 1
 fi
 
-echo "Afterlight browser smoke test passed: core game and the computed 844x390 landscape command deck rendered with four visible rooms."
+if ! grep -Fq 'data-architect-probe="passed"' "$ARCHITECT_DOM_FILE"; then
+  echo "Architect browser smoke test failed."
+  grep -F 'AFTERLIGHT_ARCHITECT_' "$ARCHITECT_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+echo "Afterlight browser smoke test passed: core game, 844x390 landscape deck and permanent Level 100 Architect unlock/multiplier rendered correctly."

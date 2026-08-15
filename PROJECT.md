@@ -49,6 +49,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/codex-check.js` - discovery migration, spawn registration, all six entries, exact multipliers and responsive locked/unlocked archive checks.
 - `scripts/landscape-layout-check.js` and `scripts/landscape-probe.html` - static guardrails plus a real 844×390 computed-layout probe for the phone landscape command deck.
 - `scripts/survivor-roster-check.js` - starter/classified roster integrity, transparent assets, save migration, selection events and shared recoil/muzzle guardrails.
+- `scripts/architect-probe.html` - real-browser Level 100 save migration, permanent unlock, exact x1.5 production multiplier, roster selection and rifle-anchor probe.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
 - `npm run test:browser` - browser startup smoke test only.
@@ -79,7 +80,7 @@ Do not casually reorder these. Missions loads after game because it owns the cus
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 12`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 13`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -193,14 +194,14 @@ All production, price and reward UI uses `AfterlightNumbers`. Suffixes progress 
 
 Official Command Center messages are release-configured in `COMMAND_MESSAGES`. A message reward is always claim-once through `command.claimed`; its coin component can scale from current hourly production while fixed Uranium remains scarce. The current Commander login is explicitly local-device only and never claims to be cloud authentication.
 
-The Command survivor roster is configured once in `SURVIVOR_SKINS`. Both Ranger starters are permanently unlocked for new and old saves and are currently cosmetic/economically equal. Four future Prestige slots have stable IDs and level requirements but deliberately contain no asset, identity or appearance data. Selecting a starter persists in `survivorSkins.selected`; both share the same shot event, recoil and short muzzle animation while using per-skin normalized muzzle metadata.
+The Command survivor roster is configured once in `SURVIVOR_SKINS`. Both Ranger starters are permanently unlocked for new and old saves and are cosmetic/economically equal. Gideon Rook, The Architect, is permanently added to an old or new save at Bunker Level 100. While selected, he grants +0.5% all passive production per Bunker Level: exactly +50% at unlock, capped at +100% from Level 200 onward. The bonus uses the shared production path, so normal rooms, special rooms, live statistics and offline earnings agree; manual damage and one-time rewards are intentionally excluded. Four future Prestige slots retain stable IDs and level requirements but deliberately contain no asset, identity or appearance data. Every selectable survivor shares the same shot event, recoil and short muzzle animation while using per-skin normalized muzzle metadata.
 
 Offline production starts after one minute away and is capped at 12 hours per load. It uses the authoritative permanent room/special-room rates at 35% base efficiency, applies mission `offlineMult` up to a 90% hard cap, divides out temporary Dealer boosts and never generates Uranium. Calculated gains are persisted as a pending claim before the collection modal opens, so closing the game cannot lose them.
 
 ## Assets
 
 Only active assets remain in `assets/`:
-- `survivor-ranger.png`, `survivor-ranger-female.webp` - selectable transparent starter survivor art. The female asset is game-resolution optimized for a fast first swap on mobile. Their muzzle flash stays a separate short-lived game effect anchored from each skin's normalized config metadata, so recoil and responsive scaling cannot detach it from the rifle.
+- `survivor-ranger.png`, `survivor-ranger-female.webp`, `survivor-architect.webp` - transparent selectable survivor art. The two Rangers are starter cosmetics; the optimized Architect is the revealed Bunker Level 100 reward. Their muzzle flash stays a separate short-lived game effect anchored from each skin's normalized config metadata, so recoil and responsive scaling cannot detach it from the rifle.
 - `enemy-common-drifter.webp`, `enemy-uncommon-cinderback.webp`, `enemy-rare-blue-shield.webp`, `enemy-epic-bloater.webp`, `enemy-legendary-gilded-warden.webp`, `enemy-brute-breaker.webp` - transparent, left-facing enemy art with no baked rarity glow; glow is rendered by CSS at runtime
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
