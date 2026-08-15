@@ -26,10 +26,11 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/missions.js` - 50 mission chain and permanent bonuses.
 - `js/systems/expeditions.js` - expedition timers, rewards and specialist discovery.
 - `js/systems/special-rooms.js` - classified rooms unlocked by specialists.
+- `js/systems/research.js` - timed, scrap-funded research, completion badge and claiming.
 
 ### Presentation/platform
 - `js/ui/visuals.js` - survivor/enemy visuals, hit feedback, resource pulses and room-art loading.
-- `js/audio.js` - background music plus compressed WebAudio UI feedback and gunshots driven by `afterlight:shot`. Reward SFX remain separate follow-up work.
+- `js/audio.js` - background music plus compressed WebAudio UI, combat, reward and research-completion feedback.
 - `js/platform.js` - standalone/fullscreen install helpers.
 
 ### Validation
@@ -48,17 +49,18 @@ The order in `index.html` is intentional:
 2. state
 3. expeditions
 4. special rooms
-5. visuals
-6. game
-7. missions
-8. audio
-9. platform
+5. research
+6. visuals
+7. game
+8. missions
+9. audio
+10. platform
 
 Do not casually reorder these. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 5`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 6`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -67,6 +69,7 @@ Main shape:
 ```text
 resources: coins, total, food, water, power, scrap, science
 progress: kills, bunker, rooms, research, stats
+researchRuntime: { active, ready }
 missions: { claimed, bonuses }
 expeditions: { active, survivors, pending }
 specialRooms: { [roomId]: level }
@@ -89,6 +92,7 @@ Do not create another persistent gameplay store unless there is a strong reason.
 - `window.AfterlightMissions`
 - `window.AfterlightExpeditions`
 - `window.AfterlightSpecialRooms`
+- `window.AfterlightResearch`
 - `window.AfterlightVisuals`
 - `window.AfterlightAudio`
 - `window.AfterlightPlatform`
@@ -146,7 +150,7 @@ The `-final` names are historical binary asset names and are intentionally left 
 
 ## Current intentional limitations
 
-- Research definitions are displayed but purchasing/research progression is not wired yet.
+- One research project can run at a time. It spends scrap up front, completes against a persisted wall-clock deadline and must be installed from the red Research notification.
 - Offline earnings modal exists in HTML but offline calculation/collection is not wired yet.
 - Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
 - Background music uses the external CC0 Bio-Hazard OGG URL from OpenGameArt.
