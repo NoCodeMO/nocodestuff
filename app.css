@@ -54,8 +54,8 @@ html,body{overscroll-behavior:none;background:#0b0d0a;margin:0}html.standalone-a
 .survivorSprite{bottom:13%}
 .enemySprite{bottom:13%}
 @keyframes cloudDrift{from{transform:translate3d(-1.8%,.2%,0) scale(1.035)}to{transform:translate3d(1.8%,-.35%,0) scale(1.055)}}
-@media(max-width:699px){.parallaxLayer{inset:-2.5% -15%}.parallaxLayer img{object-position:47% center}.worldBunker img{object-position:30% center}.worldGround img{object-position:54% center}.survivorSprite{bottom:27%}.enemySprite{bottom:27%}.muzzleFx{bottom:43%}.impactFx{bottom:41%}.killRewards{bottom:46%}}
-@media(min-width:700px){.parallaxLayer img{object-position:center 47%}.survivorSprite,.enemySprite{bottom:10%}}
+@media(max-width:699px){#scene{height:min(45%,480px)!important}#bunker{top:calc(66px + min(45%,480px))}.parallaxLayer{inset:-2.5% -15%}.parallaxLayer img{object-position:47% center}.worldBunker img{object-position:30% center}.worldGround img{object-position:54% center}.survivorSprite{bottom:27%;height:min(34%,165px)}.enemySprite{bottom:27%;height:min(29%,145px)}.enemySprite[data-tier="3"]{height:min(36%,180px)}.enemySprite[data-tier="4"]{height:min(33%,165px)}.enemySprite[data-tier="5"]{height:min(47%,235px)}.muzzleFx{bottom:43%}.impactFx{bottom:41%}.killRewards{bottom:46%}}
+@media(min-width:700px){#scene{height:min(48%,650px)!important}#bunker{top:calc(72px + min(48%,650px))}.parallaxLayer img{object-position:center 47%}.survivorSprite{bottom:10%;height:min(44%,260px)}.enemySprite{bottom:10%;height:min(35%,210px)}.enemySprite[data-tier="2"]{height:min(38%,228px)}.enemySprite[data-tier="3"]{height:min(43%,258px)}.enemySprite[data-tier="4"]{height:min(39%,234px)}.enemySprite[data-tier="5"]{height:min(59%,354px)}}
 @media(prefers-reduced-motion:reduce){.parallaxLayer{transform:none!important}.parallaxLayer img{animation:none!important}.worldClouds img{opacity:.4}}
 
 /* Resource intelligence */
