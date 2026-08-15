@@ -142,7 +142,7 @@ Special-room production is returned by `AfterlightSpecialRooms.rates()` and inte
 Only active assets remain in `assets/`:
 - `survivor-final.webp`
 - `walker-final.webp`
-- `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-opaque.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses real alpha and normal blending so its concrete stays fully opaque
+- `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `generator-room.webp`
 - `workshop-room.webp`
 - `.b64` room-art fallbacks, including the current greenhouse art.
