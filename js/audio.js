@@ -23,12 +23,14 @@ function noise(duration=.09,volume=.16,delay=0,cutoff=1800){
   const ctx=unlockUi();if(!ctx)return false;const length=Math.ceil(ctx.sampleRate*duration),buffer=ctx.createBuffer(1,length,ctx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*(1-i/length);
   const start=ctx.currentTime+delay,source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();source.buffer=buffer;filter.type='lowpass';filter.frequency.value=cutoff;gain.gain.setValueAtTime(volume,start);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);source.connect(filter).connect(gain).connect(master);source.start(start);return true;
 }
+const UI_VOLUME=1.1;
+const uiTone=(frequency,duration,volume,delay,type,endFrequency)=>tone(frequency,duration,volume*UI_VOLUME,delay,type,endFrequency);
 function uiSound(kind='tap'){
   const now=performance.now();if(kind==='tap'&&now-lastSound<45)return false;lastSound=now;
-  if(kind==='confirm'){tone(440,.075,.09,0,'triangle',520);tone(660,.09,.075,.045,'sine',760);return true}
-  if(kind==='close'){tone(360,.055,.065,0,'triangle',210);return true}
-  if(kind==='nav'){tone(420,.05,.07,0,'triangle',510);tone(720,.035,.035,.025,'sine',650);return true}
-  tone(520,.045,.065,0,'triangle',420);tone(900,.025,.025,.012,'sine',760);return true;
+  if(kind==='confirm'){uiTone(440,.075,.09,0,'triangle',520);uiTone(660,.09,.075,.045,'sine',760);return true}
+  if(kind==='close'){uiTone(360,.055,.065,0,'triangle',210);return true}
+  if(kind==='nav'){uiTone(420,.05,.07,0,'triangle',510);uiTone(720,.035,.035,.025,'sine',650);return true}
+  uiTone(520,.045,.065,0,'triangle',420);uiTone(900,.025,.025,.012,'sine',760);return true;
 }
 function gunshot(){
   const now=performance.now();if(now-lastShot<38)return false;lastShot=now;noise(.085,.2,0,2400);tone(150,.085,.16,0,'sawtooth',48);noise(.055,.07,.025,800);return true;
