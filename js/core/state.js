@@ -31,7 +31,7 @@ function normalize(){
   if(Array.isArray(state.expeditions.pending?.found))state.expeditions.pending.found=state.expeditions.pending.found[0]||null;
   state.specialRooms=state.specialRooms||{};state.researchRuntime=state.researchRuntime||{active:null,ready:null};state.merchant={...base.merchant,...(state.merchant||{}),active:{...base.merchant.active,...(state.merchant?.active||{})},purchases:{...base.merchant.purchases,...(state.merchant?.purchases||{})}};state.offline={...base.offline,...(state.offline||{})};state.command={...base.command,...(state.command||{}),account:{...base.command.account,...(state.command?.account||{})}};state.command.read=Array.isArray(state.command.read)?state.command.read:[];state.command.claimed=Array.isArray(state.command.claimed)?state.command.claimed:[];state.settings={...base.settings,...(state.settings||{})};
   for(const k of ['coins','total','food','water','power','scrap','science','uranium','kills'])if(!Number.isFinite(Number(state[k])))state[k]=0;
-  const roomTotal=Object.values(state.rooms).reduce((a,b)=>a+(Number(b)||0),0);state.bunker=1+Math.floor(roomTotal/4);
+  const roomTotal=Object.values(state.rooms).reduce((a,b)=>a+(Number(b)||0),0),bunkerStep=CFG.ROOM_ECONOMY?.bunkerLevelEvery||4;state.bunker=1+Math.floor(roomTotal/bunkerStep);
 }
 function save(){normalize();state.last=Date.now();localStorage.setItem(KEY,JSON.stringify(state))}
 function notify(reason='state'){window.dispatchEvent(new CustomEvent('afterlight:state',{detail:{reason}}))}

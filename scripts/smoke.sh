@@ -49,6 +49,7 @@ required=(
   'data-merchant-system="ready"'
   'data-room-details-system="ready"'
   'data-room-id="generator"'
+  'id="bunkerProgress"'
   'assets/room-generator.webp'
   'data-command-center-system="ready"'
   'data-offline-system="ready"'

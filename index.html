@@ -14,7 +14,7 @@
   <link rel="preload" as="image" href="assets/combat-bunker-clean.webp" type="image/webp">
   <link rel="preload" as="image" href="assets/enemy-common-drifter.webp" type="image/webp">
   <link rel="preload" as="image" href="assets/room-generator.webp" type="image/webp">
-  <link rel="stylesheet" href="app.css?build=19">
+  <link rel="stylesheet" href="app.css?build=20">
 </head>
 <body>
   <main id="app">
@@ -39,7 +39,7 @@
     </section>
 
     <section id="bunker">
-      <div class="sectionTitle"><span>YOUR BUNKER</span><small id="bunkerLevel">LEVEL 1</small></div>
+      <div class="sectionTitle"><span>YOUR BUNKER</span><div id="bunkerProgressTrack" class="bunkerProgressTrack" role="progressbar" aria-label="Progress to next Bunker Level"><i id="bunkerProgress"></i><small id="bunkerProgressText">0 / 4 ROOM LEVELS</small></div><small id="bunkerLevel">LEVEL 1</small></div>
       <div id="rooms"></div>
     </section>
 
@@ -64,7 +64,7 @@
   </main>
 
   <!-- Load order is documented in PROJECT.md. -->
-  <script src="js/core/config.js?build=12"></script>
+  <script src="js/core/config.js?build=13"></script>
   <script src="js/core/numbers.js?build=1"></script>
   <script src="js/core/state.js?build=9"></script>
   <script src="js/systems/expeditions.js?build=5"></script>
@@ -73,7 +73,7 @@
   <script src="js/systems/merchant.js?build=2"></script>
   <script src="js/systems/command-center.js?build=1"></script>
   <script src="js/ui/visuals.js?build=16"></script>
-  <script src="js/core/game.js?build=13"></script>
+  <script src="js/core/game.js?build=14"></script>
   <script src="js/systems/offline.js?build=1"></script>
   <script src="js/systems/missions.js?build=6"></script>
   <script src="js/audio.js?build=10"></script>
