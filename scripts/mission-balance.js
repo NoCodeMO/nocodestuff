@@ -24,4 +24,8 @@ if(product('costMult')<.92)fail('the mission chain makes room upgrades unfairly 
 if(!operations.some(mission=>mission[4]==='coinCache')||!operations.some(mission=>mission[4]==='scrapCache'))fail('economy-scaled coin and scrap caches are required');
 const source=read('js/systems/missions.js');if(!/rate\/dealer/.test(source))fail('mission caches must exclude temporary Dealer multipliers');
 if(!/slice\(0,5\)/.test(source))fail('the expanded log must expose five active objectives');
+if(!/function claimAll\(\)/.test(source)||!/ST\.update\('missions-batch'/.test(source))fail('Claim All must award every ready mission in one save transaction');
+if(!/detail:\{batch:true,count:results\.length/.test(source))fail('Claim All must emit one consolidated reward event');
+if(!/id="missionClaimAll"/.test(source)||!/missionWinBatch/.test(source))fail('Claim All needs an explicit control and consolidated celebration');
 console.log('Afterlight mission balance passed: 150 new objectives, 15 chapters, 200 total missions and capped late-game rewards.');
+
