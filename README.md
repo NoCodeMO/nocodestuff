@@ -14,6 +14,7 @@ For development, read **`PROJECT.md` first**. It contains the current architectu
 index.html
 app.css
 manifest.webmanifest
+PROJECT.md
 
 js/
   core/
@@ -30,24 +31,28 @@ js/
   platform.js
 
 assets/
-scripts/validate.js
+scripts/
+  validate.js
+  smoke.sh
 ```
 
 There are no numbered game versions or phase stylesheets in production. Git history is the version history.
 
 ## Validation
 
-No dependencies are required.
+No npm dependencies are required.
 
 ```bash
-npm test
+npm test              # JS syntax + file/reference checks
+npm run test:browser  # boots the real game in headless Chrome
+npm run test:all      # both
 ```
 
-The validator checks JavaScript syntax, local HTML/CSS references and prevents old numbered runtime files from creeping back into the repo.
+The browser smoke test verifies that the core game and dynamic systems actually initialize. GitHub Pages only deploys after both validation layers pass.
 
 ## Deployment
 
-Pushes to `main` deploy through `.github/workflows/pages.yml`. The workflow validates the project before GitHub Pages deployment.
+Pushes to `main` deploy through `.github/workflows/pages.yml`. The workflow validates and boots the project before GitHub Pages deployment.
 
 ## Persistence
 
