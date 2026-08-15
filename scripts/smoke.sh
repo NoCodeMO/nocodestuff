@@ -43,3 +43,4 @@ for marker in "${required[@]}"; do
 done
 
 echo "Afterlight browser smoke test passed: core game, visuals, missions, specialist rooms and user-gesture UI audio rendered."
+
