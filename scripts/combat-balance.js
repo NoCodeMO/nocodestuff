@@ -20,6 +20,7 @@ if(ENEMIES.find(type=>type.id==='brute').glow!=='transparent')fail('Brute must r
 for(const id of ['uncommon','rare','epic','legendary'])if(ENEMIES.find(type=>type.id===id).glow==='transparent')fail(`${id} requires an in-game glow color`);
 if(COMBAT.hordeVisualCount!==3||COMBAT.hordeMultiplier!==3)fail('hordes must contain at most three infected and pay/scale at exactly x3');
 if(!(COMBAT.hordeChance>0&&COMBAT.hordeChance<1))fail('horde chance must be a probability');
+if(COMBAT.criticalChance!==.08||COMBAT.criticalMultiplier!==2)fail('critical hits must stay at a balanced 8% chance and x2 damage');
 const millionPerHourBounty=1_000_000*COMBAT.bountyHourlyShare;
 if(millionPerHourBounty!==800)fail(`1M/hour must produce an 800-coin Common base bounty, received ${millionPerHourBounty}`);
 for(const [hourly,expectedBounty] of [[10_000,8],[1_000_000,800],[1_000_000_000,800_000]])if(hourly*COMBAT.bountyHourlyShare!==expectedBounty)fail(`hourly income ${hourly} should scale to ${expectedBounty}`);
@@ -36,6 +37,8 @@ for(const [pattern,message] of [
   [/killCredit:horde\?COMBAT\.hordeMultiplier:1/,'hordes must award x3 kill credit'],
   [/addCoins\(defeated\.reward,false\)/,'hourly-scaled bounties must not double-apply the coin bonus'],
   [/bruteCores/,'Brute kills must award their exclusive core drop']
+  ,[/const baseDamage=tapDamage\(\),critical=criticalHit\(\),damage=baseDamage\*\(critical\?COMBAT\.criticalMultiplier:1\)/,'critical damage must be calculated once in core combat']
+  ,[/S\.stats\.criticals/,'lifetime critical hits must be tracked']
 ])if(!pattern.test(game))fail(message);
 const visuals=fs.readFileSync(path.join(root,'js','ui','visuals.js'),'utf8');
 for(const [pattern,message] of [
@@ -51,8 +54,9 @@ for(const [pattern,message] of [
   [/dataset\.muzzleAnchor='77\.5% 20\.5%'/,'the rifle barrel needs one explicit normalized muzzle anchor']
 ])if(!pattern.test(visuals))fail(message);
 const css=fs.readFileSync(path.join(root,'app.css'),'utf8');
-if(!/float\.className='damageNumber'/.test(visuals)||!/if\(active\.length>8\)active\[0\]\.remove\(\)/.test(visuals))fail('per-shot damage feedback must exist and remain spam-safe');
+if(!/float\.className='damageNumber'\+\(detail\.critical/.test(visuals)||!/if\(active\.length>8\)active\[0\]\.remove\(\)/.test(visuals))fail('per-shot damage feedback must exist and remain spam-safe');
 if(!/@keyframes damageNumberRise/.test(css))fail('floating damage animation is missing');
+if(!/@keyframes criticalNumberRise/.test(css)||!/CRIT -/.test(visuals))fail('critical hits need distinct visual feedback');
 if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \+ 100%\)/.test(css))fail('spawn entrance must start beyond the right edge');
 if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow must remain disabled');
 if(!/\.enemyUnit:is\([^}]+\) \.enemySprite\{filter:[^}]+var\(--enemy-glow\)/.test(css))fail('rarity glow must follow each sprite alpha instead of its layout container');

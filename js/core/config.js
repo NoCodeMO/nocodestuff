@@ -67,6 +67,8 @@ const ENEMIES=[
   {id:'brute',rarity:'BRUTE',name:'THE BREAKER',chance:1,asset:'assets/enemy-brute-breaker.webp',hpMultiplier:9,bountyMultiplier:16,scrapMultiplier:10,glow:'transparent',accent:'#d76a50',brute:true}
 ];
 const COMBAT=Object.freeze({
+  criticalChance:.08,
+  criticalMultiplier:2,
   hordeChance:.12,
   hordeVisualCount:3,
   hordeMultiplier:3,
@@ -77,3 +79,4 @@ const COMBAT=Object.freeze({
 });
 window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,COMMAND_MESSAGES,ENEMIES,COMBAT});
 })();
+
