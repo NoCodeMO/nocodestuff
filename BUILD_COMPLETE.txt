@@ -1,1 +1,0 @@
-Afterlight 3-phase improvement build completed 2026-08-14. Tap/input fixes, improved combat feedback, stronger UI readability, zombie tier differentiation, mobile/iPad polish.
