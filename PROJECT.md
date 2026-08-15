@@ -47,6 +47,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/command-center-check.js` - Command Center tabs, schema migration, message rewards, account/settings persistence and large-number notation.
 - `scripts/offline-balance.js` - offline threshold/cap, efficiency, permanent-rate sourcing, pending-save safety and Uranium exclusion.
 - `scripts/codex-check.js` - discovery migration, spawn registration, all six entries, exact multipliers and responsive locked/unlocked archive checks.
+- `scripts/landscape-layout-check.js` and `scripts/landscape-probe.html` - static guardrails plus a real 844×390 computed-layout probe for the phone landscape command deck.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
 - `npm run test:browser` - browser startup smoke test only.
@@ -182,6 +183,8 @@ Dealer boosts activate immediately and use persisted wall-clock deadlines. The 5
 Normal-room production keeps the original 1.18 per-level growth and 1.62 cost growth. Levels 5, 10, 25 and 50 add derived permanent room multipliers of x1.25, x1.5, x2 and x3. These bonuses are calculated from room level, so old saves receive them automatically without migration. Bulk x10 costs are the exact sum of ten sequential upgrades; MAX buys only the levels the current coin balance can fully fund.
 
 Every four combined normal-room levels grant one Bunker Level. The Base screen exposes this exact 0–4 progression in a live accessible bar, driven by the same shared `bunkerLevelEvery` economy constant used by save normalization and core recalculation.
+
+Phone landscape mode (560px+ wide and at most 600px high) uses a dedicated command-deck layout instead of the desktop stack: a compact resource HUD, a notch-safe vertical navigation rail, combat on the left and a persistent two-column room deck on the right. The first four room cards must fit without scrolling at the 844×390 reference viewport. Drawers, missions and room intelligence also receive landscape-specific full-area compositions.
 
 All production, price and reward UI uses `AfterlightNumbers`. Suffixes progress through K, M, B, T, Qa, Qi, Sx, Sp, Oc, No and Dc before continuing into higher tiers and scientific notation. Do not reintroduce local `fmt` implementations in individual systems.
 

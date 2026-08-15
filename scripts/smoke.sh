@@ -3,6 +3,7 @@ set -euo pipefail
 
 PORT="${PORT:-4173}"
 DOM_FILE="${TMPDIR:-/tmp}/afterlight-dom.html"
+LANDSCAPE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-landscape-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/afterlight-chrome.log"
 
 python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/afterlight-server.log" 2>&1 &
@@ -21,6 +22,7 @@ if [[ -z "$CHROME" ]]; then
 fi
 
 "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=2500 --dump-dom "http://127.0.0.1:${PORT}/" >"$DOM_FILE" 2>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,500 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/landscape-probe.html" >"$LANDSCAPE_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Afterlight Bunker</title>'
@@ -70,4 +72,12 @@ for marker in "${required[@]}"; do
   fi
 done
 
-echo "Afterlight browser smoke test passed: core game, layered combat world, missions, specialist rooms and user-gesture UI audio rendered."
+if ! grep -Fq 'data-landscape-layout="passed"' "$LANDSCAPE_DOM_FILE"; then
+  echo "Landscape browser smoke test failed."
+  grep -F 'AFTERLIGHT_LANDSCAPE_' "$LANDSCAPE_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+echo "Afterlight browser smoke test passed: core game and the computed 844x390 landscape command deck rendered with four visible rooms."

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Afterlight landscape layout probe</title>
+  <style>
+    html,body{margin:0;background:#000;color:#fff;font:12px monospace}
+    iframe{display:block;width:844px;height:390px;border:0}
+  </style>
+</head>
+<body data-landscape-layout="running">
+  <iframe id="gameFrame" title="Afterlight landscape probe"></iframe>
+  <output id="layoutReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const frame=document.getElementById('gameFrame'),params=new URLSearchParams(location.search),targetWidth=Math.max(560,Math.min(980,Number(params.get('width'))||844)),targetHeight=Math.max(280,Math.min(600,Number(params.get('height'))||390)),childParams=new URLSearchParams({v:'landscape-probe-'+targetWidth+'x'+targetHeight});
+      if(params.has('enemy'))childParams.set('enemy',params.get('enemy'));if(params.has('horde'))childParams.set('horde',params.get('horde'));
+      frame.style.width=targetWidth+'px';frame.style.height=targetHeight+'px';frame.src='../index.html?'+childParams;
+      function finish(){
+        const doc=frame.contentDocument,rect=id=>doc.getElementById(id).getBoundingClientRect(),app=rect('app'),hud=rect('hud'),tabs=rect('tabs'),scene=rect('scene'),bunker=rect('bunker'),rooms=doc.getElementById('rooms'),cards=[...rooms.querySelectorAll(':scope > .room')].slice(0,4),columns=getComputedStyle(rooms).gridTemplateColumns.trim().split(/\s+/).length,visibleRooms=cards.filter(card=>{const box=card.getBoundingClientRect();return box.top>=bunker.top-1&&box.bottom<=bunker.bottom+1}).length,metrics={target:[targetWidth,targetHeight],app:[Math.round(app.width),Math.round(app.height)],hudHeight:Math.round(hud.height),nav:[Math.round(tabs.width),Math.round(tabs.height)],scene:[Math.round(scene.left),Math.round(scene.width)],bunker:[Math.round(bunker.left),Math.round(bunker.width)],columns,visibleRooms},passed=app.width>=targetWidth-2&&app.height>=targetHeight-2&&hud.height<=52&&tabs.width>=56&&tabs.width<=80&&tabs.height>=targetHeight-60&&scene.left>=tabs.right-1&&scene.right<=bunker.left+2&&scene.width>=Math.min(380,targetWidth*.42)&&bunker.width>=Math.min(300,targetWidth*.44)&&columns===2&&visibleRooms===4;
+        document.body.dataset.landscapeLayout=passed?'passed':'failed';
+        document.getElementById('layoutReport').textContent='AFTERLIGHT_LANDSCAPE_'+(passed?'PASS ':'FAIL ')+JSON.stringify(metrics);
+      }
+      frame.addEventListener('load',()=>setTimeout(finish,900));
+    })();
+  </script>
+</body>
+</html>
