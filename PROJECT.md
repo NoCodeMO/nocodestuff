@@ -145,7 +145,7 @@ The `-final` names are historical binary asset names and are intentionally left 
 
 - Research definitions are displayed but purchasing/research progression is not wired yet.
 - Offline earnings modal exists in HTML but offline calculation/collection is not wired yet.
-- Combat gun SFX is intentionally disabled. The WebAudio experiment was removed because it was unreliable on iOS. Add future SFX through `afterlight:shot`, preferably using a tested audio asset.
+- Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
 - Background music uses the external CC0 Bio-Hazard OGG URL from OpenGameArt.
 - Generator and Workshop use direct WebP room art. Greenhouse uses a base64 WebP fallback loader. Other normal rooms currently use stylized backgrounds.
 - No service worker is active during development. This is intentional because an earlier worker caused stale production builds.
@@ -173,3 +173,4 @@ The `-final` names are historical binary asset names and are intentionally left 
 6. Confirm the GitHub Pages workflow and deployment succeeded before saying a change is live.
 
 This structure is deliberately optimized for rapid AI-assisted iteration and large changes without needing to rediscover the project each session.
+
