@@ -56,7 +56,7 @@ const MERCHANT_OFFERS=[
 const SURVIVOR_SKINS=[
   {id:'ranger-male',order:1,name:'RANGER // MALE',callsign:'RANGER-01',tier:'STARTER',asset:'assets/survivor-ranger.png',muzzleAnchor:{x:77.5,y:20.5},description:'The original Afterlight perimeter ranger. A balanced cosmetic survivor with the standard combat rig.',starter:true},
   {id:'ranger-female',order:2,name:'RANGER // FEMALE',callsign:'RANGER-02',tier:'STARTER',asset:'assets/survivor-ranger-female.webp',muzzleAnchor:{x:77.5,y:20.5},description:'A veteran scout rebuilt in the same responsive combat rig, with full recoil and muzzle feedback.',starter:true},
-  {id:'architect',order:3,name:'GIDEON ROOK',callsign:'THE ARCHITECT',tier:'LEVEL 100',asset:'assets/survivor-architect.webp',muzzleAnchor:{x:79.3,y:16.4},description:'Afterlight’s master engineer deploys an amber exo-rig that permanently converts bunker progress into stronger passive output.',unlock:{type:'bunker',level:100},perk:{type:'passiveProductionPerBunkerLevel',perLevel:.005,maxBonus:1}},
+  {id:'architect',order:3,name:'GIDEON ROOK',callsign:'THE ARCHITECT',tier:'LEVEL 100',asset:'assets/survivor-architect.webp',muzzleAnchor:{x:79.3,y:14.8},description:'Afterlight’s master engineer deploys an amber exo-rig that permanently converts bunker progress into stronger passive output.',unlock:{type:'bunker',level:100},perk:{type:'passiveProductionPerBunkerLevel',perLevel:.005,maxBonus:1}},
   {id:'prestige-1',order:4,name:'CLASSIFIED SURVIVOR',tier:'CLASSIFIED',unlock:{type:'prestige',level:1}},
   {id:'prestige-3',order:5,name:'CLASSIFIED SURVIVOR',tier:'CLASSIFIED',unlock:{type:'prestige',level:3}},
   {id:'prestige-5',order:6,name:'CLASSIFIED SURVIVOR',tier:'CLASSIFIED',unlock:{type:'prestige',level:5}},

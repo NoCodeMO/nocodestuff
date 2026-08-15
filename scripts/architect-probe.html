@@ -16,7 +16,7 @@
       function finish(){
         const win=frame.contentWindow,doc=frame.contentDocument,state=win.AfterlightState.snapshot(),before=win.AfterlightGame.rates().coins,unlockedAt100=state.bunker===100&&state.survivorSkins.unlocked.includes('architect'),selected=win.AfterlightCommandCenter.selectSurvivor('architect'),after=win.AfterlightGame.rates().coins,multiplier=win.AfterlightGame.survivorProductionMultiplier();
         win.AfterlightCommandCenter.render(doc.getElementById('drawerBody'));win.AfterlightCommandCenter.setTab('survivors',doc.getElementById('drawerBody'));
-        const activeCard=doc.querySelector('[data-survivor-slot="architect"].selected'),stage=doc.getElementById('spriteStage'),survivorUnit=doc.querySelector('.survivorUnit'),passed=unlockedAt100&&selected&&Math.abs(after/before-1.5)<1e-9&&multiplier===1.5&&!!activeCard&&stage?.dataset.survivorId==='architect'&&survivorUnit?.dataset.muzzleAnchor==='79.3% 16.4%';
+        const activeCard=doc.querySelector('[data-survivor-slot="architect"].selected'),stage=doc.getElementById('spriteStage'),survivorUnit=doc.querySelector('.survivorUnit'),passed=unlockedAt100&&selected&&Math.abs(after/before-1.5)<1e-9&&multiplier===1.5&&!!activeCard&&stage?.dataset.survivorId==='architect'&&survivorUnit?.dataset.muzzleAnchor==='79.3% 14.8%';
         document.body.dataset.architectProbe=passed?'passed':'failed';report.textContent='AFTERLIGHT_ARCHITECT_'+(passed?'PASS ':'FAIL ')+JSON.stringify({bunker:state.bunker,unlockedAt100,selected,multiplier,rateRatio:after/before,activeCard:!!activeCard,survivorId:stage?.dataset.survivorId,muzzleAnchor:survivorUnit?.dataset.muzzleAnchor});
       }
       frame.addEventListener('load',()=>setTimeout(finish,1000));
