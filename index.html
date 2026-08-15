@@ -10,18 +10,18 @@
   <meta name="theme-color" content="#0b0d0a">
   <title>Afterlight Bunker</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="app.css?build=2">
+  <link rel="stylesheet" href="app.css?build=3">
 </head>
 <body>
   <main id="app">
     <header id="hud">
       <div class="brand"><b>AFTERLIGHT</b><span>BUNKER PROTOCOL</span></div>
-      <div class="resource"><i>◉</i><div><b id="coins">0</b><span id="cps">+0/s</span></div></div>
-      <div class="resource"><i>🌿</i><div><b id="food">0</b><span id="foodps">+0/s</span></div></div>
-      <div class="resource"><i>💧</i><div><b id="water">0</b><span id="waterps">+0/s</span></div></div>
-      <div class="resource"><i>⚡</i><div><b id="power">0</b><span id="powerps">+0/s</span></div></div>
-      <div class="resource"><i>⚙</i><div><b id="scrap">0</b><span>SCRAP</span></div></div>
-      <div class="resource"><i>✦</i><div><b id="science">0</b><span id="scienceps">+0/s</span></div></div>
+      <div class="resource" data-resource="coins" role="button" tabindex="0" aria-label="Open coin statistics"><i>◉</i><div><b id="coins">0</b><span id="cps">+0/s</span></div></div>
+      <div class="resource" data-resource="food" role="button" tabindex="0" aria-label="Open food statistics"><i>🌿</i><div><b id="food">0</b><span id="foodps">+0/s</span></div></div>
+      <div class="resource" data-resource="water" role="button" tabindex="0" aria-label="Open water statistics"><i>💧</i><div><b id="water">0</b><span id="waterps">+0/s</span></div></div>
+      <div class="resource" data-resource="power" role="button" tabindex="0" aria-label="Open power statistics"><i>⚡</i><div><b id="power">0</b><span id="powerps">+0/s</span></div></div>
+      <div class="resource" data-resource="scrap" role="button" tabindex="0" aria-label="Open scrap statistics"><i>⚙</i><div><b id="scrap">0</b><span>SCRAP</span></div></div>
+      <div class="resource" data-resource="science" role="button" tabindex="0" aria-label="Open science statistics"><i>✦</i><div><b id="science">0</b><span id="scienceps">+0/s</span></div></div>
     </header>
 
     <section id="scene">
@@ -64,7 +64,7 @@
   <script src="js/systems/expeditions.js?build=2"></script>
   <script src="js/systems/special-rooms.js?build=2"></script>
   <script src="js/ui/visuals.js?build=2"></script>
-  <script src="js/core/game.js?build=2"></script>
+  <script src="js/core/game.js?build=3"></script>
   <script src="js/systems/missions.js?build=2"></script>
   <script src="js/audio.js?build=5"></script>
   <script src="js/platform.js?build=2"></script>
