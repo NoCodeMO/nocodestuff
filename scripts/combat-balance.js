@@ -41,9 +41,12 @@ for(const [pattern,message] of [
   [/detail\.visualCount/,'hordes must render their configured visual count'],
   [/detail\.asset/,'spawn visuals must use the selected enemy asset'],
   [/--enemy-glow/,'rarity glow must be rendered by the game'],
+  [/function shotFeedback\(\)\{clearSpawn\(\);/,'shots must clear the completed entrance state before hit feedback'],
+  [/spawnClearTimer=setTimeout\(clearSpawn,500\)/,'spawn state requires a fallback cleanup'],
   [/className='enemyUnit'/,'enemy visuals must use one coordinated encounter unit']
 ])if(!pattern.test(visuals))fail(message);
 const css=fs.readFileSync(path.join(root,'app.css'),'utf8');
 if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \+ 100%\)/.test(css))fail('spawn entrance must start beyond the right edge');
-if(!/\.enemyGlow\{/.test(css))fail('rarity glow CSS is missing');
+if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow must remain disabled');
+if(!/\.enemyUnit:is\([^}]+\) \.enemySprite\{filter:[^}]+var\(--enemy-glow\)/.test(css))fail('rarity glow must follow each sprite alpha instead of its layout container');
 console.log(`Afterlight combat balance passed: ${total}% rarity table, ${ENEMIES.length} sprites, 800 coins at 1M/hour, hordes x${COMBAT.hordeMultiplier}.`);
