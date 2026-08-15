@@ -31,6 +31,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/merchant.js` - Uranium wallet, Dealer stock, temporary boost timers, purchase rules and runtime multipliers.
 - `js/systems/command-center.js` - How to Play, advanced Stats, official messages/rewards, settings and local Commander login/logout.
 - `js/systems/offline.js` - persisted, claimable offline production with permanent-rate math, Dealer exclusion and a 12-hour safety cap.
+- `js/systems/codex.js` - responsive Infected Codex, persistent first-sighting discovery, locked specimens and exact configured combat intelligence.
 
 ### Presentation/platform
 - `js/ui/visuals.js` - survivor/enemy visuals, sprite-relative rifle flash, recoil/hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
@@ -45,6 +46,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/mission-balance.js` - exact mission count, unique chapter objectives, permanent multiplier caps, economy-scaled caches and Uranium budget.
 - `scripts/command-center-check.js` - Command Center tabs, schema migration, message rewards, account/settings persistence and large-number notation.
 - `scripts/offline-balance.js` - offline threshold/cap, efficiency, permanent-rate sourcing, pending-save safety and Uranium exclusion.
+- `scripts/codex-check.js` - discovery migration, spawn registration, all six entries, exact multipliers and responsive locked/unlocked archive checks.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
 - `npm run test:browser` - browser startup smoke test only.
@@ -65,16 +67,17 @@ The order in `index.html` is intentional:
 8. command center
 9. visuals
 10. game
-11. offline earnings
-12. missions
-13. audio
-14. platform
+11. Infected Codex
+12. offline earnings
+13. missions
+14. audio
+15. platform
 
 Do not casually reorder these. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 10`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 11`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -82,7 +85,7 @@ Main shape:
 
 ```text
 resources: coins, total, food, water, power, scrap, science, uranium
-progress: kills, bunker, rooms, research, stats (including rarity kills, hordes, Brute Cores and Uranium earned/spent)
+progress: kills, bunker, rooms, research, stats (including discovered infected, rarity kills, criticals, best streak, hordes, Brute Cores and Uranium earned/spent)
 researchRuntime: { active, ready }
 missions: { claimed, bonuses }
 expeditions: { active, survivors, pending }
@@ -113,6 +116,7 @@ Do not create another persistent gameplay store unless there is a strong reason.
 - `window.AfterlightResearch`
 - `window.AfterlightMerchant`
 - `window.AfterlightCommandCenter`
+- `window.AfterlightCodex`
 - `window.AfterlightVisuals`
 - `window.AfterlightAudio`
 - `window.AfterlightPlatform`
@@ -164,6 +168,8 @@ Mission bonuses are consumed by the core economy. Current supported bonus keys:
 Special-room production is returned by `AfterlightSpecialRooms.rates()` and integrated into the core economy. Do not add another production interval that writes resources independently.
 
 Enemy encounters use one weighted table with an exact 100% total: Common 55%, Uncommon 25%, Rare 12%, Epic 5%, Legendary 2% and Brute 1%. A non-Brute encounter independently has a 12% horde chance. A horde contains exactly three infected and grants exactly x3 HP, coins, scrap and kill credit compared with that same single infected. Brutes can never become hordes.
+
+The first actual spawn of each configured enemy is persisted through `stats.discovered`; old saves automatically unlock entries backed by existing rarity kills. Clicking the enemy status card opens the Infected Codex. Locked entries remain silhouettes while discovered entries show the shared configured sprite, base chance, lifetime kills, HP multiplier, Coin multiplier, Scrap multiplier and encounter notes.
 
 The base zombie bounty is the greatest of a progression floor and 0.08% of actual hourly coin production. For example, a bunker producing 1,000,000 coins/hour gets an 800-coin Common base bounty before rarity, horde, research and mission multipliers. This keeps kills useful in both early and late game without letting combat replace the bunker economy. Brutes are outside the rarity glow system and always award one exclusive Brute Core.
 

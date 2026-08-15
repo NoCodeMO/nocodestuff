@@ -53,6 +53,8 @@ required=(
   'assets/room-generator.webp'
   'data-command-center-system="ready"'
   'data-offline-system="ready"'
+  'data-codex-system="ready"'
+  'id="enemyCodexHint"'
   'data-tab="command"'
   'id="commandBadge"'
   'js/core/numbers.js?build=1'

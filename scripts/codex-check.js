@@ -1,0 +1,10 @@
+'use strict';
+const fs=require('fs'),path=require('path'),root=path.resolve(__dirname,'..'),read=file=>fs.readFileSync(path.join(root,file),'utf8'),fail=message=>{throw new Error(`Codex check: ${message}`)};
+const state=read('js/core/state.js'),game=read('js/core/game.js'),codex=read('js/systems/codex.js'),html=read('index.html'),css=read('app.css');
+for(const [pattern,message] of [[/schema:11/,'Codex discoveries require schema 11'],[/discovered:\[\]/,'Codex discoveries need a persisted default'],[/new Set\(state\.stats\.discovered/,'discovery migration must remove invalid duplicates'],[/Number\(count\)>0&&!state\.stats\.discovered\.includes/,'old rarity kills must unlock their Codex entries']])if(!pattern.test(state))fail(message);
+for(const [pattern,message] of [[/function discoverEnemy\(id\)/,'core combat must register observed enemy types'],[/ST\.update\('enemy-discovered'/,'new sightings must be saved immediately'],[/discoverEnemy\(type\.id\);enemy=/,'sightings must be recorded only when an enemy actually spawns']])if(!pattern.test(game))fail(message);
+for(const [pattern,message] of [[/ENEMIES\.map\(type=>card\(type,current\)\)/,'Codex must render all configured enemy types'],[/data-codex-known/,'Codex must distinguish locked and discovered entries'],[/type\.hpMultiplier/,'Codex must show health multipliers'],[/type\.bountyMultiplier/,'Codex must show bounty multipliers'],[/type\.scrapMultiplier/,'Codex must show scrap multipliers'],[/S\.stats\.rarityKills/,'Codex must show lifetime kills'],[/afterlight:enemy/,'open Codex must follow the current target']])if(!pattern.test(codex))fail(message);
+if(!/id="enemyCard" role="button" tabindex="0"/.test(html)||!/js\/systems\/codex\.js\?build=1/.test(html))fail('enemy card must provide the accessible Codex entry point');
+if(!/\.codexModal/.test(css)||!/\.codexGrid/.test(css)||!/\.codexEntry\.locked/.test(css))fail('Codex layout and locked silhouette styling are incomplete');
+console.log('Afterlight Codex passed: persisted sightings, six configured entries, responsive archive and exact combat multipliers.');
+
