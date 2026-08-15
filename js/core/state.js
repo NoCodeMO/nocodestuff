@@ -3,11 +3,11 @@ const CFG=window.AfterlightConfig;if(!CFG)throw new Error('AfterlightConfig must
 const KEY='afterlight_v4';
 const parse=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}};
 const defaults=()=>({
-  schema:6,coins:0,total:0,food:0,water:0,power:0,scrap:0,science:0,kills:0,level:1,bunker:1,
+  schema:7,coins:0,total:0,food:0,water:0,power:0,scrap:0,science:0,kills:0,level:1,bunker:1,
   rooms:{generator:1,workshop:0,greenhouse:0,purifier:0,lab:0,living:0,storage:0,turret:0},
   research:{tools:0,solar:0,hydro:0,filters:0,automation:0,walls:0},
   researchRuntime:{active:null,ready:null},
-  stats:{clicks:0,bosses:0},
+  stats:{clicks:0,bosses:0,hordes:0,bruteCores:0,rarityKills:{common:0,uncommon:0,rare:0,epic:0,legendary:0,brute:0}},
   missions:{claimed:[],bonuses:{}},
   expeditions:{active:null,survivors:[],pending:null},
   specialRooms:{},
@@ -15,14 +15,14 @@ const defaults=()=>({
   last:Date.now()
 });
 const base=defaults(),old=parse(KEY)||{};
-const state={...base,...old,rooms:{...base.rooms,...(old.rooms||{})},research:{...base.research,...(old.research||{})},stats:{...base.stats,...(old.stats||{})},settings:{...base.settings,...(old.settings||{})}};
+const state={...base,...old,rooms:{...base.rooms,...(old.rooms||{})},research:{...base.research,...(old.research||{})},stats:{...base.stats,...(old.stats||{}),rarityKills:{...base.stats.rarityKills,...(old.stats?.rarityKills||{})}},settings:{...base.settings,...(old.settings||{})}};
 if(!old.missions){const m=parse('afterlight_missions_v1');if(m)state.missions={claimed:Array.isArray(m.claimed)?m.claimed:[],bonuses:{...(m.bon||{})}}}
 if(!old.expeditions){const x=parse('afterlight_expedition_runtime_v1');if(x)state.expeditions={active:x.active||null,survivors:Array.isArray(x.survivors)?x.survivors:[],pending:x.pending||null}}
 if(!old.specialRooms){const r=parse('afterlight_special_rooms_v1');if(r?.rooms)state.specialRooms={...r.rooms}}
 if(old.settings?.music==null){const legacyMusic=localStorage.getItem('afterlight_music');if(legacyMusic)state.settings.music=legacyMusic!=='off'}
 function normalize(){
-  state.schema=6;
-  state.rooms={...base.rooms,...(state.rooms||{})};state.research={...base.research,...(state.research||{})};state.stats={...base.stats,...(state.stats||{})};
+  state.schema=7;
+  state.rooms={...base.rooms,...(state.rooms||{})};state.research={...base.research,...(state.research||{})};state.stats={...base.stats,...(state.stats||{}),rarityKills:{...base.stats.rarityKills,...(state.stats?.rarityKills||{})}};
   state.missions=state.missions||{claimed:[],bonuses:{}};state.missions.claimed=Array.isArray(state.missions.claimed)?state.missions.claimed:[];state.missions.bonuses=state.missions.bonuses||{};
   state.expeditions=state.expeditions||{active:null,survivors:[],pending:null};state.expeditions.survivors=Array.isArray(state.expeditions.survivors)?state.expeditions.survivors:[];
   if(Array.isArray(state.expeditions.pending?.found))state.expeditions.pending.found=state.expeditions.pending.found[0]||null;

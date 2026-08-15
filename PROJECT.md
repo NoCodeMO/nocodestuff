@@ -18,7 +18,7 @@ This file is the fastest entry point for any future development session. Read th
 - `manifest.webmanifest` - PWA/home-screen metadata.
 
 ### Core
-- `js/core/config.js` - game content/config shared by systems: normal rooms, research definitions, expeditions, specialists and classified rooms.
+- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms and the complete enemy/rarity table.
 - `js/core/state.js` - one authoritative persistent state object and save migration.
 - `js/core/game.js` - economy, combat, normal rooms, HUD, tabs and drawer routing.
 
@@ -35,6 +35,7 @@ This file is the fastest entry point for any future development session. Read th
 
 ### Validation
 - `scripts/validate.js` - zero-dependency JS syntax, local reference and legacy-file checks.
+- `scripts/combat-balance.js` - deterministic enemy rarity, asset, horde, glow and income-scaled bounty checks.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
 - `npm run test:browser` - browser startup smoke test only.
@@ -60,7 +61,7 @@ Do not casually reorder these. Missions loads after game because it owns the cus
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 6`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 7`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -68,7 +69,7 @@ Main shape:
 
 ```text
 resources: coins, total, food, water, power, scrap, science
-progress: kills, bunker, rooms, research, stats
+progress: kills, bunker, rooms, research, stats (including rarity kills, hordes and Brute Cores)
 researchRuntime: { active, ready }
 missions: { claimed, bonuses }
 expeditions: { active, survivors, pending }
@@ -109,8 +110,8 @@ Compatibility globals used by inline UI:
 Use events instead of adding duplicate click listeners across systems:
 
 - `afterlight:shot` - emitted by core combat; visuals/SFX can react.
-- `afterlight:enemy-killed` - emitted once after a kill reward is granted; owns the cash SFX trigger.
-- `afterlight:enemy` - emitted when a new enemy spawns.
+- `afterlight:enemy-killed` - emitted once after coins/scrap and any Brute Core are granted; includes the exact reward and enemy metadata and owns the cash SFX trigger.
+- `afterlight:enemy` - emitted when a new enemy or horde spawns; includes its rarity, art, in-game glow, HP, rewards and visual count.
 - `afterlight:state` - important state mutation; `detail.reason` describes the change.
 - `afterlight:survivors` - specialist roster changed.
 - `afterlight:mission-claimed` - emitted after a successful claim; owns the mission reward fanfare.
@@ -137,23 +138,28 @@ Mission bonuses are consumed by the core economy. Current supported bonus keys:
 
 Special-room production is returned by `AfterlightSpecialRooms.rates()` and integrated into the core economy. Do not add another production interval that writes resources independently.
 
+Enemy encounters use one weighted table with an exact 100% total: Common 55%, Uncommon 25%, Rare 12%, Epic 5%, Legendary 2% and Brute 1%. A non-Brute encounter independently has a 12% horde chance. A horde renders three infected, but its HP, rewards and kill credit are a single x5 package.
+
+The base zombie bounty is the greatest of a progression floor and 0.08% of actual hourly coin production. For example, a bunker producing 1,000,000 coins/hour gets an 800-coin Common base bounty before rarity, horde, research and mission multipliers. This keeps kills useful in both early and late game without letting combat replace the bunker economy. Brutes are outside the rarity glow system and always award one exclusive Brute Core.
+
 ## Assets
 
 Only active assets remain in `assets/`:
 - `survivor-final.webp`
-- `walker-final.webp`
+- `enemy-common-drifter.webp`, `enemy-uncommon-cinderback.webp`, `enemy-rare-blue-shield.webp`, `enemy-epic-bloater.webp`, `enemy-legendary-gilded-warden.webp`, `enemy-brute-breaker.webp` - transparent, left-facing enemy art with no baked rarity glow; glow is rendered by CSS at runtime
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `generator-room.webp`
 - `workshop-room.webp`
 - `.b64` room-art fallbacks, including the current greenhouse art.
 
-The `-final` names are historical binary asset names and are intentionally left alone because the GitHub text-file tooling cannot safely rename binary files in-place. Do not treat them as duplicate versions.
+The survivor `-final` name is a historical binary asset name and is intentionally left alone. `walker-final.webp` is retained only as an unused legacy asset so existing cached sessions cannot request a missing file; new combat never references it.
 
 ## Current intentional limitations
 
 - One research project can run at a time. It spends scrap up front, completes against a persisted wall-clock deadline and must be installed from the red Research notification.
 - Offline earnings modal exists in HTML but offline calculation/collection is not wired yet.
 - Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
+- Enemy movement is currently a fast offscreen-right entrance plus hit/death feedback. Full character-specific sprite-sheet animation is intentionally deferred.
 - Background music uses the external CC0 Bio-Hazard OGG URL from OpenGameArt.
 - Generator and Workshop use direct WebP room art. Greenhouse uses a base64 WebP fallback loader. Other normal rooms currently use stylized backgrounds.
 - No service worker is active during development. This is intentional because an earlier worker caused stale production builds.
