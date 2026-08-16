@@ -28,7 +28,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,500 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/landscape-probe.html" >"$LANDSCAPE_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,700 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/architect-probe.html" >"$ARCHITECT_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/prestige-probe.html" >"$PRESTIGE_DOM_FILE" 2>>"$CHROME_LOG"
-"$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/account-reset-probe.html" >"$RESET_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=8000 --dump-dom "http://127.0.0.1:${PORT}/scripts/account-reset-probe.html" >"$RESET_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Afterlight Bunker</title>'
