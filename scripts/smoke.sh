@@ -90,13 +90,13 @@ required=(
   'js/core/config.js?build=30'
   'js/core/economy.js?build=2'
   'js/core/numbers.js?build=1'
-  'js/core/state.js?build=21'
+  'js/core/state.js?build=22'
   'js/systems/prestige.js?build=3'
   'js/systems/operations.js?build=2'
-  'js/systems/command-center.js?build=6'
+  'js/systems/command-center.js?build=7'
   'js/systems/survivor-dialogue.js?build=1'
   'js/core/game.js?build=23'
-  'js/audio.js?build=14'
+  'js/audio.js?build=15'
   'js/systems/care-package.js?build=2'
 )
 
