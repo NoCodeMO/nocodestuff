@@ -113,7 +113,7 @@ const ENEMIES=[
   {id:'uncommon',rarity:'UNCOMMON',name:'CINDERBACK',chance:25,asset:'assets/enemy-uncommon-cinderback.webp',deathAsset:'assets/enemy-uncommon-cinderback-death.png',hpMultiplier:1.4,bountyMultiplier:1.6,scrapMultiplier:1.35,glow:'#a75d26',accent:'#c57a32'},
   {id:'rare',rarity:'RARE',name:'BLUE SHIELD',chance:12,asset:'assets/enemy-rare-blue-shield.webp',deathAsset:'assets/enemy-rare-blue-shield-death.png',hpMultiplier:2.1,bountyMultiplier:2.6,scrapMultiplier:2,glow:'#3f86d8',accent:'#64a8f2'},
   {id:'epic',rarity:'EPIC',name:'THE BLOATER',chance:5,asset:'assets/enemy-epic-bloater.webp',deathAsset:'assets/enemy-epic-bloater-death.png',hpMultiplier:3.2,bountyMultiplier:4.5,scrapMultiplier:3,glow:'#8747c9',accent:'#b76bea'},
-  {id:'legendary',rarity:'LEGENDARY',name:'GILDED WARDEN',chance:2,asset:'assets/enemy-legendary-gilded-warden.webp',hpMultiplier:5,bountyMultiplier:8,scrapMultiplier:5,glow:'#d5a936',accent:'#edca59'},
+  {id:'legendary',rarity:'LEGENDARY',name:'GILDED WARDEN',chance:2,asset:'assets/enemy-legendary-gilded-warden.webp',deathAsset:'assets/enemy-legendary-gilded-warden-death.png',hpMultiplier:5,bountyMultiplier:8,scrapMultiplier:5,glow:'#d5a936',accent:'#edca59'},
   {id:'brute',rarity:'BRUTE',name:'THE BREAKER',chance:1,asset:'assets/enemy-brute-breaker.webp',hpMultiplier:9,bountyMultiplier:16,scrapMultiplier:10,glow:'transparent',accent:'#d76a50',brute:true}
 ];
 const COMBAT=Object.freeze({
