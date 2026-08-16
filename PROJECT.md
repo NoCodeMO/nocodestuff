@@ -26,12 +26,12 @@ This file is the fastest entry point for any future development session. Read th
 
 ### Systems
 - `js/systems/missions.js` - 200-mission campaign: the original 50-save-compatible chain plus 15 operations chapters with 150 late-game objectives.
-- `js/systems/expeditions.js` - expedition timers, rewards and specialist discovery.
+- `js/systems/expeditions.js` - Food/Water-funded expedition timers, sustainable-economy rewards, scarce Uranium rolls and specialist discovery.
 - `js/systems/special-rooms.js` - classified rooms unlocked by specialists.
-- `js/systems/research.js` - timed, scrap-funded research, completion badge and claiming.
+- `js/systems/research.js` - timed, dual Scrap/Science-funded research, completion badge and claiming.
 - `js/systems/merchant.js` - Uranium wallet, Dealer stock, temporary boost timers, purchase rules and runtime multipliers.
 - `js/systems/command-center.js` - How to Play, persistent survivor roster, advanced Stats, official messages/rewards, settings and local Commander login/logout.
-- `js/systems/offline.js` - persisted, claimable offline production with permanent-rate math, Dealer exclusion and a 12-hour safety cap.
+- `js/systems/offline.js` - persisted, claimable offline production using sustainable no-reserve rates, Dealer exclusion and a 12-hour safety cap.
 - `js/systems/codex.js` - responsive Infected Codex, persistent first-sighting discovery, locked specimens and exact configured combat intelligence.
 - `js/systems/care-package.js` - persisted 90–150 second supply-drop scheduler, fall/landing lifecycle, five-second claims, economy-scaled loot and rare free Dealer activations.
 - `js/systems/survivor-dialogue.js` - survivor-specific idle, kill, streak, horde and Brute barks with contextual selection, typewriter timing and a single spam-safe scene bubble.
@@ -59,6 +59,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/survivor-dialogue-check.js` - all eight survivor voices, contextual pools/odds, typewriter events, responsive bubble CSS, reduced-motion behavior and gesture-safe retro voice bleeps.
 - `scripts/economy-rebalance-check.js` - deterministic fresh-cycle simulator, Prestige pacing envelope, Mastery curve, mission caps, Dealer exclusivity and destructive-reset guardrails.
 - `scripts/operations-balance-check.js` - Power/Water/Food/Scrap/Science/Workforce allocation, reserve drain, priority order, pause/resume and underperformance UI guardrails.
+- `scripts/cross-system-balance-check.js` - executable dual-cost Research, ration-funded Expedition, Dealer-free reward, sustainable offline and attention-reward math.
 - `scripts/prestige-balance-check.js` - all five targets, survivors, active/permanent perk math, capped Core curve, reset boundaries, room costs and cross-system multiplier wiring.
 - `scripts/prestige-probe.html` - real-browser schema-15 migration plus transactional Prestige I–V reset, preservation, recovery backup, unlock, art, muzzle-anchor and multiplier probe.
 - `scripts/architect-probe.html` - real-browser Level 100 save migration, permanent unlock, exact x1.5 production multiplier, roster selection and rifle-anchor probe.
@@ -97,7 +98,7 @@ Do not casually reorder these. Prestige loads before every economy consumer so r
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 18`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 19`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -120,7 +121,7 @@ command: { read, claimed, lastTab, account: { loggedIn, name, createdAt } }
 settings: { music, uiSfx, reducedEffects }
 ```
 
-`AfterlightState.resetAll('RESET')` is the only full-account deletion path. It removes only Afterlight-owned local keys and then reloads into a clean schema-18 save. The Command Center protects it with an exact `RESET` phrase plus a three-second hold; never add an unguarded reset shortcut.
+`AfterlightState.resetAll('RESET')` is the only full-account deletion path. It removes only Afterlight-owned local keys and then reloads into a clean schema-19 save. The Command Center protects it with an exact `RESET` phrase plus a three-second hold; never add an unguarded reset shortcut. New accounts and migrated pre-schema-19 saves receive 25 Food and 25 Water so the first short Expedition can be learned without a resource soft-lock.
 
 `state.js` automatically imports legacy data from:
 - `afterlight_missions_v1`
@@ -168,7 +169,9 @@ Use events instead of adding duplicate click listeners across systems:
 - `afterlight:enemy` - emitted when a new enemy or horde spawns; includes its rarity, art, in-game glow, HP, rewards and visual count.
 - `afterlight:state` - important state mutation; `detail.reason` describes the change.
 - `afterlight:survivors` - specialist roster changed.
+- `afterlight:research-complete` - a persisted Research timer finished and the red claim notification became active.
 - `afterlight:mission-claimed` - emitted after a successful claim; owns the mission reward fanfare.
+- `afterlight:expedition-started` - emitted after Food/Water rations are atomically deducted and the sustainable reward rates are captured.
 - `afterlight:expedition-complete` - emitted exactly when the completion reveal is created; owns the expedition fanfare.
 - `afterlight:merchant-purchase` - emitted after Uranium is spent and the boost is active; owns the Dealer celebration and fanfare.
 - `afterlight:merchant-expired` - emitted when one or more persisted wall-clock boosts expire.
@@ -210,7 +213,7 @@ Mission bonuses are consumed by the core economy. Current supported bonus keys:
 
 Special-room production is returned by `AfterlightSpecialRooms.rates()` and integrated into the core economy. Do not add another production interval that writes resources independently.
 
-Every built normal room participates in the operations network. The Generator is self-starting; the Purifier, Greenhouse and Living Quarters retain a small emergency recovery floor so a bad allocation cannot permanently soft-lock a run. Other rooms need configured combinations of Power, Water, Food, Scrap, Science and virtual Workforce. Living Quarters plus one starting survivor provide Workforce; Power/Water/Food/Scrap/Science use current production plus at most one five-minute stock reserve. When demand exceeds supply, Essential rooms receive resources before Normal and Low rooms. A paused room produces nothing and releases its load. Efficiency below 90% creates a visible room-card alert, while the room screen shows exact required/supplied rates, the bottleneck and a direct upgrade or priority recommendation.
+Every built normal room participates in the operations network. The Generator is self-starting; the Purifier, Greenhouse and Living Quarters retain a small emergency recovery floor so a bad allocation cannot permanently soft-lock a run. Other rooms need configured combinations of Power, Water, Food, Scrap, Science and virtual Workforce. Living Quarters plus one starting survivor provide Workforce; Power/Water/Food/Scrap/Science use current production plus at most one five-minute stock reserve. When demand exceeds supply, Essential rooms receive resources before Normal and Low rooms. A paused room produces nothing and releases its load. Efficiency below 90% creates a visible room-card alert, while the room screen shows exact required/supplied rates, the bottleneck and a direct upgrade or priority recommendation. `AfterlightGame.rates({useReserves:false,cache:false})` is the required sustainable-rate path for long-lived rewards: it ignores temporary stockpiles and does not overwrite the live UI snapshot.
 
 Enemy encounters use one weighted table with an exact 100% total: Common 55%, Uncommon 25%, Rare 12%, Epic 5%, Legendary 2% and Brute 1%. Every non-Brute encounter has a 12% base horde chance, with a persisted pity counter guaranteeing a horde by the eighth eligible encounter. Brutes can never become hordes and neither advance nor reset that counter. A horde contains exactly three infected and grants exactly x3 HP, coins, scrap and kill credit compared with that same single infected.
 
@@ -222,13 +225,13 @@ Prestige Rooms are permanent and capped at Level 3 with exact Core costs of 1, 2
 
 The base zombie bounty is the greatest of a progression floor and 0.08% of actual hourly coin production. For example, a bunker producing 1,000,000 coins/hour gets an 800-coin Common base bounty before rarity, horde, research and mission multipliers. This keeps kills useful in both early and late game without letting combat replace the bunker economy. Brutes are outside the rarity glow system and always award one exclusive Brute Core.
 
-Uranium Crystals are a deliberately scarce non-passive currency. Every claimed mission awards a tier-scaled amount, expeditions use visible zone-specific crystal chances and every Brute awards exactly one. Existing saves receive a one-time crystal grant for missions already claimed. Uranium is only spent at the Dealer and is never generated by room production or offline income.
+Uranium Crystals are a deliberately scarce non-passive currency. Every claimed mission awards one to three crystals based on its unlock tier, expeditions use visible zone-specific chances from 5% to 60% and every Brute awards exactly one. The full 200-mission chain supplies roughly 260 crystals rather than an unlimited recurring faucet. Existing saves receive a one-time crystal grant for missions already claimed. Uranium is only spent at the Dealer and is never generated by room production or offline income.
 
-The mission campaign contains exactly 200 missions. The original 50 IDs are immutable for save compatibility. The 150 operations missions are grouped into 15 chapters and cover infected kills, Brutes, hordes, rarity hunts, shots, bunker/room progression and research. Their Coin and Scrap caches scale from the player's permanent hourly economy with a progression floor and explicitly divide out temporary Dealer boosts. Permanent bonuses are rebuilt once under `balanceVersion: 1` for existing saves and remain within shared hard caps (including ×2.5 production/resources, ×1.75 Coins and a 0.75 room-cost floor), preventing the old mission chain from compounding into runaway progress.
+The mission campaign contains exactly 200 missions. The original 50 IDs are immutable for save compatibility. The 150 operations missions are grouped into 15 chapters and cover infected kills, Brutes, hordes, rarity hunts, shots, bunker/room progression and research. Their Coin and Scrap caches scale from the player's sustainable permanent hourly economy with a progression floor; both five-minute reserves and temporary Dealer boosts are excluded. Permanent bonuses are rebuilt once under `balanceVersion: 1` for existing saves and remain within shared hard caps (including ×2.5 production/resources, ×1.75 Coins and a 0.75 room-cost floor), preventing the old mission chain from compounding into runaway progress.
 
 Dealer boosts activate immediately and use persisted wall-clock deadlines. The ×5 Coins, ×10 Coins and ×3 Everything contracts share the single `overdrive` channel, so buying one replaces the others and the temporary all-production ceiling is ×10 rather than the previous ×30 stack. The rebalance costs are 25/60/75 Uranium for those three contracts, with the remaining specialist contracts priced from 30–50. Repurchasing the same active contract extends its remaining time rather than wasting it.
 
-Care packages arrive on a persisted randomized 90–150 second schedule while the game is visible. Their five-second claim window starts only after the 1.35-second parachute landing. Every claimed cache gives Coins, Scrap and one survival resource scaled from permanent production with early-game floors; temporary Dealer multipliers are divided out before reward calculation. Uranium is capped to a 10% one-crystal roll and a random free five-minute Dealer contract is a rare 4% jackpot (about 1.2 expected jackpots per perfect-attention hour). Free contracts use the shared Dealer channel rules, activate immediately and never spend Uranium. Missed drops simply schedule the next encounter.
+Care packages arrive on a persisted randomized 90–150 second schedule while the game is visible. Their five-second claim window starts only after the 1.35-second parachute landing. Every claimed cache gives Coins, Scrap and one survival resource scaled from sustainable permanent production with early-game floors; five-minute reserves and temporary Dealer multipliers are excluded. Uranium is a 4% one-crystal roll (about 1.2 per perfect-attention hour) and a random free five-minute Dealer contract is a 1.2% jackpot (about 0.36 per perfect-attention hour). Free contracts use the shared Dealer channel rules, activate immediately and never spend Uranium. Missed drops simply schedule the next encounter.
 
 Normal rooms use a smooth 1.142 price curve whose scale ramps from ×1 to ×125 across the opening levels, while output grows at 1.07 per level. The higher scale is what moves Prestige I from a short session into roughly a full passive day. Every block of 100 room levels is one Mastery Rank: local levels 5, 10, 25, 50, 75 and 100 award x1.25, x1.5, x2, x3, x4 and x5 room multipliers, then the sequence repeats without an output drop at the next rank. This makes all 100 levels meaningful and lets established saves continue through the explicit Level 5000 ceiling. Bulk x10 costs are the exact sum of sequential upgrades; MAX buys at most 500 levels and only those the current Coin balance can fully fund. Every quote is validated again inside the state transaction, invalid/overflowed prices are rejected and all resources use a finite 1e300 ceiling.
 
@@ -244,7 +247,11 @@ Official Command Center messages are release-configured in `COMMAND_MESSAGES`. A
 
 The Command survivor roster is configured once in `SURVIVOR_SKINS`. Both Ranger starters are permanently unlocked for new and old saves and are cosmetic/economically equal. Gideon Rook, The Architect, is permanently added to an old or new save at Bunker Level 100. While selected, he grants +0.5% all passive production per Bunker Level: exactly +50% at unlock, capped at +100% from Level 200 onward. The five Prestige survivors stay visually classified until unlocked: Mara Voss (Rare, +40% Scrap), Knox Ward (Rare, -12% room cost), Malik Graves (Epic, -25% expedition time and +30% loot), Cole Ash (Epic, +50% damage and infected loot) and Dr. Elara Sable (Legendary, -25% research cost/time and +50% critical damage). Every selectable survivor shares the same shot event, recoil and short muzzle animation while using per-skin normalized muzzle metadata. `SURVIVOR_DIALOGUE` gives all eight characters a distinct voice and short pools for idle, normal kill, streak, horde and Brute contexts; new lines belong in that config instead of the presentation or audio modules.
 
-Offline production starts after one minute away and is capped at 12 hours per load. It uses the authoritative permanent room/special-room rates at 35% base efficiency, applies mission `offlineMult` up to a 90% hard cap, divides out temporary Dealer boosts and never generates Uranium. Calculated gains are persisted as a pending claim before the collection modal opens, so closing the game cannot lose them.
+Research projects spend both Scrap and Science up front in one state transaction. Both prices scale exponentially with project level, while the persisted wall-clock timer and red claim notification retain the existing one-project-at-a-time loop. This makes the Research Lab's Science output a progression input rather than another passive score.
+
+Expeditions spend their displayed Food and Water ration cost when deployed. The cost is the greater of a per-zone floor and a configured number of seconds of sustainable Food/Water production, so it stays relevant without becoming impossible for a new save. Coin and Scrap previews/rewards similarly capture sustainable permanent production at deployment, use zone-specific reward-time bands plus early floors, and ignore Dealer boosts. Longer zones improve specialist discovery access and Uranium efficiency instead of becoming an unchecked currency faucet.
+
+Offline production starts after one minute away and is capped at 12 hours per load. It uses the authoritative sustainable room/special-room rates with stock reserves disabled at 35% base efficiency, applies mission `offlineMult` up to a 90% hard cap, divides out temporary Dealer boosts and never generates Uranium. Its modal reports how many rooms were supply-limited during the calculation. Calculated gains are persisted as a pending claim before the collection modal opens, so closing the game cannot lose them.
 
 ## Assets
 
@@ -259,7 +266,7 @@ Only active assets remain in `assets/`:
 
 ## Current intentional limitations
 
-- One research project can run at a time. It spends scrap up front, completes against a persisted wall-clock deadline and must be installed from the red Research notification.
+- One research project can run at a time. It spends Scrap and Science up front, completes against a persisted wall-clock deadline and must be installed from the red Research notification.
 - Offline earnings are claimable and persisted; production beyond the 12-hour cap is intentionally discarded.
 - Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
 - Survivor dialogue uses original synthesized retro bleeps, follows the UI SFX setting and cannot unlock WebAudio without a user gesture. It is intentionally short-form ambient flavor rather than a branching conversation system.

@@ -16,7 +16,7 @@ function intervalMs(){
   return Math.round(randomBetween(RULES.minimumIntervalMs,RULES.maximumIntervalMs));
 }
 function permanentRate(resource){
-  const live=Math.max(0,Number(GAME.rates?.()?.[resource])||0),temporary=Math.max(1,Number(MERCHANT.multiplier?.(resource))||1);
+  const live=Math.max(0,Number(GAME.rates?.({useReserves:false,cache:false})?.[resource])||0),temporary=Math.max(1,Number(MERCHANT.multiplier?.(resource))||1);
   return live/temporary;
 }
 function scaledReward(resource,seconds,minValue){

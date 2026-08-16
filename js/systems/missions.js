@@ -40,7 +40,7 @@ const roomTotal=()=>Object.values(S.rooms||{}).reduce((sum,value)=>sum+(Number(v
 const researchTotal=()=>Object.values(S.research||{}).reduce((sum,value)=>sum+(Number(value)||0),0);
 const val=q=>q[2]==='kills'?(S.kills||0):q[2]==='bosses'?(S.stats?.bosses||0):q[2]==='hordes'?(S.stats?.hordes||0):q[2]==='shots'?(S.stats?.clicks||0):q[2]==='bunker'?(S.bunker||1):q[2]==='roomtotal'?roomTotal():q[2]==='researchtotal'?researchTotal():q[2].startsWith('rarity:')?(S.stats?.rarityKills?.[q[2].slice(7)]||0):(S.rooms?.[q[2]]||0);
 
-function baseRate(resource){const rate=Number(window.AfterlightGame?.rates?.()?.[resource]||0),dealer=Math.max(1,Number(window.AfterlightMerchant?.multiplier?.(resource)||1));return rate/dealer}
+function baseRate(resource){const rate=Number(window.AfterlightGame?.rates?.({useReserves:false,cache:false})?.[resource]||0),dealer=Math.max(1,Number(window.AfterlightMerchant?.multiplier?.(resource)||1));return rate/dealer}
 function cachePayout(q){
   if(!['coinCache','scrapCache'].includes(q[4]))return null;
   const resource=q[4]==='coinCache'?'coins':'scrap',unlock=Math.max(1,q[6]),floor=resource==='coins'?350*Math.pow(unlock,2.3):8*Math.pow(unlock,1.55);
@@ -48,7 +48,7 @@ function cachePayout(q){
 }
 function reduction(value){const percent=(1-value)*100;return percent<1?percent.toFixed(1):String(Math.round(percent))}
 function reward(q,payout=cachePayout(q)){if(payout)return `${fmt(payout.amount)} ${payout.resource.toUpperCase()} · ECONOMY CACHE`;return ({coins:`${fmt(q[5])} COINS`,scrap:`${fmt(q[5])} SCRAP`,food:`${fmt(q[5])} FOOD`,coinMult:`x${q[5]} ALL COINS`,zombieMult:`x${q[5]} ZOMBIE BOUNTY`,prodMult:`x${q[5]} ALL PRODUCTION`,powerMult:`x${q[5]} POWER`,scrapMult:`x${q[5]} SCRAP`,foodMult:`x${q[5]} FOOD`,waterMult:`x${q[5]} WATER`,scienceMult:`x${q[5]} SCIENCE`,damageMult:`x${q[5]} DAMAGE`,costMult:`${reduction(q[5])}% CHEAPER UPGRADES`,offlineMult:`x${q[5]} OFFLINE GAINS`}[q[4]]||q[4])}
-const uraniumReward=q=>Math.max(1,Math.min(6,1+Math.floor((Math.max(1,q[6])-1)/25)));
+const uraniumReward=q=>Math.max(1,Math.min(3,1+Math.floor((Math.max(1,q[6])-1)/70)));
 const eligible=q=>(S.bunker||1)>=q[6]&&!M.claimed.includes(q[0]);
 const completion=q=>Math.min(1,val(q)/q[3]);
 function activeMissions(){return Q.filter(eligible).sort((a,b)=>{const readyA=completion(a)>=1,readyB=completion(b)>=1;if(readyA!==readyB)return readyA?-1:1;return a[6]-b[6]||completion(b)-completion(a)}).slice(0,5)}

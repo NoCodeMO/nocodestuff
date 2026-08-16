@@ -19,19 +19,19 @@ const ROOMS={
   turret:{name:'AUTO TURRET',icon:'⌖',base:3600,unlock:7,art:'assets/room-turret.webp',prod:{coins:12},desc:'A rebuilt sentry cannon protects the perimeter and earns security contracts from settlements under Afterlight protection.'}
 };
 const RESEARCH=[
-  {id:'tools',icon:'🔧',name:'KINETIC TOOLING',desc:'+18% manual damage per level',baseCost:8,baseSeconds:25,costGrowth:1.58,timeGrowth:1.3,effect:1.18},
-  {id:'solar',icon:'☀',name:'MICROGRID THEORY',desc:'+8% all passive production per level',baseCost:12,baseSeconds:35,costGrowth:1.6,timeGrowth:1.31,effect:1.08},
-  {id:'hydro',icon:'🌿',name:'HYDROPONIC YIELDS',desc:'+15% food production per level',baseCost:10,baseSeconds:30,costGrowth:1.57,timeGrowth:1.29,effect:1.15},
-  {id:'filters',icon:'💧',name:'MOLECULAR FILTRATION',desc:'+15% water production per level',baseCost:11,baseSeconds:32,costGrowth:1.57,timeGrowth:1.29,effect:1.15},
-  {id:'automation',icon:'🤖',name:'BUNKER AUTOMATION',desc:'+10% passive coin production per level',baseCost:16,baseSeconds:45,costGrowth:1.61,timeGrowth:1.32,effect:1.1},
-  {id:'walls',icon:'🧱',name:'THREAT ANALYSIS',desc:'+12% infected bounty per level',baseCost:14,baseSeconds:40,costGrowth:1.59,timeGrowth:1.31,effect:1.12}
+  {id:'tools',icon:'🔧',name:'KINETIC TOOLING',desc:'+18% manual damage per level',baseCost:8,scienceCost:2,baseSeconds:25,costGrowth:1.58,scienceGrowth:1.46,timeGrowth:1.3,effect:1.18},
+  {id:'solar',icon:'☀',name:'MICROGRID THEORY',desc:'+8% all passive production per level',baseCost:12,scienceCost:4,baseSeconds:35,costGrowth:1.6,scienceGrowth:1.48,timeGrowth:1.31,effect:1.08},
+  {id:'hydro',icon:'🌿',name:'HYDROPONIC YIELDS',desc:'+15% food production per level',baseCost:10,scienceCost:3,baseSeconds:30,costGrowth:1.57,scienceGrowth:1.46,timeGrowth:1.29,effect:1.15},
+  {id:'filters',icon:'💧',name:'MOLECULAR FILTRATION',desc:'+15% water production per level',baseCost:11,scienceCost:3,baseSeconds:32,costGrowth:1.57,scienceGrowth:1.46,timeGrowth:1.29,effect:1.15},
+  {id:'automation',icon:'🤖',name:'BUNKER AUTOMATION',desc:'+10% passive coin production per level',baseCost:16,scienceCost:6,baseSeconds:45,costGrowth:1.61,scienceGrowth:1.5,timeGrowth:1.32,effect:1.1},
+  {id:'walls',icon:'🧱',name:'THREAT ANALYSIS',desc:'+12% infected bounty per level',baseCost:14,scienceCost:5,baseSeconds:40,costGrowth:1.59,scienceGrowth:1.49,timeGrowth:1.31,effect:1.12}
 ];
 const EXPEDITIONS={
-  store:{id:'store',icon:'🏪',name:'ABANDONED STORE',seconds:60,unlock:1,coins:[75,140],scrap:[8,18],uranium:[1,1],uraniumChance:.2,specialistChance:.22},
-  blocks:{id:'blocks',icon:'🏚',name:'RUINED BLOCKS',seconds:180,unlock:2,coins:[180,350],scrap:[20,42],uranium:[1,1],uraniumChance:.35,specialistChance:.28},
-  clinic:{id:'clinic',icon:'🏥',name:'FIELD HOSPITAL',seconds:600,unlock:3,coins:[500,900],scrap:[55,100],uranium:[1,2],uraniumChance:.6,specialistChance:.36},
-  metro:{id:'metro',icon:'🚇',name:'UNDERGROUND METRO',seconds:1800,unlock:5,coins:[1500,2600],scrap:[140,260],uranium:[2,3],uraniumChance:.8,specialistChance:.44},
-  checkpoint:{id:'checkpoint',icon:'☣',name:'MILITARY CHECKPOINT',seconds:3600,unlock:7,coins:[4000,7000],scrap:[350,600],uranium:[4,6],uraniumChance:1,specialistChance:.55}
+  store:{id:'store',icon:'🏪',name:'ABANDONED STORE',seconds:60,unlock:1,coins:[75,140],scrap:[8,18],coinSeconds:[90,150],scrapSeconds:[50,90],supplySeconds:45,supplies:{food:5,water:5},uranium:[1,1],uraniumChance:.05,specialistChance:.22},
+  blocks:{id:'blocks',icon:'🏚',name:'RUINED BLOCKS',seconds:180,unlock:2,coins:[180,350],scrap:[20,42],coinSeconds:[240,420],scrapSeconds:[120,210],supplySeconds:90,supplies:{food:12,water:12},uranium:[1,1],uraniumChance:.12,specialistChance:.28},
+  clinic:{id:'clinic',icon:'🏥',name:'FIELD HOSPITAL',seconds:600,unlock:3,coins:[500,900],scrap:[55,100],coinSeconds:[720,1200],scrapSeconds:[360,600],supplySeconds:180,supplies:{food:30,water:40},uranium:[1,1],uraniumChance:.25,specialistChance:.36},
+  metro:{id:'metro',icon:'🚇',name:'UNDERGROUND METRO',seconds:1800,unlock:5,coins:[1500,2600],scrap:[140,260],coinSeconds:[1800,3000],scrapSeconds:[900,1500],supplySeconds:300,supplies:{food:90,water:120},uranium:[1,2],uraniumChance:.4,specialistChance:.44},
+  checkpoint:{id:'checkpoint',icon:'☣',name:'MILITARY CHECKPOINT',seconds:3600,unlock:7,coins:[4000,7000],scrap:[350,600],coinSeconds:[5400,9000],scrapSeconds:[2700,4500],supplySeconds:480,supplies:{food:200,water:250},uranium:[2,3],uraniumChance:.6,specialistChance:.55}
 };
 const SPECIALISTS=[
   {id:'maya',name:'MAYA REYES',role:'REACTOR ENGINEER',icon:'☢',unlocks:'NUCLEAR REACTOR'},
@@ -139,9 +139,9 @@ const CARE_PACKAGE=Object.freeze({
   coinSeconds:[35,65],
   scrapSeconds:[20,40],
   secondarySeconds:[18,36],
-  uraniumChance:.1,
+  uraniumChance:.04,
   uranium:[1,1],
-  dealerBoostChance:.04,
+  dealerBoostChance:.012,
   secondaryResources:['food','water','power','science']
 });
 const OFFLINE=Object.freeze({minimumAwayMs:60000,maximumAwayMs:43200000,baseEfficiency:.35,maximumEfficiency:.9});

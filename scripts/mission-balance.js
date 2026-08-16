@@ -16,13 +16,13 @@ if(chapters.size!==15||[...chapters.values()].some(group=>group.length!==10))fai
 const requiredMetrics=['kills','bunker','roomtotal','bosses','hordes','shots','researchtotal'];for(const metric of requiredMetrics)if(!operations.some(mission=>mission[2]===metric))fail(`missing ${metric} objectives`);
 if(!operations.some(mission=>mission[2].startsWith('rarity:')))fail('rarity hunt objectives are required');
 for(const mission of operations){if(!Number.isFinite(mission[3])||mission[3]<=0)fail(`${mission[0]} has an invalid target`);if(!Number.isFinite(mission[6])||mission[6]<10)fail(`${mission[0]} has an invalid unlock`)}
-const crystalRewards=missions.map(api.crystalReward);if(Math.max(...crystalRewards)!==6||Math.min(...crystalRewards)!==1)fail('mission crystals must stay between one and six');
-if(crystalRewards.reduce((sum,value)=>sum+value,0)>550)fail('the complete mission chain injects too many Uranium Crystals');
+const crystalRewards=missions.map(api.crystalReward);if(Math.max(...crystalRewards)!==3||Math.min(...crystalRewards)!==1)fail('mission crystals must stay between one and three');
+const totalCrystals=crystalRewards.reduce((sum,value)=>sum+value,0);if(totalCrystals<220||totalCrystals>300)fail(`the complete mission chain injects an unfair ${totalCrystals} Uranium Crystals`);
 const product=key=>operations.filter(mission=>mission[4]===key).reduce((value,mission)=>value*mission[5],1);
 if(product('prodMult')>1.46||product('zombieMult')>1.57||product('damageMult')>1.57||product('coinMult')>1.35||product('scienceMult')>1.46)fail('the 150-mission permanent bonus curve compounds too aggressively');
 if(product('costMult')<.92)fail('the mission chain makes room upgrades unfairly cheap');
 if(!operations.some(mission=>mission[4]==='coinCache')||!operations.some(mission=>mission[4]==='scrapCache'))fail('economy-scaled coin and scrap caches are required');
-const source=read('js/systems/missions.js');if(!/rate\/dealer/.test(source))fail('mission caches must exclude temporary Dealer multipliers');
+const source=read('js/systems/missions.js');if(!/useReserves:false,cache:false/.test(source)||!/rate\/dealer/.test(source))fail('mission caches must use sustainable production and exclude temporary Dealer multipliers');
 if(!/slice\(0,5\)/.test(source))fail('the expanded log must expose five active objectives');
 if(!/function claimAll\(\)/.test(source)||!/ST\.update\('missions-batch'/.test(source))fail('Claim All must award every ready mission in one save transaction');
 if(!/detail:\{batch:true,count:results\.length/.test(source))fail('Claim All must emit one consolidated reward event');

@@ -77,16 +77,16 @@ required=(
   'id="hordeSignal"'
   'data-tab="command"'
   'id="commandBadge"'
-  'js/core/config.js?build=23'
+  'js/core/config.js?build=24'
   'js/core/economy.js?build=2'
   'js/core/numbers.js?build=1'
-  'js/core/state.js?build=19'
+  'js/core/state.js?build=20'
   'js/systems/prestige.js?build=3'
-  'js/systems/operations.js?build=1'
+  'js/systems/operations.js?build=2'
   'js/systems/survivor-dialogue.js?build=1'
-  'js/core/game.js?build=21'
+  'js/core/game.js?build=22'
   'js/audio.js?build=13'
-  'js/systems/care-package.js?build=1'
+  'js/systems/care-package.js?build=2'
 )
 
 for marker in "${required[@]}"; do

@@ -21,8 +21,8 @@ function roomRateAt(k,q,level){if(!level)return 0;const mastery=roomMastery(leve
 function roomRate(k,q){return roomRateAt(k,q,S.rooms[k]||0)}
 function rawRoomRates(){const out={};for(const id in ROOMS){out[id]={coins:0,food:0,water:0,power:0,scrap:0,science:0};for(const q in out[id])out[id][q]=roomRate(id,q)}return out}
 function specialRates(){const raw=window.AfterlightSpecialRooms?.rates?.()||{},out={coins:0,food:0,water:0,power:0,scrap:0,science:0};for(const q in out)out[q]=(Number(raw[q])||0)*productionMultiplier(q);return out}
-function operationsSnapshot(){latestOperations=OPS.evaluate(rawRoomRates(),specialRates());latestOperations.rates.coins+=.1*productionMultiplier('coins');return latestOperations}
-function rates(){return operationsSnapshot().rates}
+function operationsSnapshot(options={}){const snapshot=OPS.evaluate(rawRoomRates(),specialRates(),options);snapshot.rates.coins+=.1*productionMultiplier('coins');if(options.cache!==false)latestOperations=snapshot;return snapshot}
+function rates(options={}){return operationsSnapshot(options).rates}
 function roomEffectiveRate(k,q,snapshot=latestOperations||operationsSnapshot()){return roomRate(k,q)*(snapshot.rooms[k]?.efficiency??1)}
 function resourceBreakdown(q){const snapshot=operationsSnapshot(),out=[];if(q==='coins')out.push({name:'BUNKER BASELINE',icon:'⌂',rate:.1*productionMultiplier(q)});for(const [id,room] of Object.entries(ROOMS)){const rate=roomEffectiveRate(id,q,snapshot);if(rate>0)out.push({name:room.name,icon:room.icon,rate})}for(const room of CFG.SPECIAL_ROOMS||[]){const lv=Number(S.specialRooms?.[room.id]||0),rate=(room.prod[q]||0)*lv*productionMultiplier(q);if(rate>0)out.push({name:room.name,icon:room.icon,rate})}const cost=Number(snapshot.consumption?.[q])||0;if(cost>0)out.push({name:'ROOM OPERATING LOAD',icon:'↘',rate:-cost});return out.sort((a,b)=>b.rate-a.rate)}
 function closeResourceStats(){document.getElementById('resourceStats')?.remove()}
