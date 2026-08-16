@@ -87,6 +87,7 @@ if(!/id='combatStreak'/.test(visuals)||!/afterlight:streak/.test(visuals)||!/@ke
 if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \+ 100%\)/.test(css))fail('spawn entrance must start beyond the right edge');
 if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow must remain disabled');
 if(!/@keyframes drifterDeathFrames/.test(css)||!/\.enemyDeathUnit\.horde \.enemyDeathSprite:nth-child\(3\)/.test(css))fail('The Drifter death frames must animate for both single encounters and three-member hordes');
+if(!/67%,100%\{aspect-ratio:700\/631;background-size:253\.5% auto;background-position:100% 11\.5%\}/.test(css))fail('the corpse frame must include the complete Drifter skull instead of clipping its left edge');
 if(!/\.enemyUnit:is\([^}]+\) \.enemySprite\{filter:[^}]+var\(--enemy-glow\)/.test(css))fail('rarity glow must follow each sprite alpha instead of its layout container');
 const survivorAsset=path.join(root,'assets','survivor-ranger.png');if(!fs.existsSync(survivorAsset))fail('missing approved survivor-ranger.png');
 const survivorBuffer=fs.readFileSync(survivorAsset);if(!survivorBuffer.subarray(1,4).equals(Buffer.from('PNG'))||survivorBuffer[25]!==6)fail('survivor-ranger.png must be a real RGBA PNG');
