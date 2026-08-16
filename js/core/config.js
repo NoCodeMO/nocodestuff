@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const ROOM_ECONOMY=Object.freeze({costGrowth:1.142,costScale:60,costScaleRamp:25,rateGrowth:1.07,masterySize:100,maximumBulk:500,maximumRoomLevel:5000,maximumValue:1e300,bunkerLevelEvery:4});
+const ROOM_ECONOMY=Object.freeze({costGrowth:1.142,costScale:125,costScaleRamp:25,rateGrowth:1.07,masterySize:100,maximumBulk:500,maximumRoomLevel:5000,maximumValue:1e300,bunkerLevelEvery:4});
 const ROOM_MILESTONES=Object.freeze([
   Object.freeze({level:5,multiplier:1.25,tier:'CALIBRATED'}),
   Object.freeze({level:10,multiplier:1.5,tier:'INDUSTRIAL'}),
@@ -66,7 +66,7 @@ const SURVIVOR_SKINS=[
   {id:'prestige-5',order:8,name:'DR. ELARA SABLE',callsign:'LAST LIGHT',tier:'LEGENDARY · PRESTIGE V',rarity:'legendary',accent:'#dfb744',asset:'assets/survivor-prestige-elara.webp',muzzleAnchor:{x:68.2,y:15.3},description:'A legendary field scientist in a white armored coat who carries a steel revolver and the final archive key.',unlock:{type:'prestige',level:5},perk:{type:'prestige',id:'last-light',label:'-25% RESEARCH COST & TIME · +50% CRITS',description:'Research costs and timers drop by 25%; critical-hit damage is multiplied by a further 1.50 while Elara is deployed.'}}
 ];
 const PRESTIGE=Object.freeze({
-  maximumLevel:5,targets:Object.freeze([100,200,325,525,850]),targetFormula:Object.freeze({first:100,second:200,growth:1.62,roundTo:25}),economyPerLevel:1.5,damagePerLevel:1.25,rosterBonusPerLevel:.05,extraCorePercent:.1,extraCoreMinimum:25,maximumCoreReward:3,roomMaximumLevel:3,roomCosts:Object.freeze([1,2,3]),
+  maximumLevel:5,targets:Object.freeze([100,200,325,525,850]),targetFormula:Object.freeze({first:100,second:200,growth:1.62,roundTo:25}),economyPerLevel:1.65,damagePerLevel:1.25,rosterBonusPerLevel:.05,extraCorePercent:.1,extraCoreMinimum:25,maximumCoreReward:3,roomMaximumLevel:3,roomCosts:Object.freeze([1,2,3]),
   levels:Object.freeze([
     Object.freeze({level:1,title:'ASH PROTOCOL',survivor:'prestige-1',room:'legacy-vault',accent:'#4f9ee8'}),
     Object.freeze({level:2,title:'IRON PROTOCOL',survivor:'prestige-2',room:'automation-bay',accent:'#4f9ee8'}),
@@ -103,6 +103,7 @@ const SURVIVOR_DIALOGUE=Object.freeze({
   })
 });
 const COMMAND_MESSAGES=[
+  {id:'operations-network-release',type:'UPDATE',date:'AUG 16 · OPERATIONS',title:'BUNKER OPERATIONS ONLINE',body:'Rooms now draw Power, Water, Food, Scrap, Science and Workforce from one shared network. Protect essential systems, keep five-minute reserves and open any warning room for an exact recovery order.'},
   {id:'command-center-launch',type:'UPDATE',date:'AUG 15 · BUILD 277',title:'COMMAND CENTER ONLINE',body:'The old Stats terminal has been rebuilt. Guides, statistics, settings, local Commander profiles and official Afterlight transmissions now share one secure hub.'},
   {id:'room-intelligence-release',type:'UPDATE',date:'AUG 15 · ROOM SYSTEMS',title:'ROOM INTELLIGENCE DEPLOYED',body:'Every normal bunker room now has unique art, live output intelligence, level milestones and exact x1, x10 and MAX upgrade quotes.'},
   {id:'founder-supply-cache',type:'EVENT',date:'FOUNDING SIGNAL · ONE-TIME',title:'AFTERLIGHT FOUNDERS CACHE',body:'Command recovered a sealed launch cache for every active bunker. Claim it once; the coin portion scales with your current bunker economy.',reward:{minimumCoins:500,coinHours:.2,scrap:50,uranium:2}}
@@ -144,5 +145,22 @@ const CARE_PACKAGE=Object.freeze({
   secondaryResources:['food','water','power','science']
 });
 const OFFLINE=Object.freeze({minimumAwayMs:60000,maximumAwayMs:43200000,baseEfficiency:.35,maximumEfficiency:.9});
-window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,SURVIVOR_SKINS,PRESTIGE,SURVIVOR_DIALOGUE,COMMAND_MESSAGES,ENEMIES,COMBAT,CARE_PACKAGE,OFFLINE});
+const OPERATIONS=Object.freeze({
+  reserveSeconds:300,warningEfficiency:.9,criticalEfficiency:.5,workforceBase:1.25,workforcePerLoad:1.4,
+  priorities:Object.freeze({essential:3,normal:2,low:1}),
+  defaultPriority:Object.freeze({generator:'essential',purifier:'essential',greenhouse:'essential',living:'essential',workshop:'normal',lab:'normal',turret:'normal',storage:'low'}),
+  recoveryFloor:Object.freeze({purifier:.35,greenhouse:.3,living:.25}),
+  roomNeeds:Object.freeze({
+    generator:Object.freeze({}),
+    workshop:Object.freeze({power:.32,workforce:.32}),
+    greenhouse:Object.freeze({power:.25,water:.18}),
+    purifier:Object.freeze({power:.22}),
+    lab:Object.freeze({power:.4,water:.22,workforce:.38}),
+    living:Object.freeze({power:.26,water:.16,food:.22}),
+    storage:Object.freeze({power:.2,science:.008,workforce:.24}),
+    turret:Object.freeze({power:.3,scrap:.018,science:.012,workforce:.26})
+  }),
+  recommendations:Object.freeze({power:'Upgrade the Power Generator or lower another room priority.',water:'Upgrade the Water Purifier or protect its priority.',food:'Upgrade the Greenhouse before expanding survivor capacity.',workforce:'Upgrade Living Quarters or lower a non-essential room priority.',scrap:'Keep a Scrap reserve or upgrade the Workshop before running defenses.',science:'Upgrade the Research Lab or pause an advanced room until Science recovers.'})
+});
+window.AfterlightConfig=Object.freeze({ROOMS,ROOM_ECONOMY,ROOM_MILESTONES,RESEARCH,EXPEDITIONS,SPECIALISTS,SPECIAL_ROOMS,MERCHANT_OFFERS,SURVIVOR_SKINS,PRESTIGE,SURVIVOR_DIALOGUE,COMMAND_MESSAGES,ENEMIES,COMBAT,CARE_PACKAGE,OFFLINE,OPERATIONS});
 })();

@@ -6,7 +6,7 @@ const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const ids=['generator','workshop','greenhouse','purifier','lab','living','storage','turret'];
 assert(JSON.stringify(Object.keys(rooms))===JSON.stringify(ids),'Normal room table must contain the eight intended rooms in display order');
 for(const id of ids){const room=rooms[id],asset=path.join(root,room.art);assert(room.desc.length>=80,`${id} needs a useful room description`);assert(fs.existsSync(asset),`${id} room artwork is missing`);const image=fs.readFileSync(asset);assert(image.length>=90000&&image.length<=300000,`${id} artwork must be optimized but high quality`);assert(image.subarray(0,4).toString()==='RIFF'&&image.subarray(8,12).toString()==='WEBP',`${id} artwork must be WebP`)}
-assert(economy.costGrowth===1.142&&economy.rateGrowth===1.07&&economy.costScale===60,'Recalibrated room cost and production curves must remain stable');
+assert(economy.costGrowth===1.142&&economy.rateGrowth===1.07&&economy.costScale===125,'Recalibrated room cost and production curves must remain stable');
 assert(economy.masterySize===100&&economy.maximumRoomLevel===5000,'Rooms need future-ready 100-level Mastery ranks');
 assert(economy.bunkerLevelEvery===4,'Every four combined room levels must grant exactly one Bunker Level');
 assert(JSON.stringify(milestones.map(item=>[item.level,item.multiplier]))===JSON.stringify([[5,1.25],[10,1.5],[25,2],[50,3],[75,4],[100,5]]),'Room milestones must follow the repeating 5/10/25/50/75/100 curve');

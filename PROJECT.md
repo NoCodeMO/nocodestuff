@@ -36,6 +36,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/care-package.js` - persisted 90–150 second supply-drop scheduler, fall/landing lifecycle, five-second claims, economy-scaled loot and rare free Dealer activations.
 - `js/systems/survivor-dialogue.js` - survivor-specific idle, kill, streak, horde and Brute barks with contextual selection, typewriter timing and a single spam-safe scene bubble.
 - `js/systems/prestige.js` - five-cycle reset transaction, permanent multipliers, Prestige Cores, five Prestige Rooms, Cycle Contracts, Automation/Archive configuration and survivor reveal presentation.
+- `js/systems/operations.js` - strategic normal-room supply allocation, five-minute reserves, Workforce capacity, priorities, pausing, efficiency states and exact recovery guidance.
 
 ### Presentation/platform
 - `js/ui/visuals.js` - configured survivor switching, enemy visuals, per-skin sprite-relative rifle flash, recoil/hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
@@ -57,6 +58,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/survivor-roster-check.js` - starter/Architect/Prestige roster integrity, transparent assets, save migration, selection events and shared recoil/muzzle guardrails.
 - `scripts/survivor-dialogue-check.js` - all eight survivor voices, contextual pools/odds, typewriter events, responsive bubble CSS, reduced-motion behavior and gesture-safe retro voice bleeps.
 - `scripts/economy-rebalance-check.js` - deterministic fresh-cycle simulator, Prestige pacing envelope, Mastery curve, mission caps, Dealer exclusivity and destructive-reset guardrails.
+- `scripts/operations-balance-check.js` - Power/Water/Food/Scrap/Science/Workforce allocation, reserve drain, priority order, pause/resume and underperformance UI guardrails.
 - `scripts/prestige-balance-check.js` - all five targets, survivors, active/permanent perk math, capped Core curve, reset boundaries, room costs and cross-system multiplier wiring.
 - `scripts/prestige-probe.html` - real-browser schema-15 migration plus transactional Prestige I–V reset, preservation, recovery backup, unlock, art, muzzle-anchor and multiplier probe.
 - `scripts/architect-probe.html` - real-browser Level 100 save migration, permanent unlock, exact x1.5 production multiplier, roster selection and rifle-anchor probe.
@@ -75,26 +77,27 @@ The order in `index.html` is intentional:
 3. numbers
 4. state
 5. prestige
-6. expeditions
-7. special rooms
-8. research
-9. merchant
-10. command center
-11. visuals
-12. survivor dialogue
-13. game
-14. Infected Codex
-15. offline earnings
-16. missions
-17. care package
-18. audio
-19. platform
+6. room operations
+7. expeditions
+8. special rooms
+9. research
+10. merchant
+11. command center
+12. visuals
+13. survivor dialogue
+14. game
+15. Infected Codex
+16. offline earnings
+17. missions
+18. care package
+19. audio
+20. platform
 
-Do not casually reorder these. Prestige loads before every economy consumer so research, expeditions and the first game tick share its multipliers. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
+Do not casually reorder these. Prestige loads before every economy consumer so research, expeditions and the first game tick share its multipliers. Room operations loads before game because `AfterlightGame.rates()` is the authoritative net-production calculation. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 17`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 18`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -105,6 +108,7 @@ resources: coins, total, food, water, power, scrap, science, uranium
 progress: kills, bunker, rooms, research, stats (including discovered infected, rarity kills, criticals, best streak, hordes, Brute Cores and Uranium earned/spent)
 researchRuntime: { active, ready }
 missions: { claimed, bonuses, balanceVersion }
+operations: { priorities: { [roomId]: essential|normal|low }, paused: { [roomId]: boolean } }
 expeditions: { active, survivors, pending }
 specialRooms: { [roomId]: level }
 prestige: { level, cores, totalResets, bestBunker, lastAt, lastReward, rooms, automation, archive, run }
@@ -116,7 +120,7 @@ command: { read, claimed, lastTab, account: { loggedIn, name, createdAt } }
 settings: { music, uiSfx, reducedEffects }
 ```
 
-`AfterlightState.resetAll('RESET')` is the only full-account deletion path. It removes only Afterlight-owned local keys and then reloads into a clean schema-17 save. The Command Center protects it with an exact `RESET` phrase plus a three-second hold; never add an unguarded reset shortcut.
+`AfterlightState.resetAll('RESET')` is the only full-account deletion path. It removes only Afterlight-owned local keys and then reloads into a clean schema-18 save. The Command Center protects it with an exact `RESET` phrase plus a three-second hold; never add an unguarded reset shortcut.
 
 `state.js` automatically imports legacy data from:
 - `afterlight_missions_v1`
@@ -133,6 +137,7 @@ Do not create another persistent gameplay store unless there is a strong reason.
 - `window.AfterlightNumbers`
 - `window.AfterlightState`
 - `window.AfterlightPrestige`
+- `window.AfterlightOperations`
 - `window.AfterlightGame`
 - `window.AfterlightMissions`
 - `window.AfterlightExpeditions`
@@ -205,11 +210,13 @@ Mission bonuses are consumed by the core economy. Current supported bonus keys:
 
 Special-room production is returned by `AfterlightSpecialRooms.rates()` and integrated into the core economy. Do not add another production interval that writes resources independently.
 
+Every built normal room participates in the operations network. The Generator is self-starting; the Purifier, Greenhouse and Living Quarters retain a small emergency recovery floor so a bad allocation cannot permanently soft-lock a run. Other rooms need configured combinations of Power, Water, Food, Scrap, Science and virtual Workforce. Living Quarters plus one starting survivor provide Workforce; Power/Water/Food/Scrap/Science use current production plus at most one five-minute stock reserve. When demand exceeds supply, Essential rooms receive resources before Normal and Low rooms. A paused room produces nothing and releases its load. Efficiency below 90% creates a visible room-card alert, while the room screen shows exact required/supplied rates, the bottleneck and a direct upgrade or priority recommendation.
+
 Enemy encounters use one weighted table with an exact 100% total: Common 55%, Uncommon 25%, Rare 12%, Epic 5%, Legendary 2% and Brute 1%. Every non-Brute encounter has a 12% base horde chance, with a persisted pity counter guaranteeing a horde by the eighth eligible encounter. Brutes can never become hordes and neither advance nor reset that counter. A horde contains exactly three infected and grants exactly x3 HP, coins, scrap and kill credit compared with that same single infected.
 
 The first actual spawn of each configured enemy is persisted through `stats.discovered`; old saves automatically unlock entries backed by existing rarity kills. Clicking the enemy status card opens the Infected Codex. Locked entries remain silhouettes while discovered entries show the shared configured sprite, base chance, lifetime kills, HP multiplier, Coin multiplier, Scrap multiplier and encounter notes.
 
-Prestige has five deliberate reset targets: Bunker Levels 100, 200, 325, 525 and 850. The first two are explicit and later targets follow the shared rounded ×1.62 curve so future levels can extend it without hand-written jumps. Each reset grants exactly one permanent survivor, ×1.5 all production and ×1.25 manual damage per Prestige level, plus +5% all production for each unlocked Prestige survivor. A reset at the exact target gives one Prestige Core; additional Cores require another 10% of that cycle's target per Core (rounded to 25 and capped at three). The transaction writes one recovery snapshot to `afterlight_prestige_backup_v1`, then resets current-cycle resources, normal/specialist rooms, run kills and unarchived research. It preserves Uranium, lifetime totals, missions/bonuses, specialists/active expeditions, Dealer boosts, discoveries, unlocked survivors, Prestige Cores and Prestige Rooms. Active research and pending offline income are intentionally cleared to prevent cross-cycle duplication.
+Prestige has five deliberate reset targets: Bunker Levels 100, 200, 325, 525 and 850. The first two are explicit and later targets follow the shared rounded ×1.62 curve so future levels can extend it without hand-written jumps. Each reset grants exactly one permanent survivor, ×1.65 all production and ×1.25 manual damage per Prestige level, plus +5% all production for each unlocked Prestige survivor. The larger production legacy deliberately compensates the much longer late-cycle room curve without making the first cycle faster. A reset at the exact target gives one Prestige Core; additional Cores require another 10% of that cycle's target per Core (rounded to 25 and capped at three). The transaction writes one recovery snapshot to `afterlight_prestige_backup_v1`, then resets current-cycle resources, normal/specialist rooms, run kills and unarchived research. It preserves Uranium, lifetime totals, missions/bonuses, specialists/active expeditions, Dealer boosts, discoveries, unlocked survivors, Prestige Cores and Prestige Rooms. Active research and pending offline income are intentionally cleared to prevent cross-cycle duplication.
 
 Prestige Rooms are permanent and capped at Level 3 with exact Core costs of 1, 2 and 3: Legacy Vault retains 8% Scrap per level on the next reset; Automation Bay provides one four-second normal-room auto-upgrade target per level; Command Relay adds 10% expedition speed and loot per level; War Room adds 8% damage and infected loot per level; Archive Core preserves one selected completed research project per level. Five scaled Cycle Contracts become active after Prestige I and award one claim-once bonus Core each cycle.
 
@@ -223,9 +230,9 @@ Dealer boosts activate immediately and use persisted wall-clock deadlines. The �
 
 Care packages arrive on a persisted randomized 90–150 second schedule while the game is visible. Their five-second claim window starts only after the 1.35-second parachute landing. Every claimed cache gives Coins, Scrap and one survival resource scaled from permanent production with early-game floors; temporary Dealer multipliers are divided out before reward calculation. Uranium is capped to a 10% one-crystal roll and a random free five-minute Dealer contract is a rare 4% jackpot (about 1.2 expected jackpots per perfect-attention hour). Free contracts use the shared Dealer channel rules, activate immediately and never spend Uranium. Missed drops simply schedule the next encounter.
 
-Normal rooms use a smooth 1.142 price curve whose scale ramps from ×1 to ×60 across the opening levels, while output grows at 1.07 per level. Every block of 100 room levels is one Mastery Rank: local levels 5, 10, 25, 50, 75 and 100 award x1.25, x1.5, x2, x3, x4 and x5 room multipliers, then the sequence repeats without an output drop at the next rank. This makes all 100 levels meaningful and lets established saves continue through the explicit Level 5000 ceiling. Bulk x10 costs are the exact sum of sequential upgrades; MAX buys at most 500 levels and only those the current Coin balance can fully fund. Every quote is validated again inside the state transaction, invalid/overflowed prices are rejected and all resources use a finite 1e300 ceiling.
+Normal rooms use a smooth 1.142 price curve whose scale ramps from ×1 to ×125 across the opening levels, while output grows at 1.07 per level. The higher scale is what moves Prestige I from a short session into roughly a full passive day. Every block of 100 room levels is one Mastery Rank: local levels 5, 10, 25, 50, 75 and 100 award x1.25, x1.5, x2, x3, x4 and x5 room multipliers, then the sequence repeats without an output drop at the next rank. This makes all 100 levels meaningful and lets established saves continue through the explicit Level 5000 ceiling. Bulk x10 costs are the exact sum of sequential upgrades; MAX buys at most 500 levels and only those the current Coin balance can fully fund. Every quote is validated again inside the state transaction, invalid/overflowed prices are rejected and all resources use a finite 1e300 ceiling.
 
-The deterministic passive simulator is a pacing guardrail, not a promise about every play style. With no combat, mission caches, care packages, offline claims or temporary Dealer boosts, its current fresh-cycle baselines are approximately 7.5h to Prestige I, 24.5h to Prestige II, 25.5h to Prestige III, 35.9h to Prestige IV and 59h to Prestige V. Active play may shorten those cycles, while future economy changes must keep the first cycle inside hours and later cycles inside the intended one-to-three-day range unless deliberately redesigned.
+The deterministic passive simulator is a pacing guardrail, not a promise about every play style. It runs the same room operating-cost network with empty reserves. With no combat, mission caches, care packages, offline claims or temporary Dealer boosts, its current fresh-cycle baselines are approximately 25.2h to Prestige I, 76.3h to Prestige II, 72.1h to Prestige III, 92.4h to Prestige IV and 138.4h to Prestige V. Active play and well-managed reserves shorten those cycles, while careless room allocation lengthens them. Future economy changes must keep the opening cycle near one passive day, the middle cycles near one to four days and the high fifth cycle below one week unless deliberately redesigned.
 
 Every four combined normal-room levels grant one Bunker Level. The Base screen exposes this exact 0–4 progression in a live accessible bar, driven by the same shared `bunkerLevelEvery` economy constant used by save normalization and core recalculation.
 

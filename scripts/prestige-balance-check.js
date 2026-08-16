@@ -11,8 +11,8 @@ assert(p.rooms.length===5&&new Set(p.rooms.map(item=>item.id)).size===5,'each le
 assert(p.rooms.every((entry,index)=>entry.level===index+1&&p.levels[index].room===entry.id),'room unlocks must follow the five-level loop');
 assert(p.roomMaximumLevel===3&&JSON.stringify([...p.roomCosts])===JSON.stringify([1,2,3]),'Prestige Room choices need a bounded 1/2/3 Core curve');
 const economy=level=>Math.pow(p.economyPerLevel,level)*(1+level*p.rosterBonusPerLevel),damage=level=>Math.pow(p.damagePerLevel,level);
-assert(Math.abs(economy(1)-1.575)<1e-12,'Prestige I must combine ×1.5 economy with the +5% roster legacy');
-assert(economy(5)>9&&economy(5)<10,'Prestige V economy should be powerful without reaching ×10');
+assert(Math.abs(economy(1)-1.7325)<1e-12,'Prestige I must combine ×1.65 economy with the +5% roster legacy');
+assert(economy(5)>15&&economy(5)<16,'Prestige V economy must compensate the much longer high-cycle room curve without exceeding ×16');
 assert(damage(5)>3&&damage(5)<3.1,'Prestige V permanent manual damage must remain near ×3');
 const requiredRoomLevels=p.targets.map(target=>(target-1)*cfg.ROOM_ECONOMY.bunkerLevelEvery);
 assert(requiredRoomLevels[0]===396&&requiredRoomLevels[4]===3396,'Bunker target conversion changed');
@@ -28,7 +28,7 @@ assert(byId('prestige-5')?.id==='last-light'&&/25%/.test(byId('prestige-5').labe
 const source=read('js/systems/prestige.js'),state=read('js/core/state.js'),game=read('js/core/game.js'),research=read('js/systems/research.js'),expeditions=read('js/systems/expeditions.js'),special=read('js/systems/special-rooms.js'),command=read('js/systems/command-center.js'),audio=read('js/audio.js'),css=read('app.css'),html=read('index.html');
 for(const [pattern,message] of [[/BACKUP_KEY='afterlight_prestige_backup_v1'/,'reset needs a recovery backup'],[/function performReset\(\)/,'transactional reset path is missing'],[/if\(!eligible\(\)\)return false/,'reset must reject ineligible players'],[/state\.coins=0;state\.food=0;state\.water=0;state\.power=0/,'cycle resources must reset together'],[/state\.survivorSkins\.unlocked=\[\.\.\.new Set/,'new survivor unlock must persist'],[/state\.command\.lastTab='prestige'/,'the new cycle should return to its Prestige dashboard'],[/state\.offline\.pending=null/,'unclaimed pre-reset offline income must not leak into the new cycle'],[/state\.researchRuntime\.active=null;state\.researchRuntime\.ready=null/,'active research must reset without leaving stale module references'],[/HOLD TO RESTART · 1\.5 SECONDS/,'destructive reset needs a deliberate hold'],[/state\.prestige\.cores-=cost/,'Prestige Room purchases must spend Cores'],[/contractClaimed=true/,'Cycle Contract reward must be claim-once'],[/setInterval\(\(\)=>\{if\(!data\(\)\.automation\.enabled/,'Automation Bay runtime is missing']])assert(pattern.test(source),message);
 const resetBody=source.slice(source.indexOf('function performReset()'),source.indexOf('function upgradeRoom(id)'));assert(!/state\.uranium\s*=/.test(resetBody),'Uranium Crystals must survive Prestige');assert(!/state\.missions\s*=/.test(resetBody),'Mission completion and permanent mission bonuses must survive Prestige');assert(!/state\.expeditions\s*=/.test(resetBody),'active expeditions and specialists must survive Prestige');assert(!/state\.merchant\s*=/.test(resetBody),'active Dealer boosts must survive Prestige');
-assert(/schema:17/.test(state)&&/prestige:\{level:0,cores:0/.test(state),'save schema 17 must safely initialize Prestige state');
+assert(/schema:18/.test(state)&&/prestige:\{level:0,cores:0/.test(state),'save schema 18 must safely initialize Prestige state');
 assert(/prestigeUnlocks=.*unlock\?\.type==='prestige'/.test(state),'old saves must unlock eligible Prestige survivors');
 assert(/AfterlightPrestige\?\.resourceMultiplier/.test(game)&&/AfterlightPrestige\?\.damageMultiplier/.test(game)&&/AfterlightPrestige\?\.zombieMultiplier/.test(game),'core economy and combat need centralized Prestige multipliers');
 assert(/researchCostMultiplier/.test(research)&&/researchTimeMultiplier/.test(research),'Elara must affect actual research cost and time');
@@ -37,6 +37,6 @@ assert(/roomCostMultiplier/.test(special),'Knox must also reduce specialist room
 assert(/tabButton\('prestige','✦','PRESTIGE'\)/.test(command)&&/AfterlightPrestige\?\.panel/.test(command),'Command Center needs the complete Prestige panel');
 assert(/afterlight:prestige-complete',prestigeSound/.test(audio),'Prestige completion needs its dedicated fanfare');
 for(const selector of ['.prestigePanel','.prestigeAscend','.prestigeRoomGrid','.cycleContracts','.prestigeConfirm','.prestigeReveal'])assert(css.includes(selector),`missing Prestige styling: ${selector}`);
-for(const marker of ['js/systems/prestige.js?build=2','app.css?build=32','js/core/state.js?build=18','js/core/game.js?build=20'])assert(html.includes(marker),`cache marker missing: ${marker}`);
+for(const marker of ['js/systems/prestige.js?build=3','app.css?build=33','js/core/state.js?build=19','js/systems/operations.js?build=1','js/core/game.js?build=21'])assert(html.includes(marker),`cache marker missing: ${marker}`);
 assert(fs.existsSync(path.join(root,'scripts','prestige-probe.html'))&&/data-prestige-probe="passed"/.test(read('scripts/smoke.sh')),'real-browser transactional reset probe is missing');
 console.log(`Afterlight Prestige balance passed: five cycles, ${skins.length} survivors, ${p.rooms.length} rooms, capped Cores and ×${economy(5).toFixed(2)} Prestige-V economy.`);
