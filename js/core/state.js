@@ -2,7 +2,10 @@
 const CFG=window.AfterlightConfig;if(!CFG)throw new Error('AfterlightConfig must load before state.js');
 const ECON=window.AfterlightEconomy;if(!ECON)throw new Error('AfterlightEconomy must load before state.js');
 const KEY='afterlight_v4';
+let resetInProgress=false,saveTimer=0;
 const parse=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}};
+const isOwnedKey=key=>/^afterlight/i.test(String(key||''));
+function clearOwnedStorage(storage){let removed=0;try{for(let index=storage.length-1;index>=0;index--){const key=storage.key(index);if(isOwnedKey(key)){storage.removeItem(key);removed++}}}catch{}return removed}
 const defaults=()=>({
   schema:19,coins:0,total:0,food:25,water:25,power:0,scrap:0,science:0,uranium:0,kills:0,level:1,bunker:1,
   rooms:{generator:1,workshop:0,greenhouse:0,purifier:0,lab:0,living:0,storage:0,turret:0},
@@ -45,12 +48,13 @@ function normalize(){
   state.command={...base.command,...(state.command||{}),account:{...base.command.account,...(state.command?.account||{})}};state.command.read=Array.isArray(state.command.read)?state.command.read:[];state.command.claimed=Array.isArray(state.command.claimed)?state.command.claimed:[];state.settings={...base.settings,...(state.settings||{})};
   for(const k of ['coins','total','food','water','power','scrap','science','uranium','kills'])state[k]=ECON.sanitizeResource(state[k]);
 }
-function save(){normalize();state.last=Date.now();localStorage.setItem(KEY,JSON.stringify(state))}
+function save(){if(resetInProgress)return false;normalize();state.last=Date.now();localStorage.setItem(KEY,JSON.stringify(state));return true}
 function notify(reason='state'){window.dispatchEvent(new CustomEvent('afterlight:state',{detail:{reason}}))}
 function update(reason,fn,{saveNow=true,notifyNow=true}={}){if(typeof fn==='function')fn(state);normalize();if(saveNow)save();if(notifyNow)notify(reason);return state}
 function bonus(name){const v=Number(state.missions?.bonuses?.[name]);return Number.isFinite(v)&&v>0?v:1}
-function resetAll(token){if(token!=='RESET')return false;for(const key of [KEY,'afterlight_prestige_backup_v1','afterlight_missions_v1','afterlight_expedition_runtime_v1','afterlight_special_rooms_v1','afterlight_music'])localStorage.removeItem(key);location.reload();return true}
+function saveWhenHidden(){if(document.hidden)save()}
+function resetAll(token){if(token!=='RESET'||resetInProgress)return false;resetInProgress=true;clearInterval(saveTimer);window.removeEventListener('pagehide',save);document.removeEventListener('visibilitychange',saveWhenHidden);clearOwnedStorage(localStorage);if(typeof sessionStorage!=='undefined')clearOwnedStorage(sessionStorage);const clean=new URL(location.href);clean.search='';clean.hash='';clean.searchParams.set('reset',String(Date.now()));location.replace(clean.href);return true}
 normalize();
-window.AfterlightState={KEY,get:()=>state,save,update,notify,bonus,resetAll,loadedAt,previousLast,offlineElapsedMs,snapshot:()=>JSON.parse(JSON.stringify(state))};
-save();setInterval(save,4000);window.addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+window.AfterlightState={KEY,get:()=>state,save,update,notify,bonus,resetAll,isResetting:()=>resetInProgress,loadedAt,previousLast,offlineElapsedMs,snapshot:()=>JSON.parse(JSON.stringify(state))};
+save();saveTimer=setInterval(save,4000);window.addEventListener('pagehide',save);document.addEventListener('visibilitychange',saveWhenHidden);
 })();

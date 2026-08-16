@@ -6,6 +6,7 @@ DOM_FILE="${TMPDIR:-/tmp}/afterlight-dom.html"
 LANDSCAPE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-landscape-dom.html"
 ARCHITECT_DOM_FILE="${TMPDIR:-/tmp}/afterlight-architect-dom.html"
 PRESTIGE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-prestige-dom.html"
+RESET_DOM_FILE="${TMPDIR:-/tmp}/afterlight-account-reset-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/afterlight-chrome.log"
 
 python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/afterlight-server.log" 2>&1 &
@@ -27,6 +28,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,500 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/landscape-probe.html" >"$LANDSCAPE_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,700 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/architect-probe.html" >"$ARCHITECT_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/prestige-probe.html" >"$PRESTIGE_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/account-reset-probe.html" >"$RESET_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Afterlight Bunker</title>'
@@ -80,9 +82,10 @@ required=(
   'js/core/config.js?build=24'
   'js/core/economy.js?build=2'
   'js/core/numbers.js?build=1'
-  'js/core/state.js?build=20'
+  'js/core/state.js?build=21'
   'js/systems/prestige.js?build=3'
   'js/systems/operations.js?build=2'
+  'js/systems/command-center.js?build=6'
   'js/systems/survivor-dialogue.js?build=1'
   'js/core/game.js?build=22'
   'js/audio.js?build=13'
@@ -122,4 +125,12 @@ if ! grep -Fq 'data-prestige-probe="passed"' "$PRESTIGE_DOM_FILE"; then
   exit 1
 fi
 
-echo "Afterlight browser smoke test passed: core game, landscape deck, Level 100 Architect and transactional Prestige I reset rendered correctly."
+if ! grep -Fq 'data-account-reset-probe="passed"' "$RESET_DOM_FILE"; then
+  echo "Account reset browser smoke test failed."
+  grep -F 'AFTERLIGHT_ACCOUNT_RESET_' "$RESET_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+echo "Afterlight browser smoke test passed: core game, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."

@@ -58,6 +58,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/survivor-roster-check.js` - starter/Architect/Prestige roster integrity, transparent assets, save migration, selection events and shared recoil/muzzle guardrails.
 - `scripts/survivor-dialogue-check.js` - all eight survivor voices, contextual pools/odds, typewriter events, responsive bubble CSS, reduced-motion behavior and gesture-safe retro voice bleeps.
 - `scripts/economy-rebalance-check.js` - deterministic fresh-cycle simulator, Prestige pacing envelope, Mastery curve, mission caps, Dealer exclusivity and destructive-reset guardrails.
+- `scripts/account-reset-check.js` and `scripts/account-reset-probe.html` - executable storage isolation plus a real delete/pagehide/reload regression probe that prevents deleted progress from being resurrected by autosave.
 - `scripts/operations-balance-check.js` - Power/Water/Food/Scrap/Science/Workforce allocation, reserve drain, priority order, pause/resume and underperformance UI guardrails.
 - `scripts/cross-system-balance-check.js` - executable dual-cost Research, ration-funded Expedition, Dealer-free reward, sustainable offline and attention-reward math.
 - `scripts/prestige-balance-check.js` - all five targets, survivors, active/permanent perk math, capped Core curve, reset boundaries, room costs and cross-system multiplier wiring.
@@ -121,7 +122,7 @@ command: { read, claimed, lastTab, account: { loggedIn, name, createdAt } }
 settings: { music, uiSfx, reducedEffects }
 ```
 
-`AfterlightState.resetAll('RESET')` is the only full-account deletion path. It removes only Afterlight-owned local keys and then reloads into a clean schema-19 save. The Command Center protects it with an exact `RESET` phrase plus a three-second hold; never add an unguarded reset shortcut. New accounts and migrated pre-schema-19 saves receive 25 Food and 25 Water so the first short Expedition can be learned without a resource soft-lock.
+`AfterlightState.resetAll('RESET')` is the only full-account deletion path. It first locks and stops autosave, unregisters page-hide/visibility saves, removes every `afterlight*` key from local and session storage, then uses a cache-busted replacement navigation to create a clean schema-19 save. This order is critical: deleting storage before guarding `pagehide` lets the departing page write the old account back. The reset intentionally leaves unrelated same-origin data and the browser cache untouched; cache files do not contain game progress. The Command Center protects it with an exact `RESET` phrase plus a touch-stable three-second pointer-captured hold; never add an unguarded reset shortcut. New accounts and migrated pre-schema-19 saves receive 25 Food and 25 Water so the first short Expedition can be learned without a resource soft-lock.
 
 `state.js` automatically imports legacy data from:
 - `afterlight_missions_v1`
