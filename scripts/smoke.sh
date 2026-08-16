@@ -7,6 +7,7 @@ LANDSCAPE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-landscape-dom.html"
 ARCHITECT_DOM_FILE="${TMPDIR:-/tmp}/afterlight-architect-dom.html"
 PRESTIGE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-prestige-dom.html"
 RESET_DOM_FILE="${TMPDIR:-/tmp}/afterlight-account-reset-dom.html"
+DEATH_DOM_FILE="${TMPDIR:-/tmp}/afterlight-drifter-death-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/afterlight-chrome.log"
 
 python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/afterlight-server.log" 2>&1 &
@@ -29,6 +30,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,700 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/architect-probe.html" >"$ARCHITECT_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/prestige-probe.html" >"$PRESTIGE_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=8000 --dump-dom "http://127.0.0.1:${PORT}/scripts/account-reset-probe.html" >"$RESET_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/death-animation-probe.html" >"$DEATH_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Afterlight Bunker</title>'
@@ -45,6 +47,7 @@ required=(
   'data-enemy-count='
   'assets/combat-clouds.webp'
   'assets/combat-bunker-clean.webp'
+  'assets/enemy-common-drifter-death.png'
   'POWER GENERATOR'
   'id="missionBox"'
   'data-mission-count="200"'
@@ -79,7 +82,7 @@ required=(
   'id="hordeSignal"'
   'data-tab="command"'
   'id="commandBadge"'
-  'js/core/config.js?build=24'
+  'js/core/config.js?build=25'
   'js/core/economy.js?build=2'
   'js/core/numbers.js?build=1'
   'js/core/state.js?build=21'
@@ -87,7 +90,7 @@ required=(
   'js/systems/operations.js?build=2'
   'js/systems/command-center.js?build=6'
   'js/systems/survivor-dialogue.js?build=1'
-  'js/core/game.js?build=22'
+  'js/core/game.js?build=23'
   'js/audio.js?build=13'
   'js/systems/care-package.js?build=2'
 )
@@ -133,4 +136,12 @@ if ! grep -Fq 'data-account-reset-probe="passed"' "$RESET_DOM_FILE"; then
   exit 1
 fi
 
-echo "Afterlight browser smoke test passed: core game, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."
+if ! grep -Fq 'data-death-animation-probe="passed"' "$DEATH_DOM_FILE"; then
+  echo "Drifter death animation browser smoke test failed."
+  grep -F 'AFTERLIGHT_DRIFTER_DEATH_' "$DEATH_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+echo "Afterlight browser smoke test passed: core game, Drifter death sequence, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."

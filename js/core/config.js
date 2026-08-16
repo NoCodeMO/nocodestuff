@@ -109,7 +109,7 @@ const COMMAND_MESSAGES=[
   {id:'founder-supply-cache',type:'EVENT',date:'FOUNDING SIGNAL · ONE-TIME',title:'AFTERLIGHT FOUNDERS CACHE',body:'Command recovered a sealed launch cache for every active bunker. Claim it once; the coin portion scales with your current bunker economy.',reward:{minimumCoins:500,coinHours:.2,scrap:50,uranium:2}}
 ];
 const ENEMIES=[
-  {id:'common',rarity:'COMMON',name:'THE DRIFTER',chance:55,asset:'assets/enemy-common-drifter.webp',hpMultiplier:1,bountyMultiplier:1,scrapMultiplier:1,glow:'transparent',accent:'#b7b4a5'},
+  {id:'common',rarity:'COMMON',name:'THE DRIFTER',chance:55,asset:'assets/enemy-common-drifter.webp',deathAsset:'assets/enemy-common-drifter-death.png',hpMultiplier:1,bountyMultiplier:1,scrapMultiplier:1,glow:'transparent',accent:'#b7b4a5'},
   {id:'uncommon',rarity:'UNCOMMON',name:'CINDERBACK',chance:25,asset:'assets/enemy-uncommon-cinderback.webp',hpMultiplier:1.4,bountyMultiplier:1.6,scrapMultiplier:1.35,glow:'#a75d26',accent:'#c57a32'},
   {id:'rare',rarity:'RARE',name:'BLUE SHIELD',chance:12,asset:'assets/enemy-rare-blue-shield.webp',hpMultiplier:2.1,bountyMultiplier:2.6,scrapMultiplier:2,glow:'#3f86d8',accent:'#64a8f2'},
   {id:'epic',rarity:'EPIC',name:'THE BLOATER',chance:5,asset:'assets/enemy-epic-bloater.webp',hpMultiplier:3.2,bountyMultiplier:4.5,scrapMultiplier:3,glow:'#8747c9',accent:'#b76bea'},
@@ -129,7 +129,11 @@ const COMBAT=Object.freeze({
   bountyHourlyShare:.0008,
   minimumBaseBounty:6,
   minimumHits:6,
-  maximumHits:18
+  maximumHits:18,
+  deathAnimationMs:390,
+  nextSpawnMs:390,
+  corpseVisibleMs:1500,
+  corpseLimit:3
 });
 const CARE_PACKAGE=Object.freeze({
   minimumIntervalMs:90000,

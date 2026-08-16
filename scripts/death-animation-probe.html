@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Afterlight Drifter death animation probe</title>
+  <style>html,body{margin:0;background:#080a08;color:#fff;font:12px monospace}iframe{display:block;width:1000px;height:760px;border:0}</style>
+</head>
+<body data-death-animation-probe="running">
+  <iframe id="gameFrame" title="Afterlight Drifter death animation probe"></iframe>
+  <output id="deathAnimationReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const frame=document.getElementById('gameFrame'),report=document.getElementById('deathAnimationReport');localStorage.removeItem('afterlight_v4');frame.src='../index.html?enemy=common&horde=1&crit=1&v=death-animation-probe';
+      frame.addEventListener('load',()=>setTimeout(()=>{const win=frame.contentWindow,doc=frame.contentDocument,game=win.AfterlightGame,before=game?.enemy?.();let shots=0;while(game?.enemy?.()&&!game.enemy().dead&&shots<100){game.attack();shots++}const death=doc.querySelector('.enemyDeathUnit[data-death-sequence="common"]'),frames=death?.querySelectorAll('.enemyDeathSprite').length||0,rewards=doc.querySelector('.killRewards.corpseRewards'),hidden=doc.querySelector('.enemyUnit')?.classList.contains('defeated'),immediate=before?.id==='common'&&before?.horde===true&&before?.deathAsset==='assets/enemy-common-drifter-death.png'&&frames===3&&!!rewards&&hidden;
+        setTimeout(()=>{const respawned=game.enemy()?.dead===false&&!doc.querySelector('.enemyUnit')?.classList.contains('defeated'),corpsePersists=!!doc.querySelector('.enemyDeathUnit[data-death-sequence="common"]');setTimeout(()=>{const corpseCleaned=!doc.querySelector('.enemyDeathUnit[data-death-sequence="common"]'),passed=immediate&&respawned&&corpsePersists&&corpseCleaned;document.body.dataset.deathAnimationProbe=passed?'passed':'failed';report.textContent='AFTERLIGHT_DRIFTER_DEATH_'+(passed?'PASS ':'FAIL ')+JSON.stringify({shots,immediate,frames,rewards:!!rewards,hidden,respawned,corpsePersists,corpseCleaned})},1120)},460)
+      },800));
+    })();
+  </script>
+</body>
+</html>

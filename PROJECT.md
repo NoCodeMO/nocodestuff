@@ -39,13 +39,13 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/operations.js` - strategic normal-room supply allocation, five-minute reserves, Workforce capacity, priorities, pausing, efficiency states and exact recovery guidance.
 
 ### Presentation/platform
-- `js/ui/visuals.js` - configured survivor switching, enemy visuals, per-skin sprite-relative rifle flash, recoil/hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
+- `js/ui/visuals.js` - configured survivor switching, enemy visuals, per-skin sprite-relative rifle flash, recoil/hit/death feedback, dedicated sprite-sheet corpse sequences, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
 - `js/audio.js` - background music plus compressed WebAudio UI, combat, reward, research-completion and gesture-safe survivor voice feedback.
 - `js/platform.js` - standalone/fullscreen install helpers.
 
 ### Validation
 - `scripts/validate.js` - zero-dependency JS syntax, local reference and legacy-file checks.
-- `scripts/combat-balance.js` - deterministic enemy rarity, asset, horde, glow and income-scaled bounty checks.
+- `scripts/combat-balance.js` - deterministic enemy rarity, live/death asset, horde, glow, death timing and income-scaled bounty checks.
 - `scripts/merchant-balance.js` - Dealer inventory, boost stacking, Uranium sources, timers and economy guardrails.
 - `scripts/room-balance.js` - all eight room artworks, milestone progression, bulk-upgrade costs and room-intelligence UI guardrails.
 - `scripts/late-game-economy-check.js` - reproduces the reported 5.63e152/LV 1979 save, verifies the post-quadrillion curve and proves repeated MAX purchases cannot create unlimited money.
@@ -59,6 +59,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/survivor-dialogue-check.js` - all eight survivor voices, contextual pools/odds, typewriter events, responsive bubble CSS, reduced-motion behavior and gesture-safe retro voice bleeps.
 - `scripts/economy-rebalance-check.js` - deterministic fresh-cycle simulator, Prestige pacing envelope, Mastery curve, mission caps, Dealer exclusivity and destructive-reset guardrails.
 - `scripts/account-reset-check.js` and `scripts/account-reset-probe.html` - executable storage isolation plus a real delete/pagehide/reload regression probe that prevents deleted progress from being resurrected by autosave.
+- `scripts/death-animation-probe.html` - real-browser Common-horde kill probe that verifies three synchronized death frames, corpse persistence, fast respawn and cleanup.
 - `scripts/operations-balance-check.js` - Power/Water/Food/Scrap/Science/Workforce allocation, reserve drain, priority order, pause/resume and underperformance UI guardrails.
 - `scripts/cross-system-balance-check.js` - executable dual-cost Research, ration-funded Expedition, Dealer-free reward, sustainable offline and attention-reward math.
 - `scripts/prestige-balance-check.js` - all five targets, survivors, active/permanent perk math, capped Core curve, reset boundaries, room costs and cross-system multiplier wiring.
@@ -218,6 +219,8 @@ Every built normal room participates in the operations network. The Generator is
 
 Enemy encounters use one weighted table with an exact 100% total: Common 55%, Uncommon 25%, Rare 12%, Epic 5%, Legendary 2% and Brute 1%. Every non-Brute encounter has a 12% base horde chance, with a persisted pity counter guaranteeing a horde by the eighth eligible encounter. Brutes can never become hordes and neither advance nor reset that counter. A horde contains exactly three infected and grants exactly x3 HP, coins, scrap and kill credit compared with that same single infected.
 
+The Drifter is the first completed character-specific death rollout. Its true-alpha horizontal sheet contains Impact, Collapse and Corpse frames on one shared ground baseline. Core combat includes the configured death asset in `afterlight:enemy-killed`; visuals snapshot the responsive encounter bounds, render the sequence in a separate corpse unit and hide only the defeated live unit. The next encounter starts after the 390ms fall while the corpse remains for 1.5 seconds, so respawn never erases the corpse. Hordes create three synchronized frame players. At most three corpse units may coexist to keep rapid clicking safe. Future infected death sheets must reuse `deathAsset` and this renderer instead of introducing enemy-specific timers or kill listeners.
+
 The first actual spawn of each configured enemy is persisted through `stats.discovered`; old saves automatically unlock entries backed by existing rarity kills. Clicking the enemy status card opens the Infected Codex. Locked entries remain silhouettes while discovered entries show the shared configured sprite, base chance, lifetime kills, HP multiplier, Coin multiplier, Scrap multiplier and encounter notes.
 
 Prestige has five deliberate reset targets: Bunker Levels 100, 200, 325, 525 and 850. The first two are explicit and later targets follow the shared rounded ×1.62 curve so future levels can extend it without hand-written jumps. Each reset grants exactly one permanent survivor, ×1.65 all production and ×1.25 manual damage per Prestige level, plus +5% all production for each unlocked Prestige survivor. The larger production legacy deliberately compensates the much longer late-cycle room curve without making the first cycle faster. A reset at the exact target gives one Prestige Core; additional Cores require another 10% of that cycle's target per Core (rounded to 25 and capped at three). The transaction writes one recovery snapshot to `afterlight_prestige_backup_v1`, then resets current-cycle resources, normal/specialist rooms, run kills and unarchived research. It preserves Uranium, lifetime totals, missions/bonuses, specialists/active expeditions, Dealer boosts, discoveries, unlocked survivors, Prestige Cores and Prestige Rooms. Active research and pending offline income are intentionally cleared to prevent cross-cycle duplication.
@@ -259,6 +262,7 @@ Offline production starts after one minute away and is capped at 12 hours per lo
 Only active assets remain in `assets/`:
 - `survivor-ranger.png`, `survivor-ranger-female.webp`, `survivor-architect.webp`, `survivor-prestige-mara.webp`, `survivor-prestige-knox.webp`, `survivor-prestige-malik.webp`, `survivor-prestige-cole.webp`, `survivor-prestige-elara.webp` - transparent selectable survivor art. The two Rangers are starter cosmetics; the Architect is the Bunker Level 100 reward; the remaining five unlock sequentially through Prestige. Their muzzle flash stays a separate short-lived game effect anchored from each skin's responsive unit coordinates, so recoil and scaling cannot detach it from the weapon. Rare/Epic/Legendary glow is rendered at runtime rather than baked into the sprite.
 - `enemy-common-drifter.webp`, `enemy-uncommon-cinderback.webp`, `enemy-rare-blue-shield.webp`, `enemy-epic-bloater.webp`, `enemy-legendary-gilded-warden.webp`, `enemy-brute-breaker.webp` - transparent, left-facing enemy art with no baked rarity glow; glow is rendered by CSS at runtime
+- `enemy-common-drifter-death.png` - true-alpha three-frame Impact/Collapse/Corpse sheet for the Common Drifter; the game crops its cells at runtime so it loads once for single encounters and hordes
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
 - `care-package-airborne.png`, `care-package-crate.png` - true-alpha matching care-package states; the parachute is used only during descent and the closed crate receives its glow, dust, timer and reward effects at runtime
@@ -271,7 +275,7 @@ Only active assets remain in `assets/`:
 - Offline earnings are claimable and persisted; production beyond the 12-hour cap is intentionally discarded.
 - Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
 - Survivor dialogue uses original synthesized retro bleeps, follows the UI SFX setting and cannot unlock WebAudio without a user gesture. It is intentionally short-form ambient flavor rather than a branching conversation system.
-- Enemy movement is currently a fast offscreen-right entrance plus hit/death feedback. Full character-specific sprite-sheet animation is intentionally deferred.
+- The Common Drifter now has a complete three-frame death/corpse sequence. Uncommon, Rare, Epic, Legendary and Brute characters still use the short fallback death until their approved sheets are produced; walk/idle sprite animation remains deferred.
 - Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
 - Commander login is a local profile stored inside the unified save. Secure cloud accounts and cross-device save sync require a future backend and are not simulated.
 - Care packages currently use one shared visual design and one fall/landing motion. Reward contents vary, but crate variants and opening sprite-sheet animation are intentionally deferred.

@@ -15,6 +15,10 @@ for(const type of ENEMIES){
   if(!header.startsWith('RIFF')||!header.endsWith('WEBP'))fail(`${type.asset} is not a WebP asset`);
   if(!(type.hpMultiplier>0&&type.bountyMultiplier>0&&type.scrapMultiplier>0))fail(`${type.id} multipliers must be positive`);
 }
+const common=ENEMIES.find(type=>type.id==='common');
+if(common.deathAsset!=='assets/enemy-common-drifter-death.png')fail('The Drifter must expose its approved three-frame death sheet');
+const deathAsset=path.join(root,common.deathAsset);if(!fs.existsSync(deathAsset))fail(`missing death sprite ${common.deathAsset}`);
+const deathBuffer=fs.readFileSync(deathAsset);if(!deathBuffer.subarray(1,4).equals(Buffer.from('PNG'))||deathBuffer[25]!==6)fail('The Drifter death sheet must be a real RGBA PNG with transparent alpha');
 if(ENEMIES.find(type=>type.id==='common').glow!=='transparent')fail('Common must not have a rarity glow');
 if(ENEMIES.find(type=>type.id==='brute').glow!=='transparent')fail('Brute must remain outside the rarity glow system');
 for(const id of ['uncommon','rare','epic','legendary'])if(ENEMIES.find(type=>type.id===id).glow==='transparent')fail(`${id} requires an in-game glow color`);
@@ -25,6 +29,7 @@ let hordeMisses=0,guaranteedAt=0;
 for(let encounter=1;encounter<=COMBAT.hordePityEncounters;encounter++){const horde=hordeMisses>=COMBAT.hordePityEncounters-1||.999999<COMBAT.hordeChance;if(horde){guaranteedAt=encounter;hordeMisses=0;break}hordeMisses++}
 if(guaranteedAt!==COMBAT.hordePityEncounters)fail(`maximum-roll pity simulation spawned at ${guaranteedAt||'never'}, expected encounter ${COMBAT.hordePityEncounters}`);
 if(COMBAT.criticalChance!==.08||COMBAT.criticalMultiplier!==2)fail('critical hits must stay at a balanced 8% chance and x2 damage');
+if(COMBAT.deathAnimationMs!==390||COMBAT.nextSpawnMs!==390||COMBAT.corpseVisibleMs!==1500||COMBAT.corpseLimit!==3)fail('death timing must stay fast, readable and spam-safe');
 if(COMBAT.streakWindowMs!==12000||COMBAT.streakStep!==.25||COMBAT.streakMaximum!==3)fail('kill streaks must use the approved 12-second, +25%, x3 cap');
 const millionPerHourBounty=1_000_000*COMBAT.bountyHourlyShare;
 if(millionPerHourBounty!==800)fail(`1M/hour must produce an 800-coin Common base bounty, received ${millionPerHourBounty}`);
@@ -51,6 +56,8 @@ for(const [pattern,message] of [
   ,[/function advanceStreak\(at=Date\.now\(\)\)/,'combat must own one deterministic streak calculator']
   ,[/Math\.floor\(baseCoins\*streak\.multiplier\)/,'streak multiplier must apply to kill rewards only after the kill']
   ,[/streakCount:streak\.count,streakMultiplier:streak\.multiplier/,'kill events must expose their exact streak reward']
+  ,[/deathAsset:type\.deathAsset\|\|null/,'encounters must expose their configured death sheet']
+  ,[/setTimeout\(spawn,COMBAT\.nextSpawnMs\)/,'the next encounter must wait for the complete death sequence']
 ])if(!pattern.test(game))fail(message);
 const visuals=fs.readFileSync(path.join(root,'js','ui','visuals.js'),'utf8');
 for(const [pattern,message] of [
@@ -63,17 +70,23 @@ for(const [pattern,message] of [
   [/function applySurvivor\(source=selectedSkin\(\),animate=true\)/,'combat must support the configured survivor roster'],
   [/survivorUnit\.append\(survivor,muzzle\)/,'muzzle flash must be anchored inside the survivor coordinate system'],
   [/restart\(survivorUnit,'shoot'\)/,'recoil must move the survivor and muzzle together'],
-  [/survivorUnit\.dataset\.muzzleAnchor=anchor/,'the rifle barrel needs one configured normalized muzzle anchor']
+  [/survivorUnit\.dataset\.muzzleAnchor=anchor/,'the rifle barrel needs one configured normalized muzzle anchor'],
+  [/function createDeathSequence\(detail\)/,'visuals must create a dedicated corpse sequence without blocking the next spawn'],
+  [/className='enemyDeathSprite'/,'the death sequence must render the approved sprite-sheet frames'],
+  [/while\(corpses\.length>limit\)corpses\.shift\(\)\?\.remove\(\)/,'old corpses must be capped for spam safety'],
+  [/enemyUnit\.classList\.remove\('dead','hit','defeated'\)/,'a newly spawned infected must always restore the live encounter unit']
 ])if(!pattern.test(visuals))fail(message);
 const css=fs.readFileSync(path.join(root,'app.css'),'utf8');
 if(!/float\.className='damageNumber'\+\(detail\.critical/.test(visuals)||!/if\(active\.length>8\)active\[0\]\.remove\(\)/.test(visuals))fail('per-shot damage feedback must exist and remain spam-safe');
 if(!/@keyframes damageNumberRise/.test(css))fail('floating damage animation is missing');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+if(!html.includes('assets/enemy-common-drifter-death.png'))fail('The Drifter death sheet must be preloaded');
 if(!/id="hordeSignal"/.test(html)||!/GUARANTEED IN/.test(game)||!/#hordeSignal\.detected/.test(css))fail('players need a visible horde signal and a distinct detected state');
 if(!/@keyframes criticalNumberRise/.test(css)||!/CRIT -/.test(visuals))fail('critical hits need distinct visual feedback');
 if(!/id='combatStreak'/.test(visuals)||!/afterlight:streak/.test(visuals)||!/@keyframes streakDrain/.test(css))fail('kill streak HUD and timer feedback are missing');
 if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \+ 100%\)/.test(css))fail('spawn entrance must start beyond the right edge');
 if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow must remain disabled');
+if(!/@keyframes drifterDeathFrames/.test(css)||!/\.enemyDeathUnit\.horde \.enemyDeathSprite:nth-child\(3\)/.test(css))fail('The Drifter death frames must animate for both single encounters and three-member hordes');
 if(!/\.enemyUnit:is\([^}]+\) \.enemySprite\{filter:[^}]+var\(--enemy-glow\)/.test(css))fail('rarity glow must follow each sprite alpha instead of its layout container');
 const survivorAsset=path.join(root,'assets','survivor-ranger.png');if(!fs.existsSync(survivorAsset))fail('missing approved survivor-ranger.png');
 const survivorBuffer=fs.readFileSync(survivorAsset);if(!survivorBuffer.subarray(1,4).equals(Buffer.from('PNG'))||survivorBuffer[25]!==6)fail('survivor-ranger.png must be a real RGBA PNG');
