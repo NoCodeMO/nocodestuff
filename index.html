@@ -27,7 +27,7 @@
   <link rel="preload" as="image" href="assets/care-package-airborne.png" type="image/png">
   <link rel="preload" as="image" href="assets/care-package-crate.png" type="image/png">
   <link rel="preload" as="image" href="assets/room-generator.webp" type="image/webp">
-  <link rel="stylesheet" href="app.css?build=48">
+  <link rel="stylesheet" href="app.css?build=49">
 </head>
 <body>
   <main id="app">
@@ -52,13 +52,18 @@
       <button id="clickCore" type="button"><span>TAP ZOMBIE</span><b id="clickValue">+1 DAMAGE</b></button>
     </section>
 
-    <section id="bunker">
+    <section id="bunker" aria-label="Fullscreen bunker overview">
+      <header class="bunkerOverviewHeader">
+        <div class="bunkerOverviewIdentity"><small>AFTERLIGHT // UNDERGROUND COMMAND</small><h1>BUNKER OVERVIEW</h1><p>Manage production rooms, operating supplies and permanent upgrades.</p></div>
+        <div class="bunkerOverviewStats"><span><small>ROOMS ONLINE</small><b id="bunkerRoomsOnline">1 / 8</b></span><span><small>AVG. EFFICIENCY</small><b id="bunkerEfficiency">100%</b></span></div>
+        <button id="closeBunker" type="button" aria-label="Return to the combat road">← RETURN TO ROAD</button>
+      </header>
       <div class="sectionTitle"><span>YOUR BUNKER</span><button id="operationsSummary" type="button" aria-label="Open the room with the greatest operating problem">✓ SYSTEMS NOMINAL</button><div id="bunkerProgressTrack" class="bunkerProgressTrack" role="progressbar" aria-label="Progress to next Bunker Level"><i id="bunkerProgress"></i><small id="bunkerProgressText">0 / 4 ROOM LEVELS</small></div><small id="bunkerLevel">LEVEL 1</small></div>
       <div id="rooms"></div>
     </section>
 
     <nav id="tabs">
-      <button class="active" data-tab="base">⌂<span>BASE</span></button>
+      <button data-tab="bunker" aria-pressed="false">⌂<span>BUNKER</span></button>
       <button data-tab="merchant">◆<span>DEALER</span><em id="merchantBadge"></em></button>
       <button data-tab="research">⚗<span>RESEARCH</span><em id="researchBadge"></em></button>
       <button data-tab="expeditions">☣<span>EXPEDITIONS</span></button>
@@ -91,7 +96,7 @@
   <script src="js/systems/command-center.js?build=7"></script>
   <script src="js/ui/visuals.js?build=26"></script>
   <script src="js/systems/survivor-dialogue.js?build=1"></script>
-  <script src="js/core/game.js?build=23"></script>
+  <script src="js/core/game.js?build=24"></script>
   <script src="js/systems/codex.js?build=1"></script>
   <script src="js/systems/offline.js?build=2"></script>
   <script src="js/systems/missions.js?build=9"></script>
