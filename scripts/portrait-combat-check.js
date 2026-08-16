@@ -11,7 +11,7 @@ for(const [pattern,message] of [
   [/\.enemyDeathUnit\.horde \.enemyDeathSprite:nth-child\(3\)\{right:32%;bottom:0;z-index:1;transform:scale\(\.76\)\}/,'corpse formation must mirror the grounded live formation'],
   [/\.enemyUnit\[data-rarity="brute"\]\{right:4px\}/,'brutes must retain a protected screen edge']
 ])if(!pattern.test(css))fail(message);
-if(!/app\.css\?build=53/.test(html))fail('index must cache-bust the portrait stylesheet');
+if(!/app\.css\?build=54/.test(html))fail('index must cache-bust the portrait stylesheet');
 if(!/portrait-combat-probe\.html/.test(smoke)||!/data-portrait-combat="passed"/.test(smoke))fail('browser smoke test must run the portrait geometry probe');
 if(!fs.existsSync(path.join(root,'scripts','portrait-combat-probe.html')))fail('computed portrait probe is missing');
 console.log('Afterlight portrait combat passed: fixed solo, brute, horde and corpse formations are protected by responsive geometry checks.');

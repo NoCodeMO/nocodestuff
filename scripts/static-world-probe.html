@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Afterlight static world probe</title><style>html,body{margin:0;background:#000}iframe{width:844px;height:520px;border:0}</style></head>
+<body data-static-world="running">
+  <iframe id="gameFrame" title="Afterlight static world probe" src="../index.html?v=static-world-probe"></iframe>
+  <output id="worldReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const frame=document.getElementById('gameFrame'),selectors=['.worldSky','.worldCity','.worldBunker','.worldGround'];
+      frame.addEventListener('load',()=>setTimeout(()=>{
+        const doc=frame.contentDocument,stage=doc.getElementById('spriteStage'),scene=doc.getElementById('scene'),read=()=>selectors.map(selector=>getComputedStyle(doc.querySelector(selector)).transform),before=read();
+        scene.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,clientX:830,clientY:500,pointerType:'mouse'}));doc.getElementById('clickCore').click();
+        setTimeout(()=>{const after=read(),cloud=getComputedStyle(doc.querySelector('.worldClouds img')),metrics={motion:stage.dataset.worldMotion,before,after,cloudAnimation:cloud.animationName,cloudDuration:cloud.animationDuration},passed=stage.dataset.worldMotion==='clouds-only'&&before.every((value,index)=>value===after[index])&&cloud.animationName==='cloudDrift'&&cloud.animationDuration==='42s';document.body.dataset.staticWorld=passed?'passed':'failed';document.getElementById('worldReport').textContent='AFTERLIGHT_STATIC_WORLD_'+(passed?'PASS ':'FAIL ')+JSON.stringify(metrics)},180);
+      },900));
+    })();
+  </script>
+</body>
+</html>

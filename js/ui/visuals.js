@@ -8,7 +8,7 @@ const WORLD_LAYERS=[
   ['worldBunker','assets/combat-bunker-clean.webp'],
   ['worldGround','assets/combat-ground.webp']
 ];
-const stage=document.createElement('div');stage.id='spriteStage';stage.dataset.parallaxLayers=String(WORLD_LAYERS.length);
+const stage=document.createElement('div');stage.id='spriteStage';stage.dataset.parallaxLayers=String(WORLD_LAYERS.length);stage.dataset.worldMotion='clouds-only';
 const world=document.createElement('div');world.className='parallaxWorld';world.setAttribute('aria-hidden','true');
 for(const [className,src] of WORLD_LAYERS){const layer=document.createElement('div');layer.className='parallaxLayer '+className;const image=document.createElement('img');image.src=src;image.alt='';image.decoding='async';image.draggable=false;layer.append(image);world.append(layer)}
 stage.append(world);
@@ -22,13 +22,6 @@ function applySurvivor(source=selectedSkin(),animate=true){const skin=typeof sou
 applySurvivor(selectedSkin(),false);
 const layerImages=[...world.querySelectorAll('img')];Promise.allSettled(layerImages.map(image=>image.decode?.()||Promise.resolve())).then(()=>stage.classList.add('worldReady'));
 for(const asset of [...(CFG.ENEMIES||[]).flatMap(item=>[item.asset,item.idleAsset,item.walkAsset,item.hitAsset,item.deathAsset]),...SKINS.map(item=>item.asset)].filter(Boolean)){const preload=new Image();preload.src=asset}
-
-const reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');let parallaxFrame=0,nextX=0,nextY=0;
-function paintParallax(){stage.style.setProperty('--parallax-x',nextX.toFixed(3));stage.style.setProperty('--parallax-y',nextY.toFixed(3));parallaxFrame=0}
-function queueParallax(){if(!parallaxFrame)parallaxFrame=requestAnimationFrame(paintParallax)}
-function moveParallax(event){if(reducedMotion?.matches||document.documentElement.classList.contains('reducedEffects'))return;const bounds=scene.getBoundingClientRect();if(!bounds.width||!bounds.height)return;nextX=Math.max(-1,Math.min(1,((event.clientX-bounds.left)/bounds.width-.5)*2));nextY=Math.max(-1,Math.min(1,((event.clientY-bounds.top)/bounds.height-.5)*2));queueParallax()}
-function resetParallax(){nextX=0;nextY=0;queueParallax()}
-scene.addEventListener('pointermove',moveParallax,{passive:true});scene.addEventListener('pointerleave',resetParallax,{passive:true});reducedMotion?.addEventListener?.('change',resetParallax);window.addEventListener('afterlight:settings-changed',resetParallax);
 
 function restart(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
 let spawnClearTimer=0;
