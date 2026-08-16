@@ -24,6 +24,10 @@ if(common.walkAsset!=='assets/enemy-common-drifter-walk.png')fail('The Drifter m
 const walkAsset=path.join(root,common.walkAsset);if(!fs.existsSync(walkAsset))fail(`missing walk sprite ${common.walkAsset}`);
 const walkBuffer=fs.readFileSync(walkAsset);if(!walkBuffer.subarray(1,4).equals(Buffer.from('PNG'))||walkBuffer[25]!==6)fail('The Drifter walk sheet must be a real RGBA PNG with transparent alpha');
 if(walkBuffer.readUInt32BE(16)!==1881||walkBuffer.readUInt32BE(20)!==836)fail('The Drifter walk sheet must contain three equal 627x836 cells');
+if(common.hitAsset!=='assets/enemy-common-drifter-hit.png')fail('The Drifter must expose its approved three-frame hit sheet');
+const hitAsset=path.join(root,common.hitAsset);if(!fs.existsSync(hitAsset))fail(`missing hit sprite ${common.hitAsset}`);
+const hitBuffer=fs.readFileSync(hitAsset);if(!hitBuffer.subarray(1,4).equals(Buffer.from('PNG'))||hitBuffer[25]!==6)fail('The Drifter hit sheet must be a real RGBA PNG with transparent alpha');
+if(hitBuffer.readUInt32BE(16)!==1881||hitBuffer.readUInt32BE(20)!==836)fail('The Drifter hit sheet must contain three equal 627x836 cells');
 if(common.deathAsset!=='assets/enemy-common-drifter-death.png')fail('The Drifter must expose its approved three-frame death sheet');
 const deathAsset=path.join(root,common.deathAsset);if(!fs.existsSync(deathAsset))fail(`missing death sprite ${common.deathAsset}`);
 const deathBuffer=fs.readFileSync(deathAsset);if(!deathBuffer.subarray(1,4).equals(Buffer.from('PNG'))||deathBuffer[25]!==6)fail('The Drifter death sheet must be a real RGBA PNG with transparent alpha');
@@ -122,6 +126,7 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 if(!html.includes('assets/enemy-common-drifter-death.png'))fail('The Drifter death sheet must be preloaded');
 if(!html.includes('assets/enemy-common-drifter-idle.png'))fail('The Drifter idle sheet must be preloaded');
 if(!html.includes('assets/enemy-common-drifter-walk.png'))fail('The Drifter walk sheet must be preloaded');
+if(!html.includes('assets/enemy-common-drifter-hit.png'))fail('The Drifter hit sheet must be preloaded');
 if(!html.includes('assets/enemy-uncommon-cinderback-death.png'))fail('The Cinderback death sheet must be preloaded');
 if(!html.includes('assets/enemy-rare-blue-shield-death.png'))fail('The Blue Shield death sheet must be preloaded');
 if(!html.includes('assets/enemy-epic-bloater-death.png'))fail('The Bloater death sheet must be preloaded');
@@ -135,6 +140,7 @@ if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow m
 if(!/@keyframes drifterDeathFrames/.test(css)||!/\.enemyDeathUnit\.horde \.enemyDeathSprite:nth-child\(3\)/.test(css))fail('The Drifter death frames must animate for both single encounters and three-member hordes');
 if(!/@keyframes drifterIdleFrames/.test(css)||!/aspect-ratio:358\/512/.test(css))fail('The Drifter idle animation must preserve the approved live scale and canvas ratio');
 if(!/\.enemyUnit\.spawn \.drifterAnimatedSprite \.drifterFrames\{background-image:var\(--drifter-walk\)/.test(css)||!/@keyframes drifterWalkFrames/.test(css))fail('The Drifter walk cycle must only run during its right-side entrance');
+if(!/\.enemyUnit\.hit\[data-rarity="common"\]\{animation:none\}/.test(css)||!/background-image:var\(--drifter-hit\)/.test(css)||!/@keyframes drifterHitFrames/.test(css))fail('The Drifter must use its dedicated three-frame shot shock without shifting the impact container');
 if(!/67%,100%\{aspect-ratio:700\/631;background-size:253\.5% auto;background-position:100% 52%\}/.test(css))fail('the corpse frame must include the complete Drifter skull and preserve the shared ground baseline');
 if(!/data-death-sequence="uncommon"/.test(css)||!/data-death-sequence="rare"/.test(css)||!/data-death-sequence="epic"/.test(css)||!/data-death-sequence="legendary"/.test(css)||!/data-death-sequence="brute"/.test(css)||!/@keyframes normalizedDeathFrames\{0%,30%\{background-position:0 50%\}31%,66%\{background-position:50% 50%\}67%,100%\{background-position:100% 50%\}\}/.test(css))fail('All five normalized infected death sheets must animate through their three cells');
 if(!/data-death-sequence="epic"\]:not\(\.horde\) \.enemyDeathSprite\{height:148%\}/.test(css)||!/data-death-sequence="epic"\]\.horde \.enemyDeathSprite\{height:127%\}/.test(css))fail('The Bloater death sequence must preserve its live visual scale in single encounters and hordes');

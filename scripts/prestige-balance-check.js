@@ -37,6 +37,6 @@ assert(/roomCostMultiplier/.test(special),'Knox must also reduce specialist room
 assert(/tabButton\('prestige','✦','PRESTIGE'\)/.test(command)&&/AfterlightPrestige\?\.panel/.test(command),'Command Center needs the complete Prestige panel');
 assert(/afterlight:prestige-complete',prestigeSound/.test(audio),'Prestige completion needs its dedicated fanfare');
 for(const selector of ['.prestigePanel','.prestigeAscend','.prestigeRoomGrid','.cycleContracts','.prestigeConfirm','.prestigeReveal'])assert(css.includes(selector),`missing Prestige styling: ${selector}`);
-for(const marker of ['js/systems/prestige.js?build=3','app.css?build=47','js/core/state.js?build=22','js/systems/operations.js?build=2','js/core/game.js?build=23'])assert(html.includes(marker),`cache marker missing: ${marker}`);
+for(const marker of ['js/systems/prestige.js?build=3','app.css?build=48','js/core/state.js?build=22','js/systems/operations.js?build=2','js/core/game.js?build=23'])assert(html.includes(marker),`cache marker missing: ${marker}`);
 assert(fs.existsSync(path.join(root,'scripts','prestige-probe.html'))&&/data-prestige-probe="passed"/.test(read('scripts/smoke.sh')),'real-browser transactional reset probe is missing');
 console.log(`Afterlight Prestige balance passed: five cycles, ${skins.length} survivors, ${p.rooms.length} rooms, capped Cores and ×${economy(5).toFixed(2)} Prestige-V economy.`);
