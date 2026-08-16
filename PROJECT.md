@@ -265,6 +265,7 @@ Only active assets remain in `assets/`:
 - `enemy-common-drifter-death.png` - true-alpha three-frame Impact/Collapse/Corpse sheet for the Common Drifter; the game crops its cells at runtime so it loads once for single encounters and hordes
 - `enemy-uncommon-cinderback-death.png` - normalized true-alpha three-frame death sheet for the Uncommon Cinderback; each 700x760 cell shares one baseline and needs no custom overlap crop
 - `enemy-rare-blue-shield-death.png` - normalized true-alpha death sheet for the Rare Blue Shield, including the complete riot shield in every 700x760 frame
+- `enemy-epic-bloater-death.png` - normalized true-alpha death sheet for the Epic Bloater; its oversized body and wide corpse stay fully inside three 700x760 cells
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
 - `care-package-airborne.png`, `care-package-crate.png` - true-alpha matching care-package states; the parachute is used only during descent and the closed crate receives its glow, dust, timer and reward effects at runtime
@@ -277,7 +278,7 @@ Only active assets remain in `assets/`:
 - Offline earnings are claimable and persisted; production beyond the 12-hour cap is intentionally discarded.
 - Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
 - Survivor dialogue uses original synthesized retro bleeps, follows the UI SFX setting and cannot unlock WebAudio without a user gesture. It is intentionally short-form ambient flavor rather than a branching conversation system.
-- Common Drifter, Uncommon Cinderback and Rare Blue Shield now have complete three-frame death/corpse sequences. Epic, Legendary and Brute characters still use the short fallback death until their approved sheets are produced; walk/idle sprite animation remains deferred.
+- Common Drifter, Uncommon Cinderback, Rare Blue Shield and Epic Bloater now have complete three-frame death/corpse sequences. Legendary and Brute characters still use the short fallback death until their approved sheets are produced; walk/idle sprite animation remains deferred.
 - Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
 - Commander login is a local profile stored inside the unified save. Secure cloud accounts and cross-device save sync require a future backend and are not simulated.
 - Care packages currently use one shared visual design and one fall/landing motion. Reward contents vary, but crate variants and opening sprite-sheet animation are intentionally deferred.

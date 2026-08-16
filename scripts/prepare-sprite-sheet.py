@@ -96,10 +96,30 @@ def occupied_x_groups(image: Image.Image, minimum_gap: int = 8) -> list[tuple[in
     return groups
 
 
-def normalize_frames(image: Image.Image, frames: int, cell_width: int, canvas_height: int, baseline: int) -> Image.Image:
+def source_frame_ranges(image: Image.Image, frames: int) -> list[tuple[int, int]]:
     groups = occupied_x_groups(image)
-    if len(groups) != frames:
-        raise ValueError(f"expected {frames} separated frames, found {len(groups)}: {groups}")
+    if len(groups) == frames:
+        return groups
+
+    alpha = image.getchannel("A")
+    column_counts = [
+        sum(1 for value in alpha.crop((x, 0, x + 1, image.height)).get_flattened_data() if value)
+        for x in range(image.width)
+    ]
+    cuts = [0]
+    search_radius = max(20, image.width // (frames * 5))
+    for index in range(1, frames):
+        target = round(image.width * index / frames)
+        left = max(cuts[-1] + 20, target - search_radius)
+        right = min(image.width - 20, target + search_radius)
+        cut = min(range(left, right + 1), key=lambda x: (column_counts[x], abs(x - target)))
+        cuts.append(cut)
+    cuts.append(image.width)
+    return list(zip(cuts, cuts[1:]))
+
+
+def normalize_frames(image: Image.Image, frames: int, cell_width: int, canvas_height: int, baseline: int) -> Image.Image:
+    groups = source_frame_ranges(image, frames)
 
     sheet = Image.new("RGBA", (frames * cell_width, canvas_height), (0, 0, 0, 0))
     for index, (left, right) in enumerate(groups):
@@ -124,11 +144,17 @@ def main() -> None:
     parser.add_argument("--cell-width", type=int, default=600)
     parser.add_argument("--height", type=int, default=760)
     parser.add_argument("--baseline", type=int, default=735)
+    parser.add_argument("--clear", action="append", default=[], metavar="X1,Y1,X2,Y2")
     args = parser.parse_args()
 
     source = Image.open(args.input)
     transparent = extract_edge_background(source)
     sheet = normalize_frames(transparent, args.frames, args.cell_width, args.height, args.baseline)
+    for raw_box in args.clear:
+        box = tuple(int(value) for value in raw_box.split(","))
+        if len(box) != 4:
+            raise ValueError(f"invalid --clear box: {raw_box}")
+        sheet.paste((0, 0, 0, 0), box)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(args.output, optimize=True)
     print(f"prepared {args.output}: {sheet.width}x{sheet.height}, {args.frames} equal alpha frames")

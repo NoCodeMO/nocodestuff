@@ -29,6 +29,11 @@ if(rare.deathAsset!=='assets/enemy-rare-blue-shield-death.png')fail('Blue Shield
 const shieldAsset=path.join(root,rare.deathAsset);if(!fs.existsSync(shieldAsset))fail(`missing death sprite ${rare.deathAsset}`);
 const shieldBuffer=fs.readFileSync(shieldAsset);if(!shieldBuffer.subarray(1,4).equals(Buffer.from('PNG'))||shieldBuffer[25]!==6)fail('The Blue Shield death sheet must be a real RGBA PNG with transparent alpha');
 if(shieldBuffer.readUInt32BE(16)!==2100||shieldBuffer.readUInt32BE(20)!==760)fail('The Blue Shield death sheet must contain three normalized 700x760 cells');
+const epic=ENEMIES.find(type=>type.id==='epic');
+if(epic.deathAsset!=='assets/enemy-epic-bloater-death.png')fail('The Bloater must expose its approved three-frame death sheet');
+const bloaterAsset=path.join(root,epic.deathAsset);if(!fs.existsSync(bloaterAsset))fail(`missing death sprite ${epic.deathAsset}`);
+const bloaterBuffer=fs.readFileSync(bloaterAsset);if(!bloaterBuffer.subarray(1,4).equals(Buffer.from('PNG'))||bloaterBuffer[25]!==6)fail('The Bloater death sheet must be a real RGBA PNG with transparent alpha');
+if(bloaterBuffer.readUInt32BE(16)!==2100||bloaterBuffer.readUInt32BE(20)!==760)fail('The Bloater death sheet must contain three normalized 700x760 cells');
 if(ENEMIES.find(type=>type.id==='common').glow!=='transparent')fail('Common must not have a rarity glow');
 if(ENEMIES.find(type=>type.id==='brute').glow!=='transparent')fail('Brute must remain outside the rarity glow system');
 for(const id of ['uncommon','rare','epic','legendary'])if(ENEMIES.find(type=>type.id===id).glow==='transparent')fail(`${id} requires an in-game glow color`);
@@ -93,6 +98,7 @@ const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 if(!html.includes('assets/enemy-common-drifter-death.png'))fail('The Drifter death sheet must be preloaded');
 if(!html.includes('assets/enemy-uncommon-cinderback-death.png'))fail('The Cinderback death sheet must be preloaded');
 if(!html.includes('assets/enemy-rare-blue-shield-death.png'))fail('The Blue Shield death sheet must be preloaded');
+if(!html.includes('assets/enemy-epic-bloater-death.png'))fail('The Bloater death sheet must be preloaded');
 if(!/id="hordeSignal"/.test(html)||!/GUARANTEED IN/.test(game)||!/#hordeSignal\.detected/.test(css))fail('players need a visible horde signal and a distinct detected state');
 if(!/@keyframes criticalNumberRise/.test(css)||!/CRIT -/.test(visuals))fail('critical hits need distinct visual feedback');
 if(!/id='combatStreak'/.test(visuals)||!/afterlight:streak/.test(visuals)||!/@keyframes streakDrain/.test(css))fail('kill streak HUD and timer feedback are missing');
@@ -100,7 +106,7 @@ if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \
 if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow must remain disabled');
 if(!/@keyframes drifterDeathFrames/.test(css)||!/\.enemyDeathUnit\.horde \.enemyDeathSprite:nth-child\(3\)/.test(css))fail('The Drifter death frames must animate for both single encounters and three-member hordes');
 if(!/67%,100%\{aspect-ratio:700\/631;background-size:253\.5% auto;background-position:100% 52%\}/.test(css))fail('the corpse frame must include the complete Drifter skull and preserve the shared ground baseline');
-if(!/data-death-sequence="uncommon"/.test(css)||!/data-death-sequence="rare"/.test(css)||!/@keyframes normalizedDeathFrames\{0%,30%\{background-position:0 50%\}31%,66%\{background-position:50% 50%\}67%,100%\{background-position:100% 50%\}\}/.test(css))fail('The Cinderback and Blue Shield must animate through their three normalized death cells');
+if(!/data-death-sequence="uncommon"/.test(css)||!/data-death-sequence="rare"/.test(css)||!/data-death-sequence="epic"/.test(css)||!/@keyframes normalizedDeathFrames\{0%,30%\{background-position:0 50%\}31%,66%\{background-position:50% 50%\}67%,100%\{background-position:100% 50%\}\}/.test(css))fail('The Cinderback, Blue Shield and Bloater must animate through their three normalized death cells');
 if(!/\.enemyUnit:is\([^}]+\) \.enemySprite\{filter:[^}]+var\(--enemy-glow\)/.test(css))fail('rarity glow must follow each sprite alpha instead of its layout container');
 const survivorAsset=path.join(root,'assets','survivor-ranger.png');if(!fs.existsSync(survivorAsset))fail('missing approved survivor-ranger.png');
 const survivorBuffer=fs.readFileSync(survivorAsset);if(!survivorBuffer.subarray(1,4).equals(Buffer.from('PNG'))||survivorBuffer[25]!==6)fail('survivor-ranger.png must be a real RGBA PNG');
