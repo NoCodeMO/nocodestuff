@@ -14,7 +14,7 @@ for(const [pattern,message] of [[/function survivorVoiceBleep\(event\)/,'audio n
 for(const selector of ['.survivorDialogue','.survivorDialogue.show','.survivorDialogueLabel','.survivorDialogueText','.survivorDialogueCaret'])assert(css.includes(selector),`missing responsive dialogue styling: ${selector}`);
 assert(css.includes('.reducedEffects .survivorDialogue')&&css.includes('@media(prefers-reduced-motion:reduce)'),'dialogue must respect both game and OS reduced-motion settings');
 assert(css.includes('@media(max-width:699px)')&&css.includes('@media(orientation:landscape) and (min-width:560px) and (max-height:600px)'),'dialogue needs phone portrait and landscape layouts');
-const visualIndex=html.indexOf('js/ui/visuals.js?build=22'),dialogueIndex=html.indexOf('js/systems/survivor-dialogue.js?build=1'),gameIndex=html.indexOf('js/core/game.js?build=23');
+const visualIndex=html.indexOf('js/ui/visuals.js?build=23'),dialogueIndex=html.indexOf('js/systems/survivor-dialogue.js?build=1'),gameIndex=html.indexOf('js/core/game.js?build=23');
 assert(visualIndex>=0&&visualIndex<dialogueIndex&&dialogueIndex<gameIndex,'dialogue must load after the survivor stage and before combat starts');
 for(const marker of ['app.css?build=44','js/core/config.js?build=30','js/systems/survivor-dialogue.js?build=1','js/audio.js?build=14'])assert(html.includes(marker),`cache marker missing: ${marker}`);
 assert(smoke.includes('forceDialogue=1')&&smoke.includes('Road stays ours.'),'real-browser smoke must render the completed deterministic dialogue line');
