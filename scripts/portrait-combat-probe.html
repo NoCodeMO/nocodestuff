@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Afterlight portrait combat probe</title>
+  <style>html,body{margin:0;background:#000;color:#fff;font:12px monospace}iframe{position:absolute;left:0;top:0;border:0;visibility:hidden}</style>
+</head>
+<body data-portrait-combat="running">
+  <output id="combatReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const cases=[
+        {name:'small-common-horde',width:320,height:568,enemy:'common',horde:true,count:3},
+        {name:'small-epic-horde',width:320,height:568,enemy:'epic',horde:true,count:3},
+        {name:'small-brute',width:320,height:568,enemy:'brute',horde:false,count:1},
+        {name:'tall-epic-horde',width:390,height:844,enemy:'epic',horde:true,count:3}
+      ],results=[];
+      const inside=(inner,outer)=>inner.left>=outer.left-.5&&inner.right<=outer.right+.5&&inner.top>=outer.top-.5&&inner.bottom<=outer.bottom+.5;
+      cases.forEach(test=>{
+        const frame=document.createElement('iframe'),params=new URLSearchParams({v:'portrait-probe-'+test.name,enemy:test.enemy});
+        if(test.horde)params.set('horde','1');
+        frame.width=test.width;frame.height=test.height;frame.style.width=test.width+'px';frame.style.height=test.height+'px';frame.src='../index.html?'+params;
+        frame.addEventListener('load',()=>setTimeout(()=>{
+          try{
+            const doc=frame.contentDocument,stage=doc.getElementById('spriteStage').getBoundingClientRect(),survivor=doc.querySelector('.survivorSprite').getBoundingClientRect(),sprites=[...doc.querySelectorAll('.enemyUnit .enemySprite')].map(node=>node.getBoundingClientRect()),card=doc.getElementById('enemyCard').getBoundingClientRect(),descending=test.horde&&sprites.length===3?sprites[0].height>sprites[1].height&&sprites[1].height>sprites[2].height&&sprites[0].top>sprites[1].top&&sprites[1].top>sprites[2].top:true,passed=sprites.length===test.count&&sprites.every(rect=>inside(rect,stage))&&inside(survivor,stage)&&descending&&(!test.horde||card.left-stage.left<=14);
+            results.push({name:test.name,passed,count:sprites.length,inside:sprites.map(rect=>inside(rect,stage)),survivorInside:inside(survivor,stage),descending});
+          }catch(error){results.push({name:test.name,passed:false,error:String(error)})}
+          if(results.length===cases.length){const passed=results.every(result=>result.passed);document.body.dataset.portraitCombat=passed?'passed':'failed';document.getElementById('combatReport').textContent='AFTERLIGHT_PORTRAIT_COMBAT_'+(passed?'PASS ':'FAIL ')+JSON.stringify(results)}
+        },950));
+        document.body.appendChild(frame);
+      });
+    })();
+  </script>
+</body>
+</html>

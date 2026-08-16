@@ -4,6 +4,7 @@ set -euo pipefail
 PORT="${PORT:-4173}"
 DOM_FILE="${TMPDIR:-/tmp}/afterlight-dom.html"
 LANDSCAPE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-landscape-dom.html"
+PORTRAIT_COMBAT_DOM_FILE="${TMPDIR:-/tmp}/afterlight-portrait-combat-dom.html"
 ARCHITECT_DOM_FILE="${TMPDIR:-/tmp}/afterlight-architect-dom.html"
 PRESTIGE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-prestige-dom.html"
 RESET_DOM_FILE="${TMPDIR:-/tmp}/afterlight-account-reset-dom.html"
@@ -27,6 +28,7 @@ fi
 
 "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=2500 --dump-dom "http://127.0.0.1:${PORT}/?forceCarePackage=1&forceDialogue=1" >"$DOM_FILE" 2>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,500 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/landscape-probe.html" >"$LANDSCAPE_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,900 --virtual-time-budget=4500 --dump-dom "http://127.0.0.1:${PORT}/scripts/portrait-combat-probe.html" >"$PORTRAIT_COMBAT_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,700 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/architect-probe.html" >"$ARCHITECT_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/prestige-probe.html" >"$PRESTIGE_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=8000 --dump-dom "http://127.0.0.1:${PORT}/scripts/account-reset-probe.html" >"$RESET_DOM_FILE" 2>>"$CHROME_LOG"
@@ -125,6 +127,14 @@ if ! grep -Fq 'data-architect-probe="passed"' "$ARCHITECT_DOM_FILE"; then
   exit 1
 fi
 
+if ! grep -Fq 'data-portrait-combat="passed"' "$PORTRAIT_COMBAT_DOM_FILE"; then
+  echo "Portrait combat browser smoke test failed."
+  grep -F 'AFTERLIGHT_PORTRAIT_COMBAT_' "$PORTRAIT_COMBAT_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
 if ! grep -Fq 'data-prestige-probe="passed"' "$PRESTIGE_DOM_FILE"; then
   echo "Prestige browser smoke test failed."
   grep -F 'AFTERLIGHT_PRESTIGE_' "$PRESTIGE_DOM_FILE" || true
@@ -149,4 +159,4 @@ if ! grep -Fq 'data-death-animation-probe="passed"' "$DEATH_DOM_FILE"; then
   exit 1
 fi
 
-echo "Afterlight browser smoke test passed: core game, Drifter death sequence, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."
+echo "Afterlight browser smoke test passed: core game, safe portrait combat, Drifter death sequence, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."
