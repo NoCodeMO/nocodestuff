@@ -95,7 +95,7 @@ required=(
   'js/systems/operations.js?build=2'
   'js/systems/command-center.js?build=7'
   'js/systems/survivor-dialogue.js?build=1'
-  'js/core/game.js?build=24'
+  'js/core/game.js?build=25'
   'js/audio.js?build=15'
   'js/systems/care-package.js?build=2'
 )
