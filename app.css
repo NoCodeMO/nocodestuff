@@ -260,3 +260,22 @@ body:has(#drawer:not(.hidden)) #appModeBanner,body:has(#missionBox.open) #appMod
 .dossierImage{position:relative;display:block;height:auto;min-height:142px;max-height:230px;aspect-ratio:16/9;overflow:hidden;isolation:isolate;background:#070a08;border-color:#78663d;box-shadow:inset 0 0 28px #000,0 8px 20px #0008}.dossierImage>img{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--dossier-position,50% 50%);filter:saturate(.96) contrast(1.05);user-select:none;pointer-events:none}.dossierImage:before{content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(180deg,#0406044f 0,#04060409 40%,#030503d9 100%),linear-gradient(90deg,#02030240,transparent 25% 75%,#02030240);pointer-events:none}.dossierImage:after{z-index:3;border:4px solid #090c098f;box-shadow:inset 0 0 18px #0009}.dossierImage>span,.dossierImage>i,.dossierImage>b,.dossierImage>em{position:absolute;z-index:2;text-shadow:0 2px 3px #000,0 0 8px #000}.dossierImage>span{left:9px;top:8px;padding:3px 5px;color:#e2c463;background:#080b09b8;border-left:2px solid #b99545;font-size:6px;letter-spacing:1.2px}.dossierImage>i{left:10px;bottom:9px;color:#f0cf6b;font:normal 18px monospace}.dossierImage>b{left:34px;bottom:11px;margin:0;color:#f4ead1;font-size:10px;letter-spacing:1.7px}.dossierImage>em{right:9px;bottom:9px;padding:4px 6px;color:#efc15b;background:#140f0bd9;border:1px solid #8b6535;font:normal 6px monospace}
 @media(max-width:760px){#drawer.expeditionDrawer #drawerBody .dossierImage{height:auto;min-height:0;max-height:none;aspect-ratio:16/9;background-size:auto}}
 @media(orientation:landscape) and (max-height:600px){#drawer.expeditionDrawer #drawerBody .dossierImage{height:112px;min-height:112px;max-height:112px;aspect-ratio:auto}}
+
+/* 30. Expedition atlas V2: readable regions and real miniature landmarks */
+.atlasWorld{background-image:linear-gradient(#07100b18,#05070632),url('assets/expedition-world-atlas-v2.webp');background-position:center;background-size:cover}
+.atlasWorld:before{background:radial-gradient(ellipse at 8% 46%,transparent 0 13%,#05080712 27%,transparent 39%),linear-gradient(90deg,transparent 0 57%,#12222a0e 73%,#551b1624 100%)}
+.atlasNode{width:118px;filter:drop-shadow(0 4px 4px #000)}
+.atlasNode>i{position:relative;width:70px;height:42px;display:block;overflow:visible;border:2px solid var(--node-accent);border-radius:4px;background:#101410;box-shadow:0 0 13px color-mix(in srgb,var(--node-accent) 58%,transparent);transition:transform .16s ease,box-shadow .16s ease}
+.atlasNode>i:after{inset:-5px;border-radius:6px}
+.atlasNode>i>img{display:block;width:100%;height:100%;border-radius:2px;object-fit:cover;object-position:var(--node-art-position);filter:saturate(.88) contrast(1.12) brightness(.9);pointer-events:none}
+.atlasNode>i>em{position:absolute;right:-7px;bottom:-7px;min-width:17px;height:17px;box-sizing:border-box;display:grid;place-items:center;padding:0 3px;border:1px solid var(--node-accent);border-radius:2px;background:#101510;color:#f3e5b8;font:normal 10px/1 monospace;box-shadow:0 2px 5px #000,0 0 7px color-mix(in srgb,var(--node-accent) 65%,transparent);pointer-events:none}
+.atlasNode span{margin-top:7px;max-width:118px;padding:3px 6px;border-color:color-mix(in srgb,var(--node-accent) 55%,#353c34);font-size:6.5px}
+.atlasNode small{max-width:118px}
+.atlasNode:hover>i,.atlasNode:focus-visible>i,.atlasNode.selected>i{transform:scale(1.09);box-shadow:0 0 24px color-mix(in srgb,var(--node-accent) 72%,transparent)}
+.atlasNode.selected>i{background:#111611}
+.atlasNode.locked{opacity:.86}.atlasNode.locked>i>img{filter:grayscale(.82) saturate(.3) contrast(1.12) brightness(.68)}
+.atlasNode.locked>i>em{color:#858d89;background:#151918}
+.atlasNode.active>i{animation:atlasLandmarkPulse .75s alternate infinite}
+@keyframes atlasLandmarkPulse{to{transform:scale(1.09);box-shadow:0 0 29px var(--node-accent)}}
+@media(max-width:760px){#drawer.expeditionDrawer #drawerBody .atlasNode{width:105px}#drawer.expeditionDrawer #drawerBody .atlasNode>i{width:64px;height:38px}#drawer.expeditionDrawer #drawerBody .atlasNode span,#drawer.expeditionDrawer #drawerBody .atlasNode small{max-width:105px}}
+@media(orientation:landscape) and (max-height:600px){#drawer.expeditionDrawer #drawerBody .atlasNode{width:98px}#drawer.expeditionDrawer #drawerBody .atlasNode>i{width:60px;height:35px}#drawer.expeditionDrawer #drawerBody .atlasNode span,#drawer.expeditionDrawer #drawerBody .atlasNode small{max-width:98px}}
