@@ -16,7 +16,7 @@ assert(css.includes('.reducedEffects .survivorDialogue')&&css.includes('@media(p
 assert(css.includes('@media(max-width:699px)')&&css.includes('@media(orientation:landscape) and (min-width:560px) and (max-height:600px)'),'dialogue needs phone portrait and landscape layouts');
 const visualIndex=html.indexOf('js/ui/visuals.js?build=20'),dialogueIndex=html.indexOf('js/systems/survivor-dialogue.js?build=1'),gameIndex=html.indexOf('js/core/game.js?build=23');
 assert(visualIndex>=0&&visualIndex<dialogueIndex&&dialogueIndex<gameIndex,'dialogue must load after the survivor stage and before combat starts');
-for(const marker of ['app.css?build=38','js/core/config.js?build=26','js/systems/survivor-dialogue.js?build=1','js/audio.js?build=13'])assert(html.includes(marker),`cache marker missing: ${marker}`);
+for(const marker of ['app.css?build=39','js/core/config.js?build=27','js/systems/survivor-dialogue.js?build=1','js/audio.js?build=13'])assert(html.includes(marker),`cache marker missing: ${marker}`);
 assert(smoke.includes('forceDialogue=1')&&smoke.includes('Road stays ours.'),'real-browser smoke must render the completed deterministic dialogue line');
 const totalLines=Object.values(profiles).reduce((sum,profile)=>sum+profile.idle.length+profile.kill.length+profile.streak.length+profile.horde.length+profile.brute.length,0);
 console.log(`Afterlight survivor dialogue passed: ${totalLines} character lines, contextual kill/idle timing, responsive typewriter UI and gesture-safe retro voice bleeps.`);
