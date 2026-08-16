@@ -266,6 +266,7 @@ Only active assets remain in `assets/`:
 - `enemy-uncommon-cinderback-death.png` - normalized true-alpha three-frame death sheet for the Uncommon Cinderback; each 700x760 cell shares one baseline and needs no custom overlap crop
 - `enemy-rare-blue-shield-death.png` - normalized true-alpha death sheet for the Rare Blue Shield, including the complete riot shield in every 700x760 frame
 - `enemy-epic-bloater-death.png` - normalized true-alpha death sheet for the Epic Bloater; its oversized body and wide corpse stay fully inside three 700x760 cells
+- The Bloater death renderer uses a character-specific 148% scale (127% in hordes) because its approved sheet contains substantially more vertical safety space than the live sprite; keep both grounded at the shared bottom baseline.
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
 - `care-package-airborne.png`, `care-package-crate.png` - true-alpha matching care-package states; the parachute is used only during descent and the closed crate receives its glow, dust, timer and reward effects at runtime
