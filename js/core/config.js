@@ -42,6 +42,8 @@ const EXPEDITIONS={
   reactor:{id:'reactor',order:13,parent:'prison',prestige:5,icon:'☢',landmark:'REACTOR',name:'REACTOR RUINS',position:[93,20],art:'assets/expedition-reactor.webp',artPosition:'50% 45%',threat:'APOCALYPTIC',seconds:18000,unlock:1,coins:[68000,115000],scrap:[6400,10500],coinSeconds:[25200,36600],scrapSeconds:[11800,17200],supplySeconds:1720,supplies:{food:1100,water:1450},uranium:[10,14],uraniumChance:1,specialistChance:.78,companionChance:.022,lore:'The reactor crater glows through permanent night. Pre-fall vaults remain embedded beneath the molten shell.',intel:'Prestige V route. Exceptional crystal yield, elite survivor signals and catastrophic exposure.'},
   blacksite:{id:'blacksite',order:14,parent:'checkpoint',prestige:5,icon:'◆',landmark:'BLACKSITE',name:'RESEARCH BLACKSITE',position:[94,65],art:'assets/expedition-blacksite.webp',artPosition:'50% 46%',threat:'APOCALYPTIC',seconds:21600,unlock:1,coins:[95000,160000],scrap:[9000,14800],coinSeconds:[30600,44400],scrapSeconds:[14400,21000],supplySeconds:2050,supplies:{food:1400,water:1850},uranium:[14,18],uraniumChance:1,specialistChance:.84,companionChance:.03,lore:'The last Afterlight precursor lab hides beyond the irradiated marsh, protected by autonomous defenses.',intel:'Prestige V route. The richest known haul and the only confirmed companion habitat.'}
 };
+const COMPANION_FIND_CHANCES=Object.freeze({store:.02,blocks:.03,clinic:.04,gas:.05,factory:.06,rail:.07,police:.08,hospital:.09,metro:.10,radio:.11,checkpoint:.12,prison:.13,reactor:.15,blacksite:.17});
+for(const [id,chance] of Object.entries(COMPANION_FIND_CHANCES))EXPEDITIONS[id].companionChance=chance;
 const SPECIALISTS=[
   {id:'maya',name:'MAYA REYES',role:'REACTOR ENGINEER',icon:'☢',unlocks:'NUCLEAR REACTOR'},
   {id:'nora',name:'NORA VALE',role:'TRAUMA SURGEON',icon:'✚',unlocks:'TRAUMA CENTER'},
@@ -50,27 +52,50 @@ const SPECIALISTS=[
   {id:'elias',name:'DR. ELIAS VOSS',role:'EXPERIMENTAL PHYSICIST',icon:'✦',unlocks:'EXPERIMENTAL LAB'}
 ];
 const EXPEDITION_COMPANIONS=[
-  {id:'ranger-dog',icon:'◆',name:'RANGER',role:'COMMON TRACKER',rarity:'common',accent:'#b8b4a2',asset:'assets/pets/pet-ranger-dog-idle.webp',frames:3,scale:.9,description:'A steady shepherd that never lets the road out of sight.'},
-  {id:'bolt',icon:'◆',name:'BOLT',role:'COMMON CARRIER',rarity:'common',accent:'#b8b4a2',asset:'assets/pets/pet-bolt-idle.webp',frames:3,scale:.9,description:'A bunker Labrador who carries supplies without complaint.'},
-  {id:'patch',icon:'◆',name:'PATCH',role:'COMMON SCROUNGER',rarity:'common',accent:'#b8b4a2',asset:'assets/pets/pet-patch-idle.webp',frames:3,scale:.72,description:'A fearless little terrier with a nose for hidden salvage.'},
-  {id:'rook-dog',icon:'◆',name:'ROOK',role:'COMMON GUARD',rarity:'common',accent:'#b8b4a2',asset:'assets/pets/pet-rook-dog-idle.webp',frames:3,scale:.92,description:'A powerful guard dog that owns every bunker doorway.'},
-  {id:'drift',icon:'◆',name:'DRIFT',role:'COMMON PATHFINDER',rarity:'common',accent:'#b8b4a2',asset:'assets/pets/pet-drift-idle.webp',frames:3,scale:.88,description:'A cold-weather husky that finds the safest path home.'},
-  {id:'ash-hound',icon:'◆',name:'ASH HOUND',role:'RARE WASTELAND TRACKER',rarity:'rare',accent:'#4f9ee8',asset:'assets/pets/pet-ash-hound-idle.webp',frames:3,scale:.95,description:'A loyal tracker recovered from the red-zone kennels.'},
-  {id:'bluefang',icon:'◆',name:'BLUEFANG',role:'RARE ARMORED SCOUT',rarity:'rare',accent:'#4f9ee8',asset:'assets/pets/pet-bluefang-idle.webp',frames:3,scale:1,description:'A steel-blue wolfdog trained to cross hostile ground.'},
-  {id:'ember',icon:'◆',name:'EMBER',role:'RARE BREACH HOUND',rarity:'rare',accent:'#c87b38',asset:'assets/pets/pet-ember-idle.webp',frames:3,scale:1.08,description:'A massive mastiff protected by heat-scarred salvage armor.'},
-  {id:'ghostwire',icon:'◆',name:'GHOSTWIRE',role:'RARE SIGNAL RUNNER',rarity:'rare',accent:'#67b8d5',asset:'assets/pets/pet-ghostwire-idle.webp',frames:3,scale:.88,description:'A silent greyhound linked to Afterlight radio frequencies.'},
-  {id:'k9-xiii',icon:'◆',name:'K-9 XIII',role:'RARE RIOT GUARD',rarity:'rare',accent:'#d85a43',asset:'assets/pets/pet-k9-xiii-idle.webp',frames:3,scale:.96,description:'An elite police dog still following its final command.'},
-  {id:'rad-cat',icon:'✦',name:'RAD-CAT',role:'UNCOMMON BUNKER CAT',rarity:'uncommon',accent:'#c88738',asset:'assets/pets/pet-rad-cat-idle.webp',frames:3,scale:.62,description:'An impossible little survivor with bright uranium eyes.'},
-  {id:'switch-cat',icon:'✦',name:'SWITCH',role:'UNCOMMON TECH CAT',rarity:'uncommon',accent:'#c88738',asset:'assets/pets/pet-switch-cat-idle.webp',frames:3,scale:.62,description:'A tabby that appears whenever bunker wiring needs attention.'},
-  {id:'cinder-cat',icon:'✦',name:'CINDER',role:'UNCOMMON ASH CAT',rarity:'uncommon',accent:'#c88738',asset:'assets/pets/pet-cinder-cat-idle.webp',frames:3,scale:.63,description:'A confident orange cat that sleeps beside warm generators.'},
-  {id:'nocturne',icon:'✦',name:'NOCTURNE',role:'UNCOMMON NIGHT CAT',rarity:'uncommon',accent:'#9d78c9',asset:'assets/pets/pet-nocturne-idle.webp',frames:3,scale:.61,description:'A silent black scout with eyes made for dead cities.'},
-  {id:'snowdrop',icon:'✦',name:'SNOWDROP',role:'UNCOMMON MEDIC CAT',rarity:'uncommon',accent:'#79b8d8',asset:'assets/pets/pet-snowdrop-idle.webp',frames:3,scale:.66,description:'A calm white cat that refuses to leave the medics behind.'},
-  {id:'signal-crow',icon:'⌁',name:'SIGNAL CROW',role:'SPECIAL RADIO SCOUT',rarity:'epic',accent:'#a45bd8',asset:'assets/pets/pet-signal-crow-idle.webp',frames:3,scale:.68,description:'A sharp-eyed bird that follows working radio towers.'},
-  {id:'scrap-ferret',icon:'⌁',name:'SCRAP FERRET',role:'SPECIAL SALVAGE SCOUT',rarity:'epic',accent:'#a45bd8',asset:'assets/pets/pet-scrap-ferret-idle.webp',frames:3,scale:.52,description:'Small enough for vents and fearless enough for ruins.'},
-  {id:'tunnel-rat',icon:'⌁',name:'TUNNEL RAT',role:'SPECIAL ROUTE SCOUT',rarity:'epic',accent:'#a45bd8',asset:'assets/pets/pet-tunnel-rat-idle.webp',frames:3,scale:.57,description:'A clever map carrier that remembers every underground route.'},
-  {id:'salvage-fox',icon:'⌁',name:'SALVAGE FOX',role:'SPECIAL CACHE SCOUT',rarity:'epic',accent:'#a45bd8',asset:'assets/pets/pet-salvage-fox-idle.webp',frames:3,scale:.76,description:'A quick red fox that can smell sealed supply caches.'},
-  {id:'watch-owl',icon:'⌁',name:'WATCH OWL',role:'SPECIAL NIGHT SCOUT',rarity:'epic',accent:'#a45bd8',asset:'assets/pets/pet-watch-owl-idle.webp',frames:3,scale:.66,description:'A silent lookout carrying pre-fall reconnaissance optics.'}
+  {id:'ranger-dog',icon:'◆',name:'RANGER',role:'COMMON TRACKER',rarity:'common',accent:'#b8b4a2',asset:'assets/pets/pet-ranger-dog-idle-v2.webp',frames:3,scale:.9,description:'A steady shepherd that never lets the road out of sight.'},
+  {id:'bolt',icon:'◆',name:'BOLT',role:'COMMON CARRIER',rarity:'common',accent:'#b8b4a2',asset:'assets/pets/pet-bolt-idle-v2.webp',frames:3,scale:.9,description:'A bunker Labrador who carries supplies without complaint.'},
+  {id:'patch',icon:'◆',name:'PATCH',role:'COMMON SCROUNGER',rarity:'common',accent:'#b8b4a2',asset:'assets/pets/pet-patch-idle-v2.webp',frames:3,scale:.72,description:'A fearless little terrier with a nose for hidden salvage.'},
+  {id:'rook-dog',icon:'◆',name:'ROOK',role:'COMMON GUARD',rarity:'common',accent:'#b8b4a2',asset:'assets/pets/pet-rook-dog-idle-v2.webp',frames:3,scale:.92,description:'A powerful guard dog that owns every bunker doorway.'},
+  {id:'drift',icon:'◆',name:'DRIFT',role:'COMMON PATHFINDER',rarity:'common',accent:'#b8b4a2',asset:'assets/pets/pet-drift-idle-v2.webp',frames:3,scale:.88,description:'A cold-weather husky that finds the safest path home.'},
+  {id:'ash-hound',icon:'◆',name:'ASH HOUND',role:'RARE WASTELAND TRACKER',rarity:'rare',accent:'#4f9ee8',asset:'assets/pets/pet-ash-hound-idle-v2.webp',frames:3,scale:.95,description:'A loyal tracker recovered from the red-zone kennels.'},
+  {id:'bluefang',icon:'◆',name:'BLUEFANG',role:'RARE ARMORED SCOUT',rarity:'rare',accent:'#4f9ee8',asset:'assets/pets/pet-bluefang-idle-v2.webp',frames:3,scale:1,description:'A steel-blue wolfdog trained to cross hostile ground.'},
+  {id:'ember',icon:'◆',name:'EMBER',role:'RARE BREACH HOUND',rarity:'rare',accent:'#c87b38',asset:'assets/pets/pet-ember-idle-v2.webp',frames:3,scale:1.08,description:'A massive mastiff protected by heat-scarred salvage armor.'},
+  {id:'ghostwire',icon:'◆',name:'GHOSTWIRE',role:'RARE SIGNAL RUNNER',rarity:'rare',accent:'#67b8d5',asset:'assets/pets/pet-ghostwire-idle-v2.webp',frames:3,scale:.88,description:'A silent greyhound linked to Afterlight radio frequencies.'},
+  {id:'k9-xiii',icon:'◆',name:'K-9 XIII',role:'RARE RIOT GUARD',rarity:'rare',accent:'#d85a43',asset:'assets/pets/pet-k9-xiii-idle-v2.webp',frames:3,scale:.96,description:'An elite police dog still following its final command.'},
+  {id:'rad-cat',icon:'✦',name:'RAD-CAT',role:'UNCOMMON BUNKER CAT',rarity:'uncommon',accent:'#c88738',asset:'assets/pets/pet-rad-cat-idle-v2.webp',frames:3,scale:.62,description:'An impossible little survivor with bright uranium eyes.'},
+  {id:'switch-cat',icon:'✦',name:'SWITCH',role:'UNCOMMON TECH CAT',rarity:'uncommon',accent:'#c88738',asset:'assets/pets/pet-switch-cat-idle-v2.webp',frames:3,scale:.62,description:'A tabby that appears whenever bunker wiring needs attention.'},
+  {id:'cinder-cat',icon:'✦',name:'CINDER',role:'UNCOMMON ASH CAT',rarity:'uncommon',accent:'#c88738',asset:'assets/pets/pet-cinder-cat-idle-v2.webp',frames:3,scale:.63,description:'A confident orange cat that sleeps beside warm generators.'},
+  {id:'nocturne',icon:'✦',name:'NOCTURNE',role:'UNCOMMON NIGHT CAT',rarity:'uncommon',accent:'#9d78c9',asset:'assets/pets/pet-nocturne-idle-v2.webp',frames:3,scale:.61,description:'A silent black scout with eyes made for dead cities.'},
+  {id:'snowdrop',icon:'✦',name:'SNOWDROP',role:'UNCOMMON MEDIC CAT',rarity:'uncommon',accent:'#79b8d8',asset:'assets/pets/pet-snowdrop-idle-v2.webp',frames:3,scale:.66,description:'A calm white cat that refuses to leave the medics behind.'},
+  {id:'signal-crow',icon:'⌁',name:'SIGNAL CROW',role:'SPECIAL RADIO SCOUT',rarity:'epic',accent:'#a45bd8',asset:'assets/pets/pet-signal-crow-idle-v2.webp',frames:3,scale:.68,description:'A sharp-eyed bird that follows working radio towers.'},
+  {id:'scrap-ferret',icon:'⌁',name:'SCRAP FERRET',role:'SPECIAL SALVAGE SCOUT',rarity:'epic',accent:'#a45bd8',asset:'assets/pets/pet-scrap-ferret-idle-v2.webp',frames:3,scale:.52,description:'Small enough for vents and fearless enough for ruins.'},
+  {id:'tunnel-rat',icon:'⌁',name:'TUNNEL RAT',role:'SPECIAL ROUTE SCOUT',rarity:'epic',accent:'#a45bd8',asset:'assets/pets/pet-tunnel-rat-idle-v2.webp',frames:3,scale:.57,description:'A clever map carrier that remembers every underground route.'},
+  {id:'salvage-fox',icon:'⌁',name:'SALVAGE FOX',role:'SPECIAL CACHE SCOUT',rarity:'epic',accent:'#a45bd8',asset:'assets/pets/pet-salvage-fox-idle-v2.webp',frames:3,scale:.76,description:'A quick red fox that can smell sealed supply caches.'},
+  {id:'watch-owl',icon:'⌁',name:'WATCH OWL',role:'SPECIAL NIGHT SCOUT',rarity:'epic',accent:'#a45bd8',asset:'assets/pets/pet-watch-owl-idle-v2.webp',frames:3,scale:.66,description:'A silent lookout carrying pre-fall reconnaissance optics.'}
 ];
+const COMPANION_PROGRESSION=Object.freeze({
+  'ranger-dog':{unlockPrestige:0,starter:true,benefit:null,benefitLabel:'COSMETIC COMPANION · NO BENEFIT',benefitDescription:'Ranger is your free loyal companion and never changes the game economy.'},
+  bolt:{unlockPrestige:0,benefit:{coinMultiplier:1.05},benefitLabel:'+5% EXPEDITION COINS',benefitDescription:'Carries extra valuables home from every completed expedition.'},
+  patch:{unlockPrestige:0,benefit:{scrapMultiplier:1.06},benefitLabel:'+6% EXPEDITION SCRAP',benefitDescription:'Sniffs out small components hidden beneath ruined floors.'},
+  'rook-dog':{unlockPrestige:0,benefit:{supplyMultiplier:.94},benefitLabel:'-6% EXPEDITION RATIONS',benefitDescription:'Guards the supply pack so less Food and Water is lost on the road.'},
+  drift:{unlockPrestige:0,benefit:{timeMultiplier:.95},benefitLabel:'-5% EXPEDITION TIME',benefitDescription:'Finds a safer and faster route back to Afterlight.'},
+  'ash-hound':{unlockPrestige:1,benefit:{companionChanceAdd:.025},benefitLabel:'+2.5% PET FIND CHANCE',benefitDescription:'Tracks living animal trails that other scouts miss.'},
+  bluefang:{unlockPrestige:1,benefit:{specialistChanceAdd:.03},benefitLabel:'+3% SPECIALIST CHANCE',benefitDescription:'Detects survivor movement across hostile terrain.'},
+  ember:{unlockPrestige:1,benefit:{coinMultiplier:1.12},benefitLabel:'+12% EXPEDITION COINS',benefitDescription:'Breaks open heavy trade caches before the team returns.'},
+  ghostwire:{unlockPrestige:1,benefit:{timeMultiplier:.88},benefitLabel:'-12% EXPEDITION TIME',benefitDescription:'Runs silent routes through the fastest radio corridors.'},
+  'k9-xiii':{unlockPrestige:1,benefit:{scrapMultiplier:1.14},benefitLabel:'+14% EXPEDITION SCRAP',benefitDescription:'Recovers military salvage from guarded locations.'},
+  'rad-cat':{unlockPrestige:1,benefit:{uraniumChanceAdd:.04},benefitLabel:'+4% CRYSTAL FIND CHANCE',benefitDescription:'Its glowing eyes react near Uranium Crystal deposits.'},
+  'switch-cat':{unlockPrestige:1,benefit:{timeMultiplier:.94},benefitLabel:'-6% EXPEDITION TIME',benefitDescription:'Keeps field equipment running and prevents route delays.'},
+  'cinder-cat':{unlockPrestige:1,benefit:{coinMultiplier:1.08},benefitLabel:'+8% EXPEDITION COINS',benefitDescription:'Finds warm, inhabited caches worth more to traders.'},
+  nocturne:{unlockPrestige:1,benefit:{companionChanceAdd:.015},benefitLabel:'+1.5% PET FIND CHANCE',benefitDescription:'Spots quiet animals hiding in dark ruins.'},
+  snowdrop:{unlockPrestige:1,benefit:{supplyMultiplier:.9},benefitLabel:'-10% EXPEDITION RATIONS',benefitDescription:'Keeps the team calm and conserves Food and Water.'},
+  'signal-crow':{unlockPrestige:3,benefit:{specialistChanceAdd:.08},benefitLabel:'+8% SPECIALIST CHANCE',benefitDescription:'Carries a clear rescue signal far beyond the atlas route.'},
+  'scrap-ferret':{unlockPrestige:3,benefit:{scrapMultiplier:1.25},benefitLabel:'+25% EXPEDITION SCRAP',benefitDescription:'Reaches sealed vents packed with rare components.'},
+  'tunnel-rat':{unlockPrestige:3,benefit:{timeMultiplier:.8},benefitLabel:'-20% EXPEDITION TIME',benefitDescription:'Remembers underground shortcuts through every sector.'},
+  'salvage-fox':{unlockPrestige:3,benefit:{coinMultiplier:1.2,companionChanceAdd:.03},benefitLabel:'+20% COINS · +3% PET CHANCE',benefitDescription:'Locates valuable caches and the animals sheltering nearby.'},
+  'watch-owl':{unlockPrestige:3,benefit:{uraniumChanceAdd:.08,specialistChanceAdd:.04},benefitLabel:'+8% CRYSTALS · +4% SPECIALISTS',benefitDescription:'Surveys crystal light and survivor signals from above.'}
+});
+for(const pet of EXPEDITION_COMPANIONS)Object.assign(pet,COMPANION_PROGRESSION[pet.id]);
 const SPECIAL_ROOMS=[
   {id:'reactor',icon:'☢',name:'NUCLEAR REACTOR',specialist:'maya',unlock:3,baseCost:2500,desc:'Massive power core. Requires a Reactor Engineer.',prod:{power:18,coins:8}},
   {id:'medbay',icon:'✚',name:'TRAUMA CENTER',specialist:'nora',unlock:5,baseCost:5000,desc:'Advanced medical facility. Requires a Trauma Surgeon.',prod:{coins:16}},

@@ -12,6 +12,7 @@ RESET_DOM_FILE="${TMPDIR:-/tmp}/afterlight-account-reset-dom.html"
 DEATH_DOM_FILE="${TMPDIR:-/tmp}/afterlight-drifter-death-dom.html"
 EXPEDITION_ART_DOM_FILE="${TMPDIR:-/tmp}/afterlight-expedition-art-dom.html"
 COMPANION_IDLE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-companion-idle-dom.html"
+PET_COMMAND_DOM_FILE="${TMPDIR:-/tmp}/afterlight-pet-command-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/afterlight-chrome.log"
 
 python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/afterlight-server.log" 2>&1 &
@@ -39,6 +40,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/death-animation-probe.html" >"$DEATH_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1200,900 --virtual-time-budget=12000 --dump-dom "http://127.0.0.1:${PORT}/scripts/expedition-art-probe.html" >"$EXPEDITION_ART_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1200,900 --virtual-time-budget=12000 --dump-dom "http://127.0.0.1:${PORT}/scripts/companion-idle-probe.html" >"$COMPANION_IDLE_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=6000 --dump-dom "http://127.0.0.1:${PORT}/scripts/pet-command-probe.html" >"$PET_COMMAND_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Afterlight Bunker</title>'
@@ -190,4 +192,12 @@ if ! grep -Fq 'data-companion-idle-probe="passed"' "$COMPANION_IDLE_DOM_FILE"; t
   exit 1
 fi
 
-echo "Afterlight browser smoke test passed: core game, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, Drifter death sequence, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."
+if ! grep -Fq 'data-pet-command-probe="passed"' "$PET_COMMAND_DOM_FILE"; then
+  echo "Pet Command browser smoke test failed."
+  grep -F 'AFTERLIGHT_PET_COMMAND_' "$PET_COMMAND_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+echo "Afterlight browser smoke test passed: core game, free Ranger and Pet Command roster, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, Drifter death sequence, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."

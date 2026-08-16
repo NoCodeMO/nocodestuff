@@ -23,7 +23,7 @@ assert(back.phase==='RETURN'&&back.returning&&back.routeProgress>.4&&back.routeP
 const css=read('app.css'),game=read('js/core/game.js'),stateSource=read('js/core/state.js');
 assert(fs.existsSync(path.join(root,'assets','expedition-world-atlas-v2.webp')),'production atlas V2 art is missing');
 assert(/drawer\?\.classList\.toggle\('expeditionDrawer',tab==='expeditions'\)/.test(game),'Expeditions must open in the fullscreen drawer');
-assert(/companions:\[\],selectedCompanion:null,completed:\{\},visited:\[\]/.test(stateSource),'atlas roster, selected companion and route history must persist in the unified save');
+assert(/companions:\['ranger-dog'\],selectedCompanion:'ranger-dog',completed:\{\},visited:\[\]/.test(stateSource),'free Ranger, selected companion and route history must persist in the unified save');
 for(const selector of ['#drawer.expeditionDrawer','.atlasWorld','.atlasRoute.active','.atlasDossier','.expScout.returning'])assert(css.includes(selector),`${selector} styling is missing`);
 assert(/<img src="\$\{zone\.art\}"/.test(read('js/systems/expeditions.js')),'dossiers must render their dedicated location image');
 assert(/zone\.art\.replace\('assets\/expedition-','assets\/expedition-map-'\)/.test(read('js/systems/expeditions.js')),'atlas nodes must derive their exact location miniature');
