@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Afterlight Prestige reset probe</title>
+  <style>html,body{margin:0;background:#080a08;color:#fff;font:12px monospace}iframe{display:block;width:1000px;height:760px;border:0}</style>
+</head>
+<body data-prestige-probe="running">
+  <iframe id="gameFrame" title="Afterlight Prestige probe"></iframe>
+  <output id="prestigeReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const rooms={generator:50,workshop:50,greenhouse:50,purifier:50,lab:49,living:49,storage:49,turret:49},frame=document.getElementById('gameFrame'),report=document.getElementById('prestigeReport'),future=Date.now()+240000;
+      localStorage.setItem('afterlight_v4',JSON.stringify({schema:15,coins:987654,total:1234567,food:400,water:500,power:600,scrap:777,science:88,uranium:7,kills:321,rooms,research:{tools:3,solar:2,hydro:1,filters:1,automation:2,walls:2},researchRuntime:{active:null,ready:null},missions:{claimed:['m1'],bonuses:{prodMult:1.1}},expeditions:{active:null,survivors:['maya'],pending:null},merchant:{active:{gold5:future},purchases:{gold5:1},spent:3},survivorSkins:{selected:'ranger-male',unlocked:['ranger-male','ranger-female','architect']},stats:{clicks:900,lifetimeKills:0,rarityKills:{common:250,uncommon:40,rare:20,epic:8,legendary:2,brute:1}},last:Date.now()}));
+      frame.src='../index.html?v=prestige-probe';
+      function finish(){
+        const win=frame.contentWindow,doc=frame.contentDocument,before=win.AfterlightState.snapshot(),api=win.AfterlightPrestige,eligible=api.eligible(),preview=api.resetPreview();
+        win.AfterlightCommandCenter.render(doc.getElementById('drawerBody'));win.AfterlightCommandCenter.setTab('prestige',doc.getElementById('drawerBody'));
+        const panelBefore=!!doc.querySelector('[data-prestige-system="ready"]'),openButton=doc.querySelector('[data-prestige-open]'),confirmation=api.confirmation(),hasHold=!!confirmation.querySelector('[data-prestige-hold]');confirmation.remove();
+        const reset=api.performReset(),after=win.AfterlightState.snapshot(),stage=doc.getElementById('spriteStage'),unit=doc.querySelector('.survivorUnit'),backup=JSON.parse(localStorage.getItem('afterlight_prestige_backup_v1')||'null'),reveal=doc.querySelector('.prestigeReveal'),allRoomsReset=Object.entries(after.rooms).every(([id,value])=>value===(id==='generator'?1:0)),allResearchReset=Object.values(after.research).every(value=>value===0),kept=after.uranium===7&&after.missions.claimed.includes('m1')&&after.expeditions.survivors.includes('maya')&&after.merchant.active.gold5===future&&after.total===before.total,resetResources=after.coins===0&&after.food===0&&after.water===0&&after.power===0&&after.scrap===0&&after.science===0&&after.kills===0,prestiged=after.schema===16&&after.prestige.level===1&&after.prestige.cores===1&&after.survivorSkins.unlocked.includes('prestige-1')&&after.survivorSkins.selected==='prestige-1',visual=stage?.dataset.survivorId==='prestige-1'&&unit?.dataset.muzzleAnchor==='73.5% 29.8%'&&unit?.dataset.rarity==='rare',math=Math.abs(api.economyMultiplier()-1.575)<1e-9&&Math.abs(api.damageMultiplier()-1.25)<1e-9&&api.activePerk()==='salvage-discipline';
+        let allCycles=true;for(let wanted=2;wanted<=5;wanted++){doc.querySelector('.prestigeReveal')?.remove();const required=api.target(),total=(required-1)*4,ids=Object.keys(win.AfterlightState.get().rooms),base=Math.floor(total/ids.length),remainder=total%ids.length;win.AfterlightState.update('prestige-probe-funding',state=>{ids.forEach((id,index)=>state.rooms[id]=base+(index<remainder?1:0));state.coins=1e100});allCycles=allCycles&&win.AfterlightState.get().bunker===required&&api.eligible()&&api.coreReward()===1&&api.performReset();const cycle=win.AfterlightState.snapshot();allCycles=allCycles&&cycle.prestige.level===wanted&&cycle.prestige.cores===wanted&&cycle.survivorSkins.unlocked.includes('prestige-'+wanted)&&cycle.survivorSkins.selected==='prestige-'+wanted&&Object.entries(cycle.rooms).every(([id,value])=>value===(id==='generator'?1:0));}
+        const final=win.AfterlightState.snapshot(),finalVisual=stage?.dataset.survivorId==='prestige-5'&&unit?.dataset.muzzleAnchor==='68.2% 15.3%'&&unit?.dataset.rarity==='legendary',finalMath=Math.abs(api.economyMultiplier()-9.4921875)<1e-9&&Math.abs(api.damageMultiplier()-3.0517578125)<1e-9&&api.activePerk()==='last-light'&&!api.next()&&!api.eligible(),passed=before.schema===16&&before.bunker===100&&eligible&&preview.reward===1&&panelBefore&&!!openButton&&hasHold&&reset&&allRoomsReset&&allResearchReset&&kept&&resetResources&&prestiged&&visual&&math&&backup?.state?.schema===16&&!!reveal&&allCycles&&finalVisual&&finalMath;
+        document.body.dataset.prestigeProbe=passed?'passed':'failed';report.textContent='AFTERLIGHT_PRESTIGE_'+(passed?'PASS ':'FAIL ')+JSON.stringify({beforeSchema:before.schema,bunker:before.bunker,eligible,previewReward:preview.reward,panelBefore,hasHold,reset,allRoomsReset,allResearchReset,kept,resetResources,prestiged,visual,math,backup:!!backup,reveal:!!reveal,allCycles,finalVisual,finalMath,afterLevel:after.prestige.level,finalLevel:final.prestige.level,cores:final.prestige.cores,survivor:stage?.dataset.survivorId,muzzle:unit?.dataset.muzzleAnchor});
+      }
+      frame.addEventListener('load',()=>setTimeout(finish,1200));
+    })();
+  </script>
+</body>
+</html>

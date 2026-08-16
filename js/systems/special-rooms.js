@@ -5,7 +5,7 @@ const found=()=>window.AfterlightExpeditions?.survivors?.()||S.expeditions?.surv
 const fmt=NUM.format;
 const level=r=>Number(S.specialRooms[r.id]||0);
 const unlocked=r=>found().includes(r.specialist)&&S.bunker>=r.unlock;
-const cost=r=>Math.max(1,Math.floor(r.baseCost*Math.pow(1.7,level(r))*ST.bonus('costMult')));
+const cost=r=>Math.max(1,Math.floor(r.baseCost*Math.pow(1.7,level(r))*ST.bonus('costMult')*(window.AfterlightPrestige?.roomCostMultiplier?.()||1)));
 function status(r){if(!found().includes(r.specialist))return 'FIND SPECIALIST ON EXPEDITION';if(S.bunker<r.unlock)return 'BUNKER LEVEL '+r.unlock+' REQUIRED';return 'SPECIALIST READY'}
 function buy(id){const r=ROOMS.find(x=>x.id===id);if(!r||!unlocked(r))return false;const price=cost(r);if(S.coins<price)return false;ST.update('special-room',s=>{s.coins-=price;s.specialRooms[id]=(s.specialRooms[id]||0)+1});renderAll();window.AfterlightGame?.hud?.();return true}
 function rates(){const out={coins:0,food:0,water:0,power:0,scrap:0,science:0};for(const r of ROOMS){const lv=level(r);if(!lv)continue;for(const [key,value] of Object.entries(r.prod))out[key]=(out[key]||0)+value*lv}return out}

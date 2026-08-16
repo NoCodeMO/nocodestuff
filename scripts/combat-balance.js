@@ -46,7 +46,7 @@ for(const [pattern,message] of [
   [/killCredit:horde\?COMBAT\.hordeMultiplier:1/,'hordes must award x3 kill credit'],
   [/addCoins\(Math\.max\(1,Math\.floor\(baseCoins\*streak\.multiplier\)\),false\)/,'hourly-scaled bounties must not double-apply the coin bonus'],
   [/bruteCores/,'Brute kills must award their exclusive core drop']
-  ,[/const baseDamage=tapDamage\(\),critical=criticalHit\(\),damage=baseDamage\*\(critical\?COMBAT\.criticalMultiplier:1\)/,'critical damage must be calculated once in core combat']
+  ,[/const baseDamage=tapDamage\(\),critical=criticalHit\(\),criticalMultiplier=critical\?COMBAT\.criticalMultiplier\*\(window\.AfterlightPrestige\?\.criticalMultiplier\?\.\(\)\|\|1\):1,damage=baseDamage\*criticalMultiplier/,'critical damage, including Elara, must be calculated once in core combat']
   ,[/S\.stats\.criticals/,'lifetime critical hits must be tracked']
   ,[/function advanceStreak\(at=Date\.now\(\)\)/,'combat must own one deterministic streak calculator']
   ,[/Math\.floor\(baseCoins\*streak\.multiplier\)/,'streak multiplier must apply to kill rewards only after the kill']

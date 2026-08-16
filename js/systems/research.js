@@ -3,8 +3,8 @@ const CFG=window.AfterlightConfig,ST=window.AfterlightState,NUM=window.Afterligh
 const S=ST.get(),R=S.researchRuntime,DEFS=CFG.RESEARCH;
 const def=id=>DEFS.find(item=>item.id===id)||null;
 const level=id=>Math.max(0,Number(S.research[id]||0));
-const cost=item=>Math.max(1,Math.round(item.baseCost*Math.pow(item.costGrowth,level(item.id))));
-const seconds=item=>Math.min(21600,Math.round(item.baseSeconds*Math.pow(item.timeGrowth,level(item.id))));
+const cost=item=>Math.max(1,Math.round(item.baseCost*Math.pow(item.costGrowth,level(item.id))*(window.AfterlightPrestige?.researchCostMultiplier?.()||1)));
+const seconds=item=>Math.max(1,Math.min(21600,Math.round(item.baseSeconds*Math.pow(item.timeGrowth,level(item.id))*(window.AfterlightPrestige?.researchTimeMultiplier?.()||1))));
 const fmt=NUM.format;
 function duration(value){value=Math.max(0,Math.ceil(value));const h=Math.floor(value/3600),m=Math.floor(value%3600/60),s=value%60;return h?`${h}h ${String(m).padStart(2,'0')}m`:m?`${m}m ${String(s).padStart(2,'0')}s`:`${s}s`}
 function effect(item,lv=level(item.id)){const total=(Math.pow(item.effect,lv)-1)*100,next=(item.effect-1)*100;return lv?`CURRENT +${total.toFixed(total<10?1:0)}% · NEXT +${next.toFixed(0)}%`:`NEXT LEVEL +${next.toFixed(0)}%`}

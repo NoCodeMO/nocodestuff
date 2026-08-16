@@ -2,7 +2,7 @@
 const fs=require('fs'),path=require('path'),vm=require('vm');
 const root=path.resolve(__dirname,'..'),read=file=>fs.readFileSync(path.join(root,file),'utf8'),assert=(condition,message)=>{if(!condition)throw new Error(`Survivor dialogue: ${message}`)};
 const context={window:{}};vm.runInNewContext(read('js/core/config.js'),context);const config=context.window.AfterlightConfig,dialogue=config.SURVIVOR_DIALOGUE,profiles=dialogue.profiles;
-assert(JSON.stringify(Object.keys(profiles))===JSON.stringify(['ranger-male','ranger-female','architect']),'every selectable revealed survivor needs a stable dialogue profile');
+assert(JSON.stringify(Object.keys(profiles))===JSON.stringify(['ranger-male','ranger-female','architect','prestige-1','prestige-2','prestige-3','prestige-4','prestige-5']),'every selectable survivor needs a stable dialogue profile');
 for(const [id,profile] of Object.entries(profiles)){assert(profile.idle.length>=6,`${id} needs enough idle variety`);assert(profile.kill.length>=8,`${id} needs enough kill variety`);for(const kind of ['streak','horde','brute'])assert(profile[kind].length>=4,`${id} needs ${kind} reactions`);assert(profile.voice.base>=70&&profile.voice.spread>=20,`${id} needs a distinct safe retro voice range`);for(const line of [...profile.idle,...profile.kill,...profile.streak,...profile.horde,...profile.brute])assert(line.length<=42,`${id} line is too long for the responsive speech box: ${line}`)}
 assert(dialogue.killChance>=.35&&dialogue.killChance<=.55,'ordinary kill dialogue must feel present without firing every kill');
 assert(dialogue.hordeChance>dialogue.killChance&&dialogue.streakChance>dialogue.killChance,'special combat moments need higher dialogue odds');
@@ -14,8 +14,9 @@ for(const [pattern,message] of [[/function survivorVoiceBleep\(event\)/,'audio n
 for(const selector of ['.survivorDialogue','.survivorDialogue.show','.survivorDialogueLabel','.survivorDialogueText','.survivorDialogueCaret'])assert(css.includes(selector),`missing responsive dialogue styling: ${selector}`);
 assert(css.includes('.reducedEffects .survivorDialogue')&&css.includes('@media(prefers-reduced-motion:reduce)'),'dialogue must respect both game and OS reduced-motion settings');
 assert(css.includes('@media(max-width:699px)')&&css.includes('@media(orientation:landscape) and (min-width:560px) and (max-height:600px)'),'dialogue needs phone portrait and landscape layouts');
-const visualIndex=html.indexOf('js/ui/visuals.js?build=18'),dialogueIndex=html.indexOf('js/systems/survivor-dialogue.js?build=1'),gameIndex=html.indexOf('js/core/game.js?build=18');
+const visualIndex=html.indexOf('js/ui/visuals.js?build=19'),dialogueIndex=html.indexOf('js/systems/survivor-dialogue.js?build=1'),gameIndex=html.indexOf('js/core/game.js?build=19');
 assert(visualIndex>=0&&visualIndex<dialogueIndex&&dialogueIndex<gameIndex,'dialogue must load after the survivor stage and before combat starts');
-for(const marker of ['app.css?build=30','js/core/config.js?build=20','js/systems/survivor-dialogue.js?build=1','js/audio.js?build=12'])assert(html.includes(marker),`cache marker missing: ${marker}`);
+for(const marker of ['app.css?build=31','js/core/config.js?build=21','js/systems/survivor-dialogue.js?build=1','js/audio.js?build=13'])assert(html.includes(marker),`cache marker missing: ${marker}`);
 assert(smoke.includes('forceDialogue=1')&&smoke.includes('Road stays ours.'),'real-browser smoke must render the completed deterministic dialogue line');
-console.log('Afterlight survivor dialogue passed: 78 character lines, contextual kill/idle timing, responsive typewriter UI and gesture-safe retro voice bleeps.');
+const totalLines=Object.values(profiles).reduce((sum,profile)=>sum+profile.idle.length+profile.kill.length+profile.streak.length+profile.horde.length+profile.brute.length,0);
+console.log(`Afterlight survivor dialogue passed: ${totalLines} character lines, contextual kill/idle timing, responsive typewriter UI and gesture-safe retro voice bleeps.`);

@@ -18,7 +18,7 @@ This file is the fastest entry point for any future development session. Read th
 - `manifest.webmanifest` - PWA/home-screen metadata.
 
 ### Core
-- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers, survivor skins/dialogue, official Command Center transmissions and the complete enemy/rarity table.
+- `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers, all survivor skins/dialogue, the five-level Prestige curve, official Command Center transmissions and the complete enemy/rarity table.
 - `js/core/economy.js` - authoritative overflow-safe resource math, two-stage normal-room price curve, sequential bulk quotes and guarded purchase validation.
 - `js/core/numbers.js` - one authoritative large-number formatter from K/M through B, T, Qa, Qi, Dc and beyond.
 - `js/core/state.js` - one authoritative persistent state object and save migration.
@@ -35,6 +35,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/codex.js` - responsive Infected Codex, persistent first-sighting discovery, locked specimens and exact configured combat intelligence.
 - `js/systems/care-package.js` - persisted 90–150 second supply-drop scheduler, fall/landing lifecycle, five-second claims, economy-scaled loot and rare free Dealer activations.
 - `js/systems/survivor-dialogue.js` - survivor-specific idle, kill, streak, horde and Brute barks with contextual selection, typewriter timing and a single spam-safe scene bubble.
+- `js/systems/prestige.js` - five-cycle reset transaction, permanent multipliers, Prestige Cores, five Prestige Rooms, Cycle Contracts, Automation/Archive configuration and survivor reveal presentation.
 
 ### Presentation/platform
 - `js/ui/visuals.js` - configured survivor switching, enemy visuals, per-skin sprite-relative rifle flash, recoil/hit/death feedback, floating kill rewards and resource pulses. Normal room art is declared once in shared config and rendered directly by the room UI.
@@ -53,8 +54,10 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/codex-check.js` - discovery migration, spawn registration, all six entries, exact multipliers and responsive locked/unlocked archive checks.
 - `scripts/care-package-check.js` - transparent production assets, timing, economy scaling, scarce Uranium/Dealer odds, state migration, event/audio wiring and responsive UI guardrails.
 - `scripts/landscape-layout-check.js` and `scripts/landscape-probe.html` - static guardrails plus a real 844×390 computed-layout probe for the phone landscape command deck.
-- `scripts/survivor-roster-check.js` - starter/classified roster integrity, transparent assets, save migration, selection events and shared recoil/muzzle guardrails.
-- `scripts/survivor-dialogue-check.js` - all three survivor voices, contextual pools/odds, typewriter events, responsive bubble CSS, reduced-motion behavior and gesture-safe retro voice bleeps.
+- `scripts/survivor-roster-check.js` - starter/Architect/Prestige roster integrity, transparent assets, save migration, selection events and shared recoil/muzzle guardrails.
+- `scripts/survivor-dialogue-check.js` - all eight survivor voices, contextual pools/odds, typewriter events, responsive bubble CSS, reduced-motion behavior and gesture-safe retro voice bleeps.
+- `scripts/prestige-balance-check.js` - all five targets, survivors, active/permanent perk math, capped Core curve, reset boundaries, room costs and cross-system multiplier wiring.
+- `scripts/prestige-probe.html` - real-browser schema-15 migration plus transactional Prestige I–V reset, preservation, recovery backup, unlock, art, muzzle-anchor and multiplier probe.
 - `scripts/architect-probe.html` - real-browser Level 100 save migration, permanent unlock, exact x1.5 production multiplier, roster selection and rifle-anchor probe.
 - `scripts/smoke.sh` - launches the actual game in headless Chrome and verifies core dynamic UI rendered.
 - `npm test` - static validation only.
@@ -70,26 +73,27 @@ The order in `index.html` is intentional:
 2. economy
 3. numbers
 4. state
-5. expeditions
-6. special rooms
-7. research
-8. merchant
-9. command center
-10. visuals
-11. survivor dialogue
-12. game
-13. Infected Codex
-14. offline earnings
-15. missions
-16. care package
-17. audio
-18. platform
+5. prestige
+6. expeditions
+7. special rooms
+8. research
+9. merchant
+10. command center
+11. visuals
+12. survivor dialogue
+13. game
+14. Infected Codex
+15. offline earnings
+16. missions
+17. care package
+18. audio
+19. platform
 
-Do not casually reorder these. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
+Do not casually reorder these. Prestige loads before every economy consumer so research, expeditions and the first game tick share its multipliers. Missions loads after game because it owns the custom Missions tab click handler. Visuals loads before game so it receives initial combat events. Expeditions and special rooms load before game so their APIs are available to the first render/economy tick.
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 15`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 16`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -102,6 +106,7 @@ researchRuntime: { active, ready }
 missions: { claimed, bonuses }
 expeditions: { active, survivors, pending }
 specialRooms: { [roomId]: level }
+prestige: { level, cores, totalResets, bestBunker, lastAt, lastReward, rooms, automation, archive, run }
 survivorSkins: { selected, unlocked }
 merchant: { active, purchases, spent, freeActivations, legacyMissionGrantDone }
 carePackage: { nextAt, active, opened, missed }
@@ -124,6 +129,7 @@ Do not create another persistent gameplay store unless there is a strong reason.
 - `window.AfterlightEconomy`
 - `window.AfterlightNumbers`
 - `window.AfterlightState`
+- `window.AfterlightPrestige`
 - `window.AfterlightGame`
 - `window.AfterlightMissions`
 - `window.AfterlightExpeditions`
@@ -171,6 +177,9 @@ Use events instead of adding duplicate click listeners across systems:
 - `afterlight:survivor-dialogue-start` - a contextual/idle line begins; includes the survivor profile and dialogue context.
 - `afterlight:survivor-dialogue-letter` - one audible typewriter character appears; audio owns the short, profile-specific retro bleep.
 - `afterlight:survivor-dialogue-complete` - the complete line is visible and its hold timer has started.
+- `afterlight:prestige-complete` - emitted only after a verified reset transaction; owns the survivor reveal, visuals swap and long Prestige fanfare.
+- `afterlight:prestige-room` - a permanent Prestige Room was upgraded with Cores.
+- `afterlight:prestige-contract` - all five current-cycle contracts were completed and their one bonus Core was claimed.
 
 UI button sounds are handled centrally in `audio.js`; do not add per-button audio listeners. Combat inside `#scene` is excluded from the button handler and its gunshot is driven by `afterlight:shot`.
 
@@ -197,6 +206,10 @@ Enemy encounters use one weighted table with an exact 100% total: Common 55%, Un
 
 The first actual spawn of each configured enemy is persisted through `stats.discovered`; old saves automatically unlock entries backed by existing rarity kills. Clicking the enemy status card opens the Infected Codex. Locked entries remain silhouettes while discovered entries show the shared configured sprite, base chance, lifetime kills, HP multiplier, Coin multiplier, Scrap multiplier and encounter notes.
 
+Prestige has five deliberate reset targets: Bunker Levels 100, 117, 138, 163 and 192. Each reset grants exactly one permanent survivor, ×1.5 all production and ×1.25 manual damage per Prestige level, plus +5% all production for each unlocked Prestige survivor. A reset at the exact target gives one Prestige Core; every 25 extra Bunker Levels adds one, capped at three. The transaction writes one recovery snapshot to `afterlight_prestige_backup_v1`, then resets current-cycle resources, normal/specialist rooms, run kills and unarchived research. It preserves Uranium, lifetime totals, missions/bonuses, specialists/active expeditions, Dealer boosts, discoveries, unlocked survivors, Prestige Cores and Prestige Rooms. Active research and pending offline income are intentionally cleared to prevent cross-cycle duplication.
+
+Prestige Rooms are permanent and capped at Level 3 with exact Core costs of 1, 2 and 3: Legacy Vault retains 8% Scrap per level on the next reset; Automation Bay provides one four-second normal-room auto-upgrade target per level; Command Relay adds 10% expedition speed and loot per level; War Room adds 8% damage and infected loot per level; Archive Core preserves one selected completed research project per level. Five scaled Cycle Contracts become active after Prestige I and award one claim-once bonus Core each cycle.
+
 The base zombie bounty is the greatest of a progression floor and 0.08% of actual hourly coin production. For example, a bunker producing 1,000,000 coins/hour gets an 800-coin Common base bounty before rarity, horde, research and mission multipliers. This keeps kills useful in both early and late game without letting combat replace the bunker economy. Brutes are outside the rarity glow system and always award one exclusive Brute Core.
 
 Uranium Crystals are a deliberately scarce non-passive currency. Every claimed mission awards a tier-scaled amount, expeditions use visible zone-specific crystal chances and every Brute awards exactly one. Existing saves receive a one-time crystal grant for missions already claimed. Uranium is only spent at the Dealer and is never generated by room production or offline income.
@@ -217,14 +230,14 @@ All production, price and reward UI uses `AfterlightNumbers`. Suffixes progress 
 
 Official Command Center messages are release-configured in `COMMAND_MESSAGES`. A message reward is always claim-once through `command.claimed`; its coin component can scale from current hourly production while fixed Uranium remains scarce. The current Commander login is explicitly local-device only and never claims to be cloud authentication.
 
-The Command survivor roster is configured once in `SURVIVOR_SKINS`. Both Ranger starters are permanently unlocked for new and old saves and are cosmetic/economically equal. Gideon Rook, The Architect, is permanently added to an old or new save at Bunker Level 100. While selected, he grants +0.5% all passive production per Bunker Level: exactly +50% at unlock, capped at +100% from Level 200 onward. The bonus uses the shared production path, so normal rooms, special rooms, live statistics and offline earnings agree; manual damage and one-time rewards are intentionally excluded. Four future Prestige slots retain stable IDs and level requirements but deliberately contain no asset, identity or appearance data. Every selectable survivor shares the same shot event, recoil and short muzzle animation while using per-skin normalized muzzle metadata. `SURVIVOR_DIALOGUE` gives each revealed character a distinct voice and short pools for idle, normal kill, streak, horde and Brute contexts; new lines belong in that config instead of the presentation or audio modules.
+The Command survivor roster is configured once in `SURVIVOR_SKINS`. Both Ranger starters are permanently unlocked for new and old saves and are cosmetic/economically equal. Gideon Rook, The Architect, is permanently added to an old or new save at Bunker Level 100. While selected, he grants +0.5% all passive production per Bunker Level: exactly +50% at unlock, capped at +100% from Level 200 onward. The five Prestige survivors stay visually classified until unlocked: Mara Voss (Rare, +40% Scrap), Knox Ward (Rare, -12% room cost), Malik Graves (Epic, -25% expedition time and +30% loot), Cole Ash (Epic, +50% damage and infected loot) and Dr. Elara Sable (Legendary, -25% research cost/time and +50% critical damage). Every selectable survivor shares the same shot event, recoil and short muzzle animation while using per-skin normalized muzzle metadata. `SURVIVOR_DIALOGUE` gives all eight characters a distinct voice and short pools for idle, normal kill, streak, horde and Brute contexts; new lines belong in that config instead of the presentation or audio modules.
 
 Offline production starts after one minute away and is capped at 12 hours per load. It uses the authoritative permanent room/special-room rates at 35% base efficiency, applies mission `offlineMult` up to a 90% hard cap, divides out temporary Dealer boosts and never generates Uranium. Calculated gains are persisted as a pending claim before the collection modal opens, so closing the game cannot lose them.
 
 ## Assets
 
 Only active assets remain in `assets/`:
-- `survivor-ranger.png`, `survivor-ranger-female.webp`, `survivor-architect.webp` - transparent selectable survivor art. The two Rangers are starter cosmetics; the optimized Architect is the revealed Bunker Level 100 reward. Their muzzle flash stays a separate short-lived game effect anchored from each skin's normalized config metadata, so recoil and responsive scaling cannot detach it from the rifle.
+- `survivor-ranger.png`, `survivor-ranger-female.webp`, `survivor-architect.webp`, `survivor-prestige-mara.webp`, `survivor-prestige-knox.webp`, `survivor-prestige-malik.webp`, `survivor-prestige-cole.webp`, `survivor-prestige-elara.webp` - transparent selectable survivor art. The two Rangers are starter cosmetics; the Architect is the Bunker Level 100 reward; the remaining five unlock sequentially through Prestige. Their muzzle flash stays a separate short-lived game effect anchored from each skin's responsive unit coordinates, so recoil and scaling cannot detach it from the weapon. Rare/Epic/Legendary glow is rendered at runtime rather than baked into the sprite.
 - `enemy-common-drifter.webp`, `enemy-uncommon-cinderback.webp`, `enemy-rare-blue-shield.webp`, `enemy-epic-bloater.webp`, `enemy-legendary-gilded-warden.webp`, `enemy-brute-breaker.webp` - transparent, left-facing enemy art with no baked rarity glow; glow is rendered by CSS at runtime
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
@@ -242,7 +255,7 @@ Only active assets remain in `assets/`:
 - Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
 - Commander login is a local profile stored inside the unified save. Secure cloud accounts and cross-device save sync require a future backend and are not simulated.
 - Care packages currently use one shared visual design and one fall/landing motion. Reward contents vary, but crate variants and opening sprite-sheet animation are intentionally deferred.
-- Prestige reset, Prestige bonuses and future survivor reveals are not implemented yet. Locked roster slots intentionally expose only their required Prestige level and no character artwork.
+- Prestige currently stops at the completed fifth cycle. Repeatable post-Prestige-V reclamation resets and Prestige 6–10 are intentionally deferred; they must extend the same bounded Core/reset model rather than bypass it.
 - Background music uses the external CC0 Bio-Hazard OGG URL from OpenGameArt.
 - Normal rooms have a dedicated detail screen with live current/next output, per-minute/per-hour rates, contribution share, milestone status, affordability timing and x1/x10/MAX buying. Classified specialist rooms intentionally remain on their separate system for now.
 - No service worker is active during development. This is intentional because an earlier worker caused stale production builds.

@@ -5,6 +5,7 @@ PORT="${PORT:-4173}"
 DOM_FILE="${TMPDIR:-/tmp}/afterlight-dom.html"
 LANDSCAPE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-landscape-dom.html"
 ARCHITECT_DOM_FILE="${TMPDIR:-/tmp}/afterlight-architect-dom.html"
+PRESTIGE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-prestige-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/afterlight-chrome.log"
 
 python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/afterlight-server.log" 2>&1 &
@@ -25,6 +26,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --virtual-time-budget=2500 --dump-dom "http://127.0.0.1:${PORT}/?forceCarePackage=1&forceDialogue=1" >"$DOM_FILE" 2>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,500 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/landscape-probe.html" >"$LANDSCAPE_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=900,700 --virtual-time-budget=3000 --dump-dom "http://127.0.0.1:${PORT}/scripts/architect-probe.html" >"$ARCHITECT_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/prestige-probe.html" >"$PRESTIGE_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Afterlight Bunker</title>'
@@ -61,6 +63,7 @@ required=(
   'data-command-center-system="ready"'
   'data-survivor-roster-system="ready"'
   'data-survivor-dialogue-system="ready"'
+  'data-prestige-system="ready"'
   'id="survivorDialogue"'
   'data-survivor-dialogue="ready"'
   'Road stays ours.'
@@ -74,13 +77,14 @@ required=(
   'id="hordeSignal"'
   'data-tab="command"'
   'id="commandBadge"'
-  'js/core/config.js?build=20'
+  'js/core/config.js?build=21'
   'js/core/economy.js?build=1'
   'js/core/numbers.js?build=1'
-  'js/core/state.js?build=16'
+  'js/core/state.js?build=17'
+  'js/systems/prestige.js?build=1'
   'js/systems/survivor-dialogue.js?build=1'
-  'js/core/game.js?build=18'
-  'js/audio.js?build=12'
+  'js/core/game.js?build=19'
+  'js/audio.js?build=13'
   'js/systems/care-package.js?build=1'
 )
 
@@ -109,4 +113,12 @@ if ! grep -Fq 'data-architect-probe="passed"' "$ARCHITECT_DOM_FILE"; then
   exit 1
 fi
 
-echo "Afterlight browser smoke test passed: core game, 844x390 landscape deck and permanent Level 100 Architect unlock/multiplier rendered correctly."
+if ! grep -Fq 'data-prestige-probe="passed"' "$PRESTIGE_DOM_FILE"; then
+  echo "Prestige browser smoke test failed."
+  grep -F 'AFTERLIGHT_PRESTIGE_' "$PRESTIGE_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+echo "Afterlight browser smoke test passed: core game, landscape deck, Level 100 Architect and transactional Prestige I reset rendered correctly."
