@@ -267,8 +267,10 @@ Only active assets remain in `assets/`:
 - `enemy-rare-blue-shield-death.png` - normalized true-alpha death sheet for the Rare Blue Shield, including the complete riot shield in every 700x760 frame
 - `enemy-epic-bloater-death.png` - normalized true-alpha death sheet for the Epic Bloater; its oversized body and wide corpse stay fully inside three 700x760 cells
 - `enemy-legendary-gilded-warden-death.png` - normalized true-alpha death sheet for the Legendary Gilded Warden; the complete cap, claws, coat and boots remain inside each 700x760 frame
+- `enemy-brute-breaker-death.png` - normalized true-alpha death sheet for The Breaker Brute; its complete breaker gauntlet, back shell, spikes and boss-sized corpse remain inside three 700x760 frames
 - The Bloater death renderer uses a character-specific 148% scale (127% in hordes) because its approved sheet contains substantially more vertical safety space than the live sprite; keep both grounded at the shared bottom baseline.
 - The Gilded Warden death renderer uses a character-specific 113% scale (97% in hordes) so its normalized sheet matches the live sprite height while remaining grounded.
+- The Breaker death renderer uses a character-specific 107% scale. Its corpse landing triggers one short screen shake, ground ring, dust burst and low synthesized thud; reduced-effects mode disables the visual shock.
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
 - `care-package-airborne.png`, `care-package-crate.png` - true-alpha matching care-package states; the parachute is used only during descent and the closed crate receives its glow, dust, timer and reward effects at runtime
@@ -281,7 +283,7 @@ Only active assets remain in `assets/`:
 - Offline earnings are claimable and persisted; production beyond the 12-hour cap is intentionally discarded.
 - Combat gun SFX is synthesized through `afterlight:shot`, unlocked by a user gesture and protected by a short spam limit.
 - Survivor dialogue uses original synthesized retro bleeps, follows the UI SFX setting and cannot unlock WebAudio without a user gesture. It is intentionally short-form ambient flavor rather than a branching conversation system.
-- Common Drifter, Uncommon Cinderback, Rare Blue Shield, Epic Bloater and Legendary Gilded Warden now have complete three-frame death/corpse sequences. The Brute still uses the short fallback death until its approved sheet is produced; walk/idle sprite animation remains deferred.
+- All six infected characters now have complete three-frame death/corpse sequences. Walk/idle sprite animation remains intentionally deferred.
 - Dealer boosts continue counting down while the game is closed. There is intentionally no inventory: every purchase activates immediately.
 - Commander login is a local profile stored inside the unified save. Secure cloud accounts and cross-device save sync require a future backend and are not simulated.
 - Care packages currently use one shared visual design and one fall/landing motion. Reward contents vary, but crate variants and opening sprite-sheet animation are intentionally deferred.

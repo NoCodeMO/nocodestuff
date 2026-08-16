@@ -52,6 +52,7 @@ required=(
   'assets/enemy-rare-blue-shield-death.png'
   'assets/enemy-epic-bloater-death.png'
   'assets/enemy-legendary-gilded-warden-death.png'
+  'assets/enemy-brute-breaker-death.png'
   'POWER GENERATOR'
   'id="missionBox"'
   'data-mission-count="200"'
@@ -86,7 +87,7 @@ required=(
   'id="hordeSignal"'
   'data-tab="command"'
   'id="commandBadge"'
-  'js/core/config.js?build=29'
+  'js/core/config.js?build=30'
   'js/core/economy.js?build=2'
   'js/core/numbers.js?build=1'
   'js/core/state.js?build=21'
@@ -95,7 +96,7 @@ required=(
   'js/systems/command-center.js?build=6'
   'js/systems/survivor-dialogue.js?build=1'
   'js/core/game.js?build=23'
-  'js/audio.js?build=13'
+  'js/audio.js?build=14'
   'js/systems/care-package.js?build=2'
 )
 

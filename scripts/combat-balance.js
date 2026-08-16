@@ -39,6 +39,11 @@ if(legendary.deathAsset!=='assets/enemy-legendary-gilded-warden-death.png')fail(
 const wardenAsset=path.join(root,legendary.deathAsset);if(!fs.existsSync(wardenAsset))fail(`missing death sprite ${legendary.deathAsset}`);
 const wardenBuffer=fs.readFileSync(wardenAsset);if(!wardenBuffer.subarray(1,4).equals(Buffer.from('PNG'))||wardenBuffer[25]!==6)fail('The Gilded Warden death sheet must be a real RGBA PNG with transparent alpha');
 if(wardenBuffer.readUInt32BE(16)!==2100||wardenBuffer.readUInt32BE(20)!==760)fail('The Gilded Warden death sheet must contain three normalized 700x760 cells');
+const brute=ENEMIES.find(type=>type.id==='brute');
+if(brute.deathAsset!=='assets/enemy-brute-breaker-death.png')fail('The Breaker must expose its approved three-frame death sheet');
+const bruteAsset=path.join(root,brute.deathAsset);if(!fs.existsSync(bruteAsset))fail(`missing death sprite ${brute.deathAsset}`);
+const bruteBuffer=fs.readFileSync(bruteAsset);if(!bruteBuffer.subarray(1,4).equals(Buffer.from('PNG'))||bruteBuffer[25]!==6)fail('The Breaker death sheet must be a real RGBA PNG with transparent alpha');
+if(bruteBuffer.readUInt32BE(16)!==2100||bruteBuffer.readUInt32BE(20)!==760)fail('The Breaker death sheet must contain three normalized 700x760 cells');
 if(ENEMIES.find(type=>type.id==='common').glow!=='transparent')fail('Common must not have a rarity glow');
 if(ENEMIES.find(type=>type.id==='brute').glow!=='transparent')fail('Brute must remain outside the rarity glow system');
 for(const id of ['uncommon','rare','epic','legendary'])if(ENEMIES.find(type=>type.id===id).glow==='transparent')fail(`${id} requires an in-game glow color`);
@@ -105,6 +110,7 @@ if(!html.includes('assets/enemy-uncommon-cinderback-death.png'))fail('The Cinder
 if(!html.includes('assets/enemy-rare-blue-shield-death.png'))fail('The Blue Shield death sheet must be preloaded');
 if(!html.includes('assets/enemy-epic-bloater-death.png'))fail('The Bloater death sheet must be preloaded');
 if(!html.includes('assets/enemy-legendary-gilded-warden-death.png'))fail('The Gilded Warden death sheet must be preloaded');
+if(!html.includes('assets/enemy-brute-breaker-death.png'))fail('The Breaker death sheet must be preloaded');
 if(!/id="hordeSignal"/.test(html)||!/GUARANTEED IN/.test(game)||!/#hordeSignal\.detected/.test(css))fail('players need a visible horde signal and a distinct detected state');
 if(!/@keyframes criticalNumberRise/.test(css)||!/CRIT -/.test(visuals))fail('critical hits need distinct visual feedback');
 if(!/id='combatStreak'/.test(visuals)||!/afterlight:streak/.test(visuals)||!/@keyframes streakDrain/.test(css))fail('kill streak HUD and timer feedback are missing');
@@ -112,9 +118,12 @@ if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \
 if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow must remain disabled');
 if(!/@keyframes drifterDeathFrames/.test(css)||!/\.enemyDeathUnit\.horde \.enemyDeathSprite:nth-child\(3\)/.test(css))fail('The Drifter death frames must animate for both single encounters and three-member hordes');
 if(!/67%,100%\{aspect-ratio:700\/631;background-size:253\.5% auto;background-position:100% 52%\}/.test(css))fail('the corpse frame must include the complete Drifter skull and preserve the shared ground baseline');
-if(!/data-death-sequence="uncommon"/.test(css)||!/data-death-sequence="rare"/.test(css)||!/data-death-sequence="epic"/.test(css)||!/data-death-sequence="legendary"/.test(css)||!/@keyframes normalizedDeathFrames\{0%,30%\{background-position:0 50%\}31%,66%\{background-position:50% 50%\}67%,100%\{background-position:100% 50%\}\}/.test(css))fail('The Cinderback, Blue Shield, Bloater and Gilded Warden must animate through their three normalized death cells');
+if(!/data-death-sequence="uncommon"/.test(css)||!/data-death-sequence="rare"/.test(css)||!/data-death-sequence="epic"/.test(css)||!/data-death-sequence="legendary"/.test(css)||!/data-death-sequence="brute"/.test(css)||!/@keyframes normalizedDeathFrames\{0%,30%\{background-position:0 50%\}31%,66%\{background-position:50% 50%\}67%,100%\{background-position:100% 50%\}\}/.test(css))fail('All five normalized infected death sheets must animate through their three cells');
 if(!/data-death-sequence="epic"\]:not\(\.horde\) \.enemyDeathSprite\{height:148%\}/.test(css)||!/data-death-sequence="epic"\]\.horde \.enemyDeathSprite\{height:127%\}/.test(css))fail('The Bloater death sequence must preserve its live visual scale in single encounters and hordes');
 if(!/data-death-sequence="legendary"\]:not\(\.horde\) \.enemyDeathSprite\{height:113%\}/.test(css)||!/data-death-sequence="legendary"\]\.horde \.enemyDeathSprite\{height:97%\}/.test(css))fail('The Gilded Warden death sequence must preserve its live visual scale in single encounters and hordes');
+if(!/data-death-sequence="brute"\] \.enemyDeathSprite\{height:107%\}/.test(css))fail('The Breaker death sequence must preserve its boss-sized live scale');
+if(!/bruteDeathImpact/.test(visuals)||!/@keyframes bruteGroundRing/.test(css)||!/@keyframes bruteGroundDust/.test(css)||!/@keyframes bruteStageImpact/.test(css))fail('The Breaker corpse landing requires a unique ground ring, dust burst and short stage shake');
+const audio=fs.readFileSync(path.join(root,'js','audio.js'),'utf8');if(!/function bruteDeathSound\(event\)/.test(audio)||!/event\.detail\?\.brute/.test(audio)||!/afterlight:enemy-killed',bruteDeathSound/.test(audio))fail('The Breaker corpse landing requires its dedicated low boss thud');
 if(!/\.enemyUnit:is\([^}]+\) \.enemySprite\{filter:[^}]+var\(--enemy-glow\)/.test(css))fail('rarity glow must follow each sprite alpha instead of its layout container');
 const survivorAsset=path.join(root,'assets','survivor-ranger.png');if(!fs.existsSync(survivorAsset))fail('missing approved survivor-ranger.png');
 const survivorBuffer=fs.readFileSync(survivorAsset);if(!survivorBuffer.subarray(1,4).equals(Buffer.from('PNG'))||survivorBuffer[25]!==6)fail('survivor-ranger.png must be a real RGBA PNG');
