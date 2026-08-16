@@ -4,7 +4,7 @@ const ECON=window.AfterlightEconomy;if(!ECON)throw new Error('AfterlightEconomy 
 const KEY='afterlight_v4';
 const parse=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}};
 const defaults=()=>({
-  schema:16,coins:0,total:0,food:0,water:0,power:0,scrap:0,science:0,uranium:0,kills:0,level:1,bunker:1,
+  schema:17,coins:0,total:0,food:0,water:0,power:0,scrap:0,science:0,uranium:0,kills:0,level:1,bunker:1,
   rooms:{generator:1,workshop:0,greenhouse:0,purifier:0,lab:0,living:0,storage:0,turret:0},
   research:{tools:0,solar:0,hydro:0,filters:0,automation:0,walls:0},
   researchRuntime:{active:null,ready:null},
@@ -12,7 +12,7 @@ const defaults=()=>({
   merchant:{active:{},purchases:{},spent:0,freeActivations:0,legacyMissionGrantDone:false},
   carePackage:{nextAt:0,active:null,opened:0,missed:0},
   offline:{pending:null,totalClaims:0,totalSeconds:0},
-  missions:{claimed:[],bonuses:{}},
+  missions:{claimed:[],bonuses:{},balanceVersion:0},
   expeditions:{active:null,survivors:[],pending:null},
   specialRooms:{},
   prestige:{level:0,cores:0,totalResets:0,bestBunker:1,lastAt:0,lastReward:0,rooms:{'legacy-vault':0,'automation-bay':0,'command-relay':0,'war-room':0,'archive-core':0},automation:{enabled:false,targets:[]},archive:[],run:{startedAt:Date.now(),roomUpgrades:0,researchClaims:0,hordes:0,brutes:0,expeditions:0,contractClaimed:false}},
@@ -30,7 +30,7 @@ if(!old.expeditions){const x=parse('afterlight_expedition_runtime_v1');if(x)stat
 if(!old.specialRooms){const r=parse('afterlight_special_rooms_v1');if(r?.rooms)state.specialRooms={...r.rooms}}
 if(old.settings?.music==null){const legacyMusic=localStorage.getItem('afterlight_music');if(legacyMusic)state.settings.music=legacyMusic!=='off'}
 function normalize(){
-  state.schema=16;
+  state.schema=17;
   state.rooms={...base.rooms,...(state.rooms||{})};for(const id of Object.keys(base.rooms))state.rooms[id]=ECON.sanitizeRoomLevel(state.rooms[id]);state.research={...base.research,...(state.research||{})};state.stats={...base.stats,...(state.stats||{}),rarityKills:{...base.stats.rarityKills,...(state.stats?.rarityKills||{})}};state.stats.discovered=Array.isArray(state.stats.discovered)?[...new Set(state.stats.discovered.filter(id=>base.stats.rarityKills[id]!=null))]:[];for(const [id,count] of Object.entries(state.stats.rarityKills))if(Number(count)>0&&!state.stats.discovered.includes(id))state.stats.discovered.push(id);
   state.missions=state.missions||{claimed:[],bonuses:{}};state.missions.claimed=Array.isArray(state.missions.claimed)?state.missions.claimed:[];state.missions.bonuses=state.missions.bonuses||{};
   state.expeditions=state.expeditions||{active:null,survivors:[],pending:null};state.expeditions.survivors=Array.isArray(state.expeditions.survivors)?state.expeditions.survivors:[];
@@ -46,7 +46,8 @@ function save(){normalize();state.last=Date.now();localStorage.setItem(KEY,JSON.
 function notify(reason='state'){window.dispatchEvent(new CustomEvent('afterlight:state',{detail:{reason}}))}
 function update(reason,fn,{saveNow=true,notifyNow=true}={}){if(typeof fn==='function')fn(state);normalize();if(saveNow)save();if(notifyNow)notify(reason);return state}
 function bonus(name){const v=Number(state.missions?.bonuses?.[name]);return Number.isFinite(v)&&v>0?v:1}
+function resetAll(token){if(token!=='RESET')return false;for(const key of [KEY,'afterlight_prestige_backup_v1','afterlight_missions_v1','afterlight_expedition_runtime_v1','afterlight_special_rooms_v1','afterlight_music'])localStorage.removeItem(key);location.reload();return true}
 normalize();
-window.AfterlightState={KEY,get:()=>state,save,update,notify,bonus,loadedAt,previousLast,offlineElapsedMs,snapshot:()=>JSON.parse(JSON.stringify(state))};
+window.AfterlightState={KEY,get:()=>state,save,update,notify,bonus,resetAll,loadedAt,previousLast,offlineElapsedMs,snapshot:()=>JSON.parse(JSON.stringify(state))};
 save();setInterval(save,4000);window.addEventListener('pagehide',save);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 })();

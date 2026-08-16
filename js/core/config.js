@@ -1,10 +1,12 @@
 (()=>{'use strict';
-const ROOM_ECONOMY=Object.freeze({costGrowth:1.62,lateCostGrowth:1.18,lateCostThreshold:1e15,rateGrowth:1.18,maximumBulk:500,maximumRoomLevel:3500,maximumValue:1e300,bunkerLevelEvery:4});
+const ROOM_ECONOMY=Object.freeze({costGrowth:1.142,costScale:60,costScaleRamp:25,rateGrowth:1.07,masterySize:100,maximumBulk:500,maximumRoomLevel:5000,maximumValue:1e300,bunkerLevelEvery:4});
 const ROOM_MILESTONES=Object.freeze([
   Object.freeze({level:5,multiplier:1.25,tier:'CALIBRATED'}),
   Object.freeze({level:10,multiplier:1.5,tier:'INDUSTRIAL'}),
   Object.freeze({level:25,multiplier:2,tier:'FORTIFIED'}),
-  Object.freeze({level:50,multiplier:3,tier:'MASTERWORK'})
+  Object.freeze({level:50,multiplier:3,tier:'MASTERWORK'}),
+  Object.freeze({level:75,multiplier:4,tier:'OVERDRIVEN'}),
+  Object.freeze({level:100,multiplier:5,tier:'ASCENDANT'})
 ]);
 const ROOMS={
   generator:{name:'POWER GENERATOR',icon:'⚡',base:35,unlock:1,art:'assets/room-generator.webp',prod:{power:1.5,coins:.4},desc:'The mechanical heart of Afterlight. It keeps every bunker system powered and sells surplus charge to nearby settlements.'},
@@ -46,12 +48,12 @@ const SPECIAL_ROOMS=[
   {id:'quantum',icon:'✦',name:'EXPERIMENTAL LAB',specialist:'elias',unlock:12,baseCost:30000,desc:'High-risk science wing. Requires an Experimental Physicist.',prod:{science:1.5,coins:40}}
 ];
 const MERCHANT_OFFERS=[
-  {id:'gold5',group:'coins',tier:'UNCOMMON',icon:'◉',name:'GILDED MINUTES',tagline:'Five minutes of accelerated bunker trade.',value:'×5 COINS',cost:3,seconds:300,accent:'#c88738',effect:{coins:5}},
-  {id:'gold10',group:'coins',tier:'RARE',icon:'◆',name:'KINGMAKER CONTRACT',tagline:'The Dealer opens his highest-value routes.',value:'×10 COINS',cost:7,seconds:300,accent:'#4f9ee8',effect:{coins:10}},
-  {id:'all3',group:'everything',tier:'LEGENDARY',icon:'☢',name:'REACTOR BLACKOUT',tagline:'Production, damage and infected bounties all surge at once.',value:'×3 EVERYTHING',cost:10,seconds:300,accent:'#dfb744',effect:{all:3}},
-  {id:'scrap5',group:'scrap',tier:'UNCOMMON',icon:'⚙',name:'SALVAGE MAGNET',tagline:'Priority access to the Dealer’s salvage crews.',value:'×5 SCRAP',cost:4,seconds:300,accent:'#bd7137',effect:{scrap:5}},
-  {id:'hunter',group:'combat',tier:'EPIC',icon:'⌖',name:'REDLINE AMMO',tagline:'Hot rounds hit harder and increase every infected bounty.',value:'×3 DAMAGE · ×2 BOUNTY',cost:5,seconds:300,accent:'#a45bd8',effect:{damage:3,zombie:2}},
-  {id:'lure',group:'lure',tier:'LEGENDARY',icon:'☣',name:'BLACKLIGHT LURE',tagline:'Pulls rarer infected and Brutes toward the bunker.',value:'BOOSTED RARITY ODDS',cost:8,seconds:300,accent:'#d8b643',effect:{rarityLuck:true}}
+  {id:'gold5',group:'overdrive',tier:'UNCOMMON',icon:'◉',name:'GILDED MINUTES',tagline:'Five minutes of accelerated bunker trade.',value:'×5 COINS',cost:25,seconds:300,accent:'#c88738',effect:{coins:5}},
+  {id:'gold10',group:'overdrive',tier:'RARE',icon:'◆',name:'KINGMAKER CONTRACT',tagline:'The Dealer opens his highest-value routes.',value:'×10 COINS',cost:60,seconds:300,accent:'#4f9ee8',effect:{coins:10}},
+  {id:'all3',group:'overdrive',tier:'LEGENDARY',icon:'☢',name:'REACTOR BLACKOUT',tagline:'Production, damage and infected bounties all surge at once.',value:'×3 EVERYTHING',cost:75,seconds:300,accent:'#dfb744',effect:{all:3}},
+  {id:'scrap5',group:'scrap',tier:'UNCOMMON',icon:'⚙',name:'SALVAGE MAGNET',tagline:'Priority access to the Dealer’s salvage crews.',value:'×5 SCRAP',cost:30,seconds:300,accent:'#bd7137',effect:{scrap:5}},
+  {id:'hunter',group:'combat',tier:'EPIC',icon:'⌖',name:'REDLINE AMMO',tagline:'Hot rounds hit harder and increase every infected bounty.',value:'×3 DAMAGE · ×2 BOUNTY',cost:40,seconds:300,accent:'#a45bd8',effect:{damage:3,zombie:2}},
+  {id:'lure',group:'lure',tier:'LEGENDARY',icon:'☣',name:'BLACKLIGHT LURE',tagline:'Pulls rarer infected and Brutes toward the bunker.',value:'BOOSTED RARITY ODDS',cost:50,seconds:300,accent:'#d8b643',effect:{rarityLuck:true}}
 ];
 const SURVIVOR_SKINS=[
   {id:'ranger-male',order:1,name:'RANGER // MALE',callsign:'RANGER-01',tier:'STARTER',asset:'assets/survivor-ranger.png',muzzleAnchor:{x:77.5,y:20.5},description:'The original Afterlight perimeter ranger. A balanced cosmetic survivor with the standard combat rig.',starter:true},
@@ -64,7 +66,7 @@ const SURVIVOR_SKINS=[
   {id:'prestige-5',order:8,name:'DR. ELARA SABLE',callsign:'LAST LIGHT',tier:'LEGENDARY · PRESTIGE V',rarity:'legendary',accent:'#dfb744',asset:'assets/survivor-prestige-elara.webp',muzzleAnchor:{x:68.2,y:15.3},description:'A legendary field scientist in a white armored coat who carries a steel revolver and the final archive key.',unlock:{type:'prestige',level:5},perk:{type:'prestige',id:'last-light',label:'-25% RESEARCH COST & TIME · +50% CRITS',description:'Research costs and timers drop by 25%; critical-hit damage is multiplied by a further 1.50 while Elara is deployed.'}}
 ];
 const PRESTIGE=Object.freeze({
-  maximumLevel:5,targets:Object.freeze([100,117,138,163,192]),economyPerLevel:1.5,damagePerLevel:1.25,rosterBonusPerLevel:.05,extraCoreEvery:25,maximumCoreReward:3,roomMaximumLevel:3,roomCosts:Object.freeze([1,2,3]),
+  maximumLevel:5,targets:Object.freeze([100,200,325,525,850]),targetFormula:Object.freeze({first:100,second:200,growth:1.62,roundTo:25}),economyPerLevel:1.5,damagePerLevel:1.25,rosterBonusPerLevel:.05,extraCorePercent:.1,extraCoreMinimum:25,maximumCoreReward:3,roomMaximumLevel:3,roomCosts:Object.freeze([1,2,3]),
   levels:Object.freeze([
     Object.freeze({level:1,title:'ASH PROTOCOL',survivor:'prestige-1',room:'legacy-vault',accent:'#4f9ee8'}),
     Object.freeze({level:2,title:'IRON PROTOCOL',survivor:'prestige-2',room:'automation-bay',accent:'#4f9ee8'}),

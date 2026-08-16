@@ -3,7 +3,8 @@ const CFG=window.AfterlightConfig,ST=window.AfterlightState,NUM=window.Afterligh
 const S=ST.get(),C=CFG.PRESTIGE,BACKUP_KEY='afterlight_prestige_backup_v1',fmt=NUM.format,escape=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 const data=()=>S.prestige,level=()=>Math.max(0,Math.min(C.maximumLevel,Math.floor(Number(data().level)||0))),definition=value=>C.levels.find(item=>item.level===value)||null,skin=id=>CFG.SURVIVOR_SKINS.find(item=>item.id===id)||null,room=id=>C.rooms.find(item=>item.id===id)||null;
 const next=()=>definition(level()+1),target=()=>next()?C.targets[level()]:null,eligible=()=>!!next()&&S.bunker>=target();
-function coreReward(){const required=target();if(!required)return 0;return Math.min(C.maximumCoreReward,1+Math.floor(Math.max(0,S.bunker-required)/C.extraCoreEvery))}
+function extraCoreInterval(required=target()){const raw=Math.max(Number(C.extraCoreMinimum)||25,required*(Number(C.extraCorePercent)||.1));return Math.max(25,Math.ceil(raw/25)*25)}
+function coreReward(){const required=target();if(!required)return 0;return Math.min(C.maximumCoreReward,1+Math.floor(Math.max(0,S.bunker-required)/extraCoreInterval(required)))}
 function activeSkin(){const selected=skin(S.survivorSkins?.selected);return selected&&S.survivorSkins?.unlocked?.includes(selected.id)?selected:null}
 const activePerk=()=>activeSkin()?.perk?.type==='prestige'?activeSkin().perk.id:'';
 const active=id=>activePerk()===id;
@@ -21,7 +22,7 @@ const researchTimeMultiplier=()=>active('last-light') ? .75 : 1;
 const criticalMultiplier=()=>active('last-light')?1.5:1;
 const scrapRetention=()=>Math.min(.24,Math.max(0,Number(data().rooms['legacy-vault'])||0)*.08);
 function multiplierSummary(atLevel=level()){return{economy:Math.pow(C.economyPerLevel,atLevel)*(1+atLevel*C.rosterBonusPerLevel),damage:Math.pow(C.damagePerLevel,atLevel),roster:1+atLevel*C.rosterBonusPerLevel}}
-function runTargets(atLevel=level()){return{roomUpgrades:20+atLevel*10,kills:30+atLevel*20,researchClaims:2+atLevel,hordes:1+Math.ceil(atLevel/2),bunker:18+atLevel*8}}
+function runTargets(atLevel=level()){const required=C.targets[Math.max(0,Math.min(C.targets.length-1,atLevel))]||C.targets[C.targets.length-1]||100;return{roomUpgrades:Math.max(30,Math.round(required*1.2)),kills:Math.max(50,Math.round(required*2.5)),researchClaims:3+atLevel*2,hordes:2+Math.ceil(atLevel*1.5),bunker:Math.max(25,Math.round(required*.3))}}
 function contractProgress(){const targets=runTargets(),run=data().run;return C.contracts.map(contract=>{const value=contract.metric==='bunker'?S.bunker:Math.max(0,Number(run[contract.metric])||0),goal=targets[contract.metric];return{...contract,value,goal,complete:value>=goal,ratio:Math.min(1,value/goal)}})}
 const contractsComplete=()=>level()>0&&contractProgress().every(item=>item.complete);
 function claimContracts(){if(data().run.contractClaimed||!contractsComplete())return false;ST.update('prestige-contract',state=>{state.prestige.cores+=1;state.prestige.run.contractClaimed=true});window.dispatchEvent(new CustomEvent('afterlight:prestige-contract',{detail:{cores:1}}));refresh();return true}
@@ -48,5 +49,5 @@ window.addEventListener('afterlight:enemy-killed',event=>{addRun('kills',event.d
 window.addEventListener('afterlight:expedition-complete',()=>addRun('expeditions',1));
 setInterval(()=>{if(!data().automation.enabled||!data().automation.targets.length||!window.AfterlightGame)return;for(const id of data().automation.targets){const cost=window.AfterlightGame.roomCost(id),entry=CFG.ROOMS[id];if(entry&&S.bunker>=entry.unlock&&Number.isFinite(cost)&&S.coins>=cost){window.AfterlightGame.buyRoom(id,1);break}}},4000);
 document.body.dataset.prestigeSystem='ready';
-window.AfterlightPrestige={level,next,target,eligible,coreReward,activeSkin,activePerk,economyMultiplier,permanentEconomyMultiplier,resourceMultiplier,roomCostMultiplier,damageMultiplier,zombieMultiplier,expeditionTimeMultiplier,expeditionRewardMultiplier,researchCostMultiplier,researchTimeMultiplier,criticalMultiplier,scrapRetention,multiplierSummary,runTargets,contractProgress,contractsComplete,claimContracts,resetPreview,performReset,upgradeRoom,toggleAutomation,toggleArchive,panel,bind,confirmation,refresh};
+window.AfterlightPrestige={level,next,target,eligible,coreReward,extraCoreInterval,activeSkin,activePerk,economyMultiplier,permanentEconomyMultiplier,resourceMultiplier,roomCostMultiplier,damageMultiplier,zombieMultiplier,expeditionTimeMultiplier,expeditionRewardMultiplier,researchCostMultiplier,researchTimeMultiplier,criticalMultiplier,scrapRetention,multiplierSummary,runTargets,contractProgress,contractsComplete,claimContracts,resetPreview,performReset,upgradeRoom,toggleAutomation,toggleArchive,panel,bind,confirmation,refresh};
 })();

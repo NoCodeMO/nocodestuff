@@ -19,7 +19,7 @@ This file is the fastest entry point for any future development session. Read th
 
 ### Core
 - `js/core/config.js` - shared game content/config: rooms, research, expeditions, specialists, classified rooms, Dealer offers, all survivor skins/dialogue, the five-level Prestige curve, official Command Center transmissions and the complete enemy/rarity table.
-- `js/core/economy.js` - authoritative overflow-safe resource math, two-stage normal-room price curve, sequential bulk quotes and guarded purchase validation.
+- `js/core/economy.js` - authoritative overflow-safe resource math, smooth scalable normal-room price curve, sequential bulk quotes and guarded purchase validation.
 - `js/core/numbers.js` - one authoritative large-number formatter from K/M through B, T, Qa, Qi, Dc and beyond.
 - `js/core/state.js` - one authoritative persistent state object and save migration.
 - `js/core/game.js` - economy, combat, normal rooms, room intelligence/progression, HUD, tabs and drawer routing.
@@ -56,6 +56,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/landscape-layout-check.js` and `scripts/landscape-probe.html` - static guardrails plus a real 844×390 computed-layout probe for the phone landscape command deck.
 - `scripts/survivor-roster-check.js` - starter/Architect/Prestige roster integrity, transparent assets, save migration, selection events and shared recoil/muzzle guardrails.
 - `scripts/survivor-dialogue-check.js` - all eight survivor voices, contextual pools/odds, typewriter events, responsive bubble CSS, reduced-motion behavior and gesture-safe retro voice bleeps.
+- `scripts/economy-rebalance-check.js` - deterministic fresh-cycle simulator, Prestige pacing envelope, Mastery curve, mission caps, Dealer exclusivity and destructive-reset guardrails.
 - `scripts/prestige-balance-check.js` - all five targets, survivors, active/permanent perk math, capped Core curve, reset boundaries, room costs and cross-system multiplier wiring.
 - `scripts/prestige-probe.html` - real-browser schema-15 migration plus transactional Prestige I–V reset, preservation, recovery backup, unlock, art, muzzle-anchor and multiplier probe.
 - `scripts/architect-probe.html` - real-browser Level 100 save migration, permanent unlock, exact x1.5 production multiplier, roster selection and rifle-anchor probe.
@@ -93,7 +94,7 @@ Do not casually reorder these. Prestige loads before every economy consumer so r
 
 ## State: one source of truth
 
-The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 16`.
+The production save key remains `afterlight_v4` for backward compatibility, but the current schema is `schema: 17`.
 
 `window.AfterlightState` owns the in-memory state and persistence. Systems must not independently read/write the main save through `localStorage`.
 
@@ -103,7 +104,7 @@ Main shape:
 resources: coins, total, food, water, power, scrap, science, uranium
 progress: kills, bunker, rooms, research, stats (including discovered infected, rarity kills, criticals, best streak, hordes, Brute Cores and Uranium earned/spent)
 researchRuntime: { active, ready }
-missions: { claimed, bonuses }
+missions: { claimed, bonuses, balanceVersion }
 expeditions: { active, survivors, pending }
 specialRooms: { [roomId]: level }
 prestige: { level, cores, totalResets, bestBunker, lastAt, lastReward, rooms, automation, archive, run }
@@ -114,6 +115,8 @@ offline: { pending, totalClaims, totalSeconds }
 command: { read, claimed, lastTab, account: { loggedIn, name, createdAt } }
 settings: { music, uiSfx, reducedEffects }
 ```
+
+`AfterlightState.resetAll('RESET')` is the only full-account deletion path. It removes only Afterlight-owned local keys and then reloads into a clean schema-17 save. The Command Center protects it with an exact `RESET` phrase plus a three-second hold; never add an unguarded reset shortcut.
 
 `state.js` automatically imports legacy data from:
 - `afterlight_missions_v1`
@@ -206,7 +209,7 @@ Enemy encounters use one weighted table with an exact 100% total: Common 55%, Un
 
 The first actual spawn of each configured enemy is persisted through `stats.discovered`; old saves automatically unlock entries backed by existing rarity kills. Clicking the enemy status card opens the Infected Codex. Locked entries remain silhouettes while discovered entries show the shared configured sprite, base chance, lifetime kills, HP multiplier, Coin multiplier, Scrap multiplier and encounter notes.
 
-Prestige has five deliberate reset targets: Bunker Levels 100, 117, 138, 163 and 192. Each reset grants exactly one permanent survivor, ×1.5 all production and ×1.25 manual damage per Prestige level, plus +5% all production for each unlocked Prestige survivor. A reset at the exact target gives one Prestige Core; every 25 extra Bunker Levels adds one, capped at three. The transaction writes one recovery snapshot to `afterlight_prestige_backup_v1`, then resets current-cycle resources, normal/specialist rooms, run kills and unarchived research. It preserves Uranium, lifetime totals, missions/bonuses, specialists/active expeditions, Dealer boosts, discoveries, unlocked survivors, Prestige Cores and Prestige Rooms. Active research and pending offline income are intentionally cleared to prevent cross-cycle duplication.
+Prestige has five deliberate reset targets: Bunker Levels 100, 200, 325, 525 and 850. The first two are explicit and later targets follow the shared rounded ×1.62 curve so future levels can extend it without hand-written jumps. Each reset grants exactly one permanent survivor, ×1.5 all production and ×1.25 manual damage per Prestige level, plus +5% all production for each unlocked Prestige survivor. A reset at the exact target gives one Prestige Core; additional Cores require another 10% of that cycle's target per Core (rounded to 25 and capped at three). The transaction writes one recovery snapshot to `afterlight_prestige_backup_v1`, then resets current-cycle resources, normal/specialist rooms, run kills and unarchived research. It preserves Uranium, lifetime totals, missions/bonuses, specialists/active expeditions, Dealer boosts, discoveries, unlocked survivors, Prestige Cores and Prestige Rooms. Active research and pending offline income are intentionally cleared to prevent cross-cycle duplication.
 
 Prestige Rooms are permanent and capped at Level 3 with exact Core costs of 1, 2 and 3: Legacy Vault retains 8% Scrap per level on the next reset; Automation Bay provides one four-second normal-room auto-upgrade target per level; Command Relay adds 10% expedition speed and loot per level; War Room adds 8% damage and infected loot per level; Archive Core preserves one selected completed research project per level. Five scaled Cycle Contracts become active after Prestige I and award one claim-once bonus Core each cycle.
 
@@ -214,13 +217,15 @@ The base zombie bounty is the greatest of a progression floor and 0.08% of actua
 
 Uranium Crystals are a deliberately scarce non-passive currency. Every claimed mission awards a tier-scaled amount, expeditions use visible zone-specific crystal chances and every Brute awards exactly one. Existing saves receive a one-time crystal grant for missions already claimed. Uranium is only spent at the Dealer and is never generated by room production or offline income.
 
-The mission campaign contains exactly 200 missions. The original 50 IDs are immutable for save compatibility. The 150 operations missions are grouped into 15 chapters and cover infected kills, Brutes, hordes, rarity hunts, shots, bunker/room progression and research. Their Coin and Scrap caches scale from the player's permanent hourly economy with a progression floor, explicitly divide out temporary Dealer boosts, and their small permanent bonuses are capped by balance tests. Mission Uranium ranges from one to six per claim so the full chain cannot flood the Dealer economy.
+The mission campaign contains exactly 200 missions. The original 50 IDs are immutable for save compatibility. The 150 operations missions are grouped into 15 chapters and cover infected kills, Brutes, hordes, rarity hunts, shots, bunker/room progression and research. Their Coin and Scrap caches scale from the player's permanent hourly economy with a progression floor and explicitly divide out temporary Dealer boosts. Permanent bonuses are rebuilt once under `balanceVersion: 1` for existing saves and remain within shared hard caps (including ×2.5 production/resources, ×1.75 Coins and a 0.75 room-cost floor), preventing the old mission chain from compounding into runaway progress.
 
-Dealer boosts activate immediately and use persisted wall-clock deadlines. The 5x and 10x coin contracts share one channel and cannot stack with each other; different channels can stack. The intended maximum coin combination is the 10x coin contract with the expensive 3x everything contract, for a temporary 30x total. That everything contract also triples all other resource production, manual damage and infected bounties. Repurchasing the same active contract extends its remaining time rather than wasting it.
+Dealer boosts activate immediately and use persisted wall-clock deadlines. The ×5 Coins, ×10 Coins and ×3 Everything contracts share the single `overdrive` channel, so buying one replaces the others and the temporary all-production ceiling is ×10 rather than the previous ×30 stack. The rebalance costs are 25/60/75 Uranium for those three contracts, with the remaining specialist contracts priced from 30–50. Repurchasing the same active contract extends its remaining time rather than wasting it.
 
 Care packages arrive on a persisted randomized 90–150 second schedule while the game is visible. Their five-second claim window starts only after the 1.35-second parachute landing. Every claimed cache gives Coins, Scrap and one survival resource scaled from permanent production with early-game floors; temporary Dealer multipliers are divided out before reward calculation. Uranium is capped to a 10% one-crystal roll and a random free five-minute Dealer contract is a rare 4% jackpot (about 1.2 expected jackpots per perfect-attention hour). Free contracts use the shared Dealer channel rules, activate immediately and never spend Uranium. Missed drops simply schedule the next encounter.
 
-Normal-room production keeps the original 1.18 per-level growth. Room costs keep the original 1.62 growth through the early game, then transition continuously near one quadrillion to 1.18 late-game growth so prices remain meaningful and finite for established saves instead of freezing at the old 9.01Qa JavaScript limit. Levels 5, 10, 25 and 50 add derived permanent room multipliers of x1.25, x1.5, x2 and x3. These bonuses are calculated from room level, so old saves receive them automatically without migration. Bulk x10 costs are the exact sum of sequential upgrades; MAX buys only the levels the current coin balance can fully fund. Every quote is validated again inside the state transaction, invalid/overflowed prices are rejected and all resources use a finite 1e300 ceiling. The explicit room-level ceiling is 3500 so the Number-based economy can never silently enter `Infinity`.
+Normal rooms use a smooth 1.142 price curve whose scale ramps from ×1 to ×60 across the opening levels, while output grows at 1.07 per level. Every block of 100 room levels is one Mastery Rank: local levels 5, 10, 25, 50, 75 and 100 award x1.25, x1.5, x2, x3, x4 and x5 room multipliers, then the sequence repeats without an output drop at the next rank. This makes all 100 levels meaningful and lets established saves continue through the explicit Level 5000 ceiling. Bulk x10 costs are the exact sum of sequential upgrades; MAX buys at most 500 levels and only those the current Coin balance can fully fund. Every quote is validated again inside the state transaction, invalid/overflowed prices are rejected and all resources use a finite 1e300 ceiling.
+
+The deterministic passive simulator is a pacing guardrail, not a promise about every play style. With no combat, mission caches, care packages, offline claims or temporary Dealer boosts, its current fresh-cycle baselines are approximately 7.5h to Prestige I, 24.5h to Prestige II, 25.5h to Prestige III, 35.9h to Prestige IV and 59h to Prestige V. Active play may shorten those cycles, while future economy changes must keep the first cycle inside hours and later cycles inside the intended one-to-three-day range unless deliberately redesigned.
 
 Every four combined normal-room levels grant one Bunker Level. The Base screen exposes this exact 0–4 progression in a live accessible bar, driven by the same shared `bunkerLevelEvery` economy constant used by save normalization and core recalculation.
 
