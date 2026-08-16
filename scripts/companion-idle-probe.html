@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Afterlight companion idle probe</title><style>html,body{margin:0;background:#050705}.probe{position:absolute;left:0;top:0;border:0}.portrait,.landscape{visibility:hidden}</style></head>
+<body data-companion-idle-probe="running">
+  <iframe class="probe desktop" data-profile="desktop" width="1200" height="800" title="Desktop companion probe"></iframe>
+  <iframe class="probe portrait" data-profile="portrait" width="390" height="844" title="Portrait companion probe"></iframe>
+  <iframe class="probe landscape" data-profile="landscape" width="844" height="390" title="Landscape companion probe"></iframe>
+  <output id="companionReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const frames=[...document.querySelectorAll('iframe')],wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)),report=document.getElementById('companionReport');
+      const petIds=['ranger-dog','bolt','patch','rook-dog','drift','ash-hound','bluefang','ember','ghostwire','k9-xiii','rad-cat','switch-cat','cinder-cat','nocturne','snowdrop','signal-crow','scrap-ferret','tunnel-rat','salvage-fox','watch-owl'];
+      localStorage.setItem('afterlight_v4',JSON.stringify({schema:20,prestige:{level:5},expeditions:{active:null,survivors:[],companions:petIds,selectedCompanion:'watch-owl',completed:{},visited:[],pending:null},last:Date.now()}));
+      const imageSize=src=>new Promise(resolve=>{const image=new Image();image.onload=()=>resolve([image.naturalWidth,image.naturalHeight]);image.onerror=()=>resolve([0,0]);image.src='../'+src});
+      async function inspect(frame){
+        const doc=frame.contentDocument,win=frame.contentWindow,profile=frame.dataset.profile,unit=doc.querySelector('.companionUnit'),sprite=doc.querySelector('.companionSprite'),stage=doc.getElementById('spriteStage'),survivor=doc.querySelector('.survivorUnit'),enemy=doc.querySelector('.enemyUnit'),pets=win.AfterlightConfig.EXPEDITION_COMPANIONS;
+        const sizes=await Promise.all(pets.map(pet=>imageSize(pet.asset))),rendered=pets.map(pet=>{const ok=win.AfterlightVisuals.applyCompanion(pet,false),style=getComputedStyle(sprite);return ok&&unit.dataset.companionId===pet.id&&style.backgroundImage.includes(pet.asset)}),box=unit.getBoundingClientRect(),stageBox=stage.getBoundingClientRect(),survivorBox=survivor.getBoundingClientRect(),enemyBox=enemy.getBoundingClientRect(),style=getComputedStyle(sprite),passed=pets.length===20&&sizes.every(size=>size[0]===768&&size[1]===256)&&rendered.every(Boolean)&&style.animationName==='companionIdleFrames'&&style.backgroundSize==='300% 100%'&&box.left>=stageBox.left&&box.right<=stageBox.right&&box.top>=stageBox.top&&box.bottom<=stageBox.bottom&&Math.abs(box.bottom-survivorBox.bottom)<=4&&box.right<=enemyBox.left+10;
+        return{profile,passed,pets:pets.length,frames:sizes.filter(size=>size[0]===768&&size[1]===256).length*3,animation:style.animationName,strip:style.backgroundSize,bounds:[Math.round(box.left-stageBox.left),Math.round(box.top-stageBox.top),Math.round(box.width),Math.round(box.height)],baseline:Math.round(box.bottom-survivorBox.bottom),enemyGap:Math.round(enemyBox.left-box.right)};
+      }
+      Promise.all(frames.map(frame=>new Promise(resolve=>{frame.addEventListener('load',()=>setTimeout(()=>inspect(frame).then(resolve),900));frame.src='../index.html?v=companion-idle-'+frame.dataset.profile}))).then(results=>{const passed=results.every(result=>result.passed);document.body.dataset.companionIdleProbe=passed?'passed':'failed';report.textContent='AFTERLIGHT_COMPANION_IDLE_'+(passed?'PASS ':'FAIL ')+JSON.stringify(results)}).catch(error=>{document.body.dataset.companionIdleProbe='failed';report.textContent='AFTERLIGHT_COMPANION_IDLE_FAIL '+error.stack});
+    })();
+  </script>
+</body>
+</html>

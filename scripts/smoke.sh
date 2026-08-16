@@ -11,6 +11,7 @@ PRESTIGE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-prestige-dom.html"
 RESET_DOM_FILE="${TMPDIR:-/tmp}/afterlight-account-reset-dom.html"
 DEATH_DOM_FILE="${TMPDIR:-/tmp}/afterlight-drifter-death-dom.html"
 EXPEDITION_ART_DOM_FILE="${TMPDIR:-/tmp}/afterlight-expedition-art-dom.html"
+COMPANION_IDLE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-companion-idle-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/afterlight-chrome.log"
 
 python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/afterlight-server.log" 2>&1 &
@@ -37,6 +38,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=8000 --dump-dom "http://127.0.0.1:${PORT}/scripts/account-reset-probe.html" >"$RESET_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/death-animation-probe.html" >"$DEATH_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1200,900 --virtual-time-budget=12000 --dump-dom "http://127.0.0.1:${PORT}/scripts/expedition-art-probe.html" >"$EXPEDITION_ART_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=1200,900 --virtual-time-budget=12000 --dump-dom "http://127.0.0.1:${PORT}/scripts/companion-idle-probe.html" >"$COMPANION_IDLE_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Afterlight Bunker</title>'
@@ -94,10 +96,10 @@ required=(
   'id="hordeSignal"'
   'data-tab="command"'
   'id="commandBadge"'
-  'js/core/config.js?build=35'
+  'js/core/config.js?build=36'
   'js/core/economy.js?build=2'
   'js/core/numbers.js?build=1'
-  'js/core/state.js?build=23'
+  'js/core/state.js?build=24'
   'js/systems/prestige.js?build=3'
   'js/systems/operations.js?build=2'
   'js/systems/command-center.js?build=7'
@@ -180,4 +182,12 @@ if ! grep -Fq 'data-expedition-art-probe="passed"' "$EXPEDITION_ART_DOM_FILE"; t
   exit 1
 fi
 
-echo "Afterlight browser smoke test passed: core game, static combat world, responsive expedition art, safe portrait combat, Drifter death sequence, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."
+if ! grep -Fq 'data-companion-idle-probe="passed"' "$COMPANION_IDLE_DOM_FILE"; then
+  echo "Companion idle animation browser smoke test failed."
+  grep -F 'AFTERLIGHT_COMPANION_IDLE_' "$COMPANION_IDLE_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+echo "Afterlight browser smoke test passed: core game, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, Drifter death sequence, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."

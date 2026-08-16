@@ -7,7 +7,7 @@ const parse=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{ret
 const isOwnedKey=key=>/^afterlight/i.test(String(key||''));
 function clearOwnedStorage(storage){let removed=0;try{for(let index=storage.length-1;index>=0;index--){const key=storage.key(index);if(isOwnedKey(key)){storage.removeItem(key);removed++}}}catch{}return removed}
 const defaults=()=>({
-  schema:19,coins:0,total:0,food:25,water:25,power:0,scrap:0,science:0,uranium:0,kills:0,level:1,bunker:1,
+  schema:20,coins:0,total:0,food:25,water:25,power:0,scrap:0,science:0,uranium:0,kills:0,level:1,bunker:1,
   rooms:{generator:1,workshop:0,greenhouse:0,purifier:0,lab:0,living:0,storage:0,turret:0},
   research:{tools:0,solar:0,hydro:0,filters:0,automation:0,walls:0},
   researchRuntime:{active:null,ready:null},
@@ -17,7 +17,7 @@ const defaults=()=>({
   offline:{pending:null,totalClaims:0,totalSeconds:0},
   missions:{claimed:[],bonuses:{},balanceVersion:0},
   operations:{priorities:{...CFG.OPERATIONS.defaultPriority},paused:{}},
-  expeditions:{active:null,survivors:[],companions:[],completed:{},visited:[],pending:null},
+  expeditions:{active:null,survivors:[],companions:[],selectedCompanion:null,completed:{},visited:[],pending:null},
   specialRooms:{},
   prestige:{level:0,cores:0,totalResets:0,bestBunker:1,lastAt:0,lastReward:0,rooms:{'legacy-vault':0,'automation-bay':0,'command-relay':0,'war-room':0,'archive-core':0},automation:{enabled:false,targets:[]},archive:[],run:{startedAt:Date.now(),roomUpgrades:0,researchClaims:0,hordes:0,brutes:0,expeditions:0,contractClaimed:false}},
   survivorSkins:{selected:'ranger-male',unlocked:['ranger-male','ranger-female']},
@@ -35,10 +35,10 @@ if(!old.expeditions){const x=parse('afterlight_expedition_runtime_v1');if(x)stat
 if(!old.specialRooms){const r=parse('afterlight_special_rooms_v1');if(r?.rooms)state.specialRooms={...r.rooms}}
 if(old.settings?.music==null){const legacyMusic=localStorage.getItem('afterlight_music');if(legacyMusic)state.settings.music=legacyMusic!=='off'}
 function normalize(){
-  state.schema=19;
+  state.schema=20;
   state.rooms={...base.rooms,...(state.rooms||{})};for(const id of Object.keys(base.rooms))state.rooms[id]=ECON.sanitizeRoomLevel(state.rooms[id]);state.research={...base.research,...(state.research||{})};state.stats={...base.stats,...(state.stats||{}),rarityKills:{...base.stats.rarityKills,...(state.stats?.rarityKills||{})}};state.stats.discovered=Array.isArray(state.stats.discovered)?[...new Set(state.stats.discovered.filter(id=>base.stats.rarityKills[id]!=null))]:[];for(const [id,count] of Object.entries(state.stats.rarityKills))if(Number(count)>0&&!state.stats.discovered.includes(id))state.stats.discovered.push(id);
   state.missions=state.missions||{claimed:[],bonuses:{}};state.missions.claimed=Array.isArray(state.missions.claimed)?state.missions.claimed:[];state.missions.bonuses=state.missions.bonuses||{};
-  state.expeditions=state.expeditions||{active:null,survivors:[],companions:[],completed:{},visited:[],pending:null};state.expeditions.survivors=Array.isArray(state.expeditions.survivors)?state.expeditions.survivors:[];state.expeditions.companions=Array.isArray(state.expeditions.companions)?state.expeditions.companions:[];state.expeditions.completed=state.expeditions.completed&&typeof state.expeditions.completed==='object'&&!Array.isArray(state.expeditions.completed)?state.expeditions.completed:{};state.expeditions.visited=Array.isArray(state.expeditions.visited)?[...new Set(state.expeditions.visited.filter(id=>CFG.EXPEDITIONS[id]))]:[];
+  state.expeditions=state.expeditions||{active:null,survivors:[],companions:[],selectedCompanion:null,completed:{},visited:[],pending:null};state.expeditions.survivors=Array.isArray(state.expeditions.survivors)?state.expeditions.survivors:[];const companionIds=new Set((CFG.EXPEDITION_COMPANIONS||[]).map(pet=>pet.id));state.expeditions.companions=Array.isArray(state.expeditions.companions)?[...new Set(state.expeditions.companions.filter(id=>companionIds.has(id)))]:[];state.expeditions.selectedCompanion=state.expeditions.companions.includes(state.expeditions.selectedCompanion)?state.expeditions.selectedCompanion:state.expeditions.companions.at(-1)||null;state.expeditions.completed=state.expeditions.completed&&typeof state.expeditions.completed==='object'&&!Array.isArray(state.expeditions.completed)?state.expeditions.completed:{};state.expeditions.visited=Array.isArray(state.expeditions.visited)?[...new Set(state.expeditions.visited.filter(id=>CFG.EXPEDITIONS[id]))]:[];
   state.operations={...base.operations,...(state.operations||{}),priorities:{...base.operations.priorities,...(state.operations?.priorities||{})},paused:{...base.operations.paused,...(state.operations?.paused||{})}};for(const id of Object.keys(base.rooms)){if(!CFG.OPERATIONS.priorities[state.operations.priorities[id]])state.operations.priorities[id]=base.operations.priorities[id];state.operations.paused[id]=state.operations.paused[id]===true}
   if(Array.isArray(state.expeditions.pending?.found))state.expeditions.pending.found=state.expeditions.pending.found[0]||null;
   state.specialRooms=state.specialRooms||{};state.researchRuntime=state.researchRuntime||{active:null,ready:null};state.merchant={...base.merchant,...(state.merchant||{}),active:{...base.merchant.active,...(state.merchant?.active||{})},purchases:{...base.merchant.purchases,...(state.merchant?.purchases||{})}};state.carePackage={...base.carePackage,...(state.carePackage||{})};state.offline={...base.offline,...(state.offline||{})};

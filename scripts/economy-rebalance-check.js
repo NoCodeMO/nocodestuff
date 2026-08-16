@@ -22,7 +22,7 @@ const missions=read('js/systems/missions.js');
 for(const marker of ['BONUS_LIMITS','balanceVersion','rebuiltBonuses','boundedBonus'])assert(missions.includes(marker),`mission normalization is missing ${marker}`);
 assert(/prodMult:2\.5/.test(missions)&&/costMult:\.75/.test(missions),'mission production and discount caps changed');
 const state=read('js/core/state.js'),command=read('js/systems/command-center.js'),css=read('app.css');
-assert(/schema:19/.test(state)&&/function resetAll\(token\)/.test(state)&&/resetInProgress/.test(state),'schema 19 and autosave-safe full reset API are required');
+assert(/schema:20/.test(state)&&/function resetAll\(token\)/.test(state)&&/resetInProgress/.test(state),'schema 20 and autosave-safe full reset API are required');
 assert(/TYPE RESET TO ARM THE BUTTON/.test(command)&&/3000\)/.test(command)&&/setPointerCapture/.test(command)&&/data-command-reset-open/.test(command),'Account reset needs typed confirmation and a touch-stable three-second hold');
 assert(css.includes('.accountResetModal')&&css.includes('@keyframes accountResetHold'),'Account reset presentation is missing');
 console.log(`Afterlight economy rebalance passed: P1–V passive baselines ${hours.map(value=>value.toFixed(1)+'h').join(' / ')}, 100-level Masteries and bounded Dealer/missions.`);
