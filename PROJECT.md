@@ -26,7 +26,7 @@ This file is the fastest entry point for any future development session. Read th
 
 ### Systems
 - `js/systems/missions.js` - 200-mission campaign: the original 50-save-compatible chain plus 15 operations chapters with 150 late-game objectives.
-- `js/systems/expeditions.js` - Food/Water-funded expedition timers, sustainable-economy rewards, scarce Uranium rolls and specialist discovery.
+- `js/systems/expeditions.js` - fullscreen 14-location Prestige atlas, graph-based mirrored outbound/return routes, Food/Water deployment, sustainable rewards, Uranium, specialists and rare companions.
 - `js/systems/special-rooms.js` - classified rooms unlocked by specialists.
 - `js/systems/research.js` - timed, dual Scrap/Science-funded research, completion badge and claiming.
 - `js/systems/merchant.js` - Uranium wallet, Dealer stock, temporary boost timers, purchase rules and runtime multipliers.
@@ -62,6 +62,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/death-animation-probe.html` - real-browser Common-horde kill probe that verifies three synchronized death frames, corpse persistence, fast respawn and cleanup.
 - `scripts/operations-balance-check.js` - Power/Water/Food/Scrap/Science/Workforce allocation, reserve drain, priority order, pause/resume and underperformance UI guardrails.
 - `scripts/cross-system-balance-check.js` - executable dual-cost Research, ration-funded Expedition, Dealer-free reward, sustainable offline and attention-reward math.
+- `scripts/expedition-atlas-check.js` - exact 4+2-per-Prestige location structure, parent-route integrity, cycle prevention, mirrored return phases, save fields, art and fullscreen UI guardrails.
 - `scripts/prestige-balance-check.js` - all five targets, survivors, active/permanent perk math, capped Core curve, reset boundaries, room costs and cross-system multiplier wiring.
 - `scripts/prestige-probe.html` - real-browser schema-15 migration plus transactional Prestige I–V reset, preservation, recovery backup, unlock, art, muzzle-anchor and multiplier probe.
 - `scripts/architect-probe.html` - real-browser Level 100 save migration, permanent unlock, exact x1.5 production multiplier, roster selection and rifle-anchor probe.
@@ -112,7 +113,7 @@ progress: kills, bunker, rooms, research, stats (including discovered infected, 
 researchRuntime: { active, ready }
 missions: { claimed, bonuses, balanceVersion }
 operations: { priorities: { [roomId]: essential|normal|low }, paused: { [roomId]: boolean } }
-expeditions: { active, survivors, pending }
+expeditions: { active, survivors, companions, completed, visited, pending }
 specialRooms: { [roomId]: level }
 prestige: { level, cores, totalResets, bestBunker, lastAt, lastReward, rooms, automation, archive, run }
 survivorSkins: { selected, unlocked }
@@ -174,7 +175,8 @@ Use events instead of adding duplicate click listeners across systems:
 - `afterlight:research-complete` - a persisted Research timer finished and the red claim notification became active.
 - `afterlight:mission-claimed` - emitted after a successful claim; owns the mission reward fanfare.
 - `afterlight:expedition-started` - emitted after Food/Water rations are atomically deducted and the sustainable reward rates are captured.
-- `afterlight:expedition-complete` - emitted exactly when the completion reveal is created; owns the expedition fanfare.
+- `afterlight:expedition-complete` - emitted only after the scout has reached the target, searched it and followed the same route back to Afterlight; owns the expedition fanfare.
+- `afterlight:expedition-roster` - the recovered specialist/companion roster changed after a returned haul was secured.
 - `afterlight:merchant-purchase` - emitted after Uranium is spent and the boost is active; owns the Dealer celebration and fanfare.
 - `afterlight:merchant-expired` - emitted when one or more persisted wall-clock boosts expire.
 - `afterlight:merchant-free-activated` - emitted when a care-package jackpot activates a no-cost five-minute Dealer contract without spending Uranium.
@@ -253,7 +255,7 @@ The Command survivor roster is configured once in `SURVIVOR_SKINS`. Both Ranger 
 
 Research projects spend both Scrap and Science up front in one state transaction. Both prices scale exponentially with project level, while the persisted wall-clock timer and red claim notification retain the existing one-project-at-a-time loop. This makes the Research Lab's Science output a progression input rather than another passive score.
 
-Expeditions spend their displayed Food and Water ration cost when deployed. The cost is the greater of a per-zone floor and a configured number of seconds of sustainable Food/Water production, so it stays relevant without becoming impossible for a new save. Coin and Scrap previews/rewards similarly capture sustainable permanent production at deployment, use zone-specific reward-time bands plus early floors, and ignore Dealer boosts. Longer zones improve specialist discovery access and Uranium efficiency instead of becoming an unchecked currency faucet.
+Expeditions use one fullscreen world atlas with 14 connected destinations: four Ashlands locations at Prestige 0 and exactly two additional locations at each Prestige I–V. Every node has an explicit parent, so all paths resolve to the bunker without loops. A deployment spends its displayed Food and Water, spends 42% of its persisted wall-clock duration walking outward, 16% searching and 42% following the same route in reverse. Rewards cannot complete before the returning scout reaches Afterlight. Coin and Scrap capture sustainable permanent production at deployment and ignore Dealer boosts. Uranium value remains bounded per active hour while individual late-zone hauls grow much larger; deeper zones progressively improve specialist odds and introduce very rare permanent companion discoveries.
 
 Offline production starts after one minute away and is capped at 12 hours per load. It uses the authoritative sustainable room/special-room rates with stock reserves disabled at 35% base efficiency, applies mission `offlineMult` up to a 90% hard cap, divides out temporary Dealer boosts and never generates Uranium. Its modal reports how many rooms were supply-limited during the calculation. Calculated gains are persisted as a pending claim before the collection modal opens, so closing the game cannot lose them.
 
@@ -275,6 +277,7 @@ Only active assets remain in `assets/`:
 - `combat-sky.webp`, `combat-clouds.webp`, `combat-city.webp`, `combat-bunker-clean.webp`, `combat-ground.webp` - aligned responsive combat parallax layers; the bunker layer uses clean alpha without a light matte fringe and normal blending so its concrete stays fully opaque
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
 - `care-package-airborne.png`, `care-package-crate.png` - true-alpha matching care-package states; the parachute is used only during descent and the closed crate receives its glow, dust, timer and reward effects at runtime
+- `expedition-world-atlas.png` - text-free high-definition retro wasteland atlas layer; all routes, nodes, locks, the survivor scout and dossier UI are rendered live above it for responsive accuracy
 
 `survivor-final.webp` and `walker-final.webp` are retained only as unused legacy assets so existing cached sessions cannot request missing files; new combat references neither one.
 

@@ -23,5 +23,5 @@ assert(!/Number\.MAX_SAFE_INTEGER/.test(game),'the exploitable 9.01Qa room-price
 assert(/ECON\.validPurchase\(quote,state\.coins,current\)/.test(game),'room purchases need an in-transaction price and balance guard');
 assert(/state\[k\]=ECON\.sanitizeResource\(state\[k\]\)/.test(state),'loaded resources must be repaired when they contain overflow values');
 assert(/lateGameEconomyTest/.test(state)&&/state\.rooms\.generator=1979/.test(state),'the localhost regression fixture must reproduce the reported save in browser tests');
-assert(html.indexOf('js/core/economy.js?build=2')<html.indexOf('js/core/state.js?build=22'),'the safe economy module must load before save-state normalization');
+assert(html.indexOf('js/core/economy.js?build=2')<html.indexOf('js/core/state.js?build=23'),'the safe economy module must load before save-state normalization');
 console.log(`Afterlight late-game economy passed: LV 1979 costs ${lateGenerator.toExponential(3)}, calibrated MAX buys ${firstMax.count} level(s), and repeated MAX is blocked.`);
