@@ -103,7 +103,10 @@ for(const [pattern,message] of [
 ])if(!pattern.test(visuals))fail(message);
 const css=fs.readFileSync(path.join(root,'app.css'),'utf8');
 if(!/float\.className='damageNumber'\+\(detail\.critical/.test(visuals)||!/if\(active\.length>8\)active\[0\]\.remove\(\)/.test(visuals))fail('per-shot damage feedback must exist and remain spam-safe');
+if(!/HIT_PIXEL_STYLES=Object\.freeze\(\{common:/.test(visuals)||!/[,{]uncommon:\{/.test(visuals)||!/[,{]rare:\{/.test(visuals)||!/[,{]epic:\{/.test(visuals)||!/[,{]legendary:\{/.test(visuals)||!/[,{]brute:\{/.test(visuals))fail('all six infected types require their own hit-pixel palette and weight');
+if(!/function hitPixels\(event\)/.test(visuals)||!/while\(active\.length>48\)active\.shift\(\)\?\.remove\(\)/.test(visuals)||!/damageFloat\(event\);hitPixels\(event\)/.test(visuals))fail('hit pixels must use the shared shot event and remain capped under spam');
 if(!/@keyframes damageNumberRise/.test(css))fail('floating damage animation is missing');
+if(!/@keyframes hitPixelBurst/.test(css)||!/@keyframes cinderbackHit/.test(css)||!/@keyframes blueShieldHit/.test(css)||!/@keyframes bloaterHit/.test(css)||!/@keyframes wardenHit/.test(css)||!/@keyframes bruteHit/.test(css))fail('infected hit pixels and character-specific recoil animations are incomplete');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 if(!html.includes('assets/enemy-common-drifter-death.png'))fail('The Drifter death sheet must be preloaded');
 if(!html.includes('assets/enemy-uncommon-cinderback-death.png'))fail('The Cinderback death sheet must be preloaded');
