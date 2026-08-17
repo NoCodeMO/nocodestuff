@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Afterlight landscape layout probe</title>
+  <title>Bunkr landscape layout probe</title>
   <style>
     html,body{margin:0;background:#000;color:#fff;font:12px monospace}
     iframe{display:block;width:844px;height:390px;border:0}
   </style>
 </head>
 <body data-landscape-layout="running">
-  <iframe id="gameFrame" title="Afterlight landscape probe"></iframe>
+  <iframe id="gameFrame" title="Bunkr landscape probe"></iframe>
   <output id="layoutReport" hidden></output>
   <script>
     (()=>{'use strict';
@@ -21,7 +21,7 @@
         doc.querySelector('[data-tab="bunker"]').click();
         setTimeout(()=>{const bunker=rect('bunker'),rooms=doc.getElementById('rooms'),cards=[...rooms.querySelectorAll(':scope > .room')].slice(0,4),columns=getComputedStyle(rooms).gridTemplateColumns.trim().split(/\s+/).length,visibleRooms=cards.filter(card=>{const box=card.getBoundingClientRect();return box.top>=bunker.top-1&&box.bottom<=bunker.bottom+1}).length,metrics={target:[targetWidth,targetHeight],app:[Math.round(app.width),Math.round(app.height)],hudHeight:Math.round(hud.height),nav:[Math.round(tabs.width),Math.round(tabs.height)],closed,openBunker:[Math.round(bunker.left),Math.round(bunker.right),Math.round(bunker.width)],columns,visibleRooms},passed=app.width>=targetWidth-2&&app.height>=targetHeight-2&&hud.height<=52&&tabs.width>=56&&tabs.width<=80&&tabs.height>=targetHeight-60&&closedDisplay==='none'&&scene.left>=tabs.right-1&&scene.right>=app.right-2&&scene.width>=app.width-tabs.width-2&&bunker.left>=tabs.right-1&&bunker.right>=app.right-2&&columns===4&&visibleRooms===4&&doc.getElementById('app').classList.contains('bunkerOpen')&&doc.getElementById('scene').getAttribute('aria-hidden')==='true';
           document.body.dataset.landscapeLayout=passed?'passed':'failed';
-          document.getElementById('layoutReport').textContent='AFTERLIGHT_LANDSCAPE_'+(passed?'PASS ':'FAIL ')+JSON.stringify(metrics);
+          document.getElementById('layoutReport').textContent='BUNKR_LANDSCAPE_'+(passed?'PASS ':'FAIL ')+JSON.stringify(metrics);
         },120);
       }
       frame.addEventListener('load',()=>setTimeout(finish,900));

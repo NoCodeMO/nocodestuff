@@ -2,19 +2,19 @@
 const fs=require('fs'),path=require('path'),vm=require('vm');
 const root=path.resolve(__dirname,'..'),read=file=>fs.readFileSync(path.join(root,file),'utf8'),assert=(value,message)=>{if(!value)throw new Error(`Expedition atlas: ${message}`)};
 const sandbox={window:{}};vm.runInNewContext(read('js/core/config.js'),sandbox,{filename:'config.js'});
-const zones=sandbox.window.AfterlightConfig.EXPEDITIONS,list=Object.values(zones),counts={};
+const zones=sandbox.window.BunkrConfig.EXPEDITIONS,list=Object.values(zones),counts={};
 for(const zone of list){counts[zone.prestige]=(counts[zone.prestige]||0)+1;assert(Array.isArray(zone.position)&&zone.position.length===2,`${zone.id} needs atlas coordinates`);assert(zone.position[0]>=5&&zone.position[0]<=95&&zone.position[1]>=12&&zone.position[1]<=88,`${zone.id} must remain fully visible inside the atlas`);assert(zone.parent==='bunker'||zones[zone.parent],`${zone.id} has an invalid parent route`);assert(zone.parent==='bunker'||zones[zone.parent].prestige<=zone.prestige,`${zone.id} route crosses backwards through Prestige`);assert(zone.lore&&zone.intel&&zone.landmark&&zone.threat,`${zone.id} dossier content is incomplete`);assert(zone.seconds>0&&zone.supplySeconds>0,`${zone.id} journey economy is incomplete`);assert(/^assets\/expedition-[a-z-]+\.webp$/.test(zone.art||''),`${zone.id} needs dedicated WebP dossier art`);const art=path.join(root,zone.art),mapArt=path.join(root,zone.art.replace('assets/expedition-','assets/expedition-map-'));assert(fs.existsSync(art),`${zone.id} dossier art is missing`);assert(fs.statSync(art).size>100000,`${zone.id} dossier art is too small to be production quality`);assert(fs.existsSync(mapArt),`${zone.id} map miniature is missing`);assert(fs.statSync(mapArt).size>5000,`${zone.id} map miniature is too small to remain readable`)}
 assert(list.length===14,'the launch atlas must contain exactly fourteen locations');
 assert(new Set(list.map(zone=>zone.art)).size===list.length,'every expedition must use unique dossier artwork');
 assert(counts[0]===4,'Prestige 0 must launch with four locations');
 for(let level=1;level<=5;level++)assert(counts[level]===2,`Prestige ${level} must add exactly two locations`);
-for(const zone of list){const seen=new Set();let current=zone;while(current&&current.parent!=='bunker'){assert(!seen.has(current.id),`${zone.id} route contains a cycle`);seen.add(current.id);current=zones[current.parent]}assert(current?.parent==='bunker',`${zone.id} must connect all the way back to Afterlight`)}
+for(const zone of list){const seen=new Set();let current=zone;while(current&&current.parent!=='bunker'){assert(!seen.has(current.id),`${zone.id} route contains a cycle`);seen.add(current.id);current=zones[current.parent]}assert(current?.parent==='bunker',`${zone.id} must connect all the way back to Bunkr`)}
 const state={bunker:10,food:1e9,water:1e9,prestige:{level:5},survivorSkins:{selected:'ranger-male'},expeditions:{active:null,survivors:[],companions:[],completed:{},visited:[],pending:null},stats:{uraniumEarned:0}};
 const element=()=>({dataset:{},classList:{add(){},remove(){},toggle(){}},querySelector(){return null},querySelectorAll(){return[]},append(){},remove(){},innerHTML:''});
-const window={AfterlightState:{get:()=>state,update:(reason,fn)=>fn(state),save(){},notify(){}},AfterlightGame:{rates:()=>({coins:10,scrap:2,food:1,water:1})},addEventListener(){},dispatchEvent(){}};
+const window={BunkrState:{get:()=>state,update:(reason,fn)=>fn(state),save(){},notify(){}},BunkrGame:{rates:()=>({coins:10,scrap:2,food:1,water:1})},addEventListener(){},dispatchEvent(){}};
 const runtime={window,document:{body:{append(){}},getElementById(){return null},querySelector(){return null},createElement:element},location:{hostname:'example.com',search:''},URLSearchParams,CustomEvent:function(){},requestAnimationFrame(){},setInterval(){},setTimeout(){},Date,Math,console};
 vm.runInNewContext(read('js/core/config.js'),runtime,{filename:'config.js'});vm.runInNewContext(read('js/core/numbers.js'),runtime,{filename:'numbers.js'});vm.runInNewContext(read('js/systems/expeditions.js'),runtime,{filename:'expeditions.js'});
-const api=runtime.window.AfterlightExpeditions,route=api.routePoints(zones.blacksite);
+const api=runtime.window.BunkrExpeditions,route=api.routePoints(zones.blacksite);
 assert(route.length>=7,'late-game routes must traverse multiple connected path segments');
 const mock={start:1000,end:11000},out=api.journey(mock,3100),search=api.journey(mock,6000),back=api.journey(mock,8900);
 assert(out.phase==='OUTBOUND'&&out.routeProgress>.4&&out.routeProgress<.6,'outbound scout progress must be proportional');
@@ -30,4 +30,4 @@ assert(/zone\.art\.replace\('assets\/expedition-','assets\/expedition-map-'\)/.t
 assert(css.includes("url('assets/expedition-world-atlas-v2.webp')"),'the readable atlas V2 background is not active');
 assert(css.includes('.atlasNode>i>img')&&css.includes('object-position:var(--node-art-position)'),'responsive map miniature styling is missing');
 assert(css.includes('.dossierImage>img')&&css.includes('object-position:var(--dossier-position'),'responsive dossier image cropping is missing');
-console.log('Afterlight expedition atlas passed: 14 logical locations, 14 unique HD scenes, Prestige gates, mirrored return travel, persistent roster and responsive fullscreen UI.');
+console.log('Bunkr expedition atlas passed: 14 logical locations, 14 unique HD scenes, Prestige gates, mirrored return travel, persistent roster and responsive fullscreen UI.');

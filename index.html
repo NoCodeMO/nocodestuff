@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Afterlight">
+  <meta name="apple-mobile-web-app-title" content="Bunkr">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0b0d0a">
-  <title>Afterlight Bunker</title>
+  <meta name="description" content="Bunkr: Last Shelter — a post-apocalyptic idle survival game about rebuilding humanity's final shelter.">
+  <title>Bunkr: Last Shelter</title>
   <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/branding/bunkr-icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/branding/bunkr-apple-touch-icon.png">
   <link rel="preload" as="image" href="assets/combat-sky.webp" type="image/webp">
   <link rel="preload" as="image" href="assets/combat-bunker-clean.webp" type="image/webp">
   <link rel="preload" as="image" href="assets/enemy-common-drifter.webp" type="image/webp">
@@ -27,12 +30,12 @@
   <link rel="preload" as="image" href="assets/care-package-airborne.png" type="image/png">
   <link rel="preload" as="image" href="assets/care-package-crate.png" type="image/png">
   <link rel="preload" as="image" href="assets/room-generator.webp" type="image/webp">
-  <link rel="stylesheet" href="app.css?build=58&pets=1&casing=1">
+  <link rel="stylesheet" href="app.css?build=59&pets=1&casing=1&brand=1">
 </head>
 <body>
   <main id="app">
     <header id="hud">
-      <div class="brand"><b>AFTERLIGHT</b><span>BUNKER PROTOCOL</span></div>
+      <div class="brand" aria-label="Bunkr: Last Shelter"><b>BUNKR</b><span>LAST SHELTER</span></div>
       <div class="resource" data-resource="coins" role="button" tabindex="0" aria-label="Open coin statistics"><i>◉</i><div><b id="coins">0</b><span id="cps">+0/s</span></div></div>
       <div class="resource" data-resource="food" role="button" tabindex="0" aria-label="Open food statistics"><i>🌿</i><div><b id="food">0</b><span id="foodps">+0/s</span></div></div>
       <div class="resource" data-resource="water" role="button" tabindex="0" aria-label="Open water statistics"><i>💧</i><div><b id="water">0</b><span id="waterps">+0/s</span></div></div>
@@ -54,7 +57,7 @@
 
     <section id="bunker" aria-label="Fullscreen bunker overview">
       <header class="bunkerOverviewHeader">
-        <div class="bunkerOverviewIdentity"><small>AFTERLIGHT // UNDERGROUND COMMAND</small><h1>BUNKER OVERVIEW</h1><p>Manage production rooms, operating supplies and permanent upgrades.</p></div>
+        <div class="bunkerOverviewIdentity"><small>BUNKR // SHELTER COMMAND</small><h1>BUNKER OVERVIEW</h1><p>Manage production rooms, operating supplies and permanent upgrades.</p></div>
         <div class="bunkerOverviewStats"><span><small>ROOMS ONLINE</small><b id="bunkerRoomsOnline">1 / 8</b></span><span><small>AVG. EFFICIENCY</small><b id="bunkerEfficiency">100%</b></span></div>
         <button id="closeBunker" type="button" aria-label="Return to the combat road">← RETURN TO ROAD</button>
       </header>
@@ -83,25 +86,26 @@
   </main>
 
   <!-- Load order is documented in PROJECT.md. -->
-  <script src="js/core/config.js?build=36&pets=1"></script>
-  <script src="js/core/economy.js?build=2"></script>
-  <script src="js/core/numbers.js?build=1"></script>
-  <script src="js/core/state.js?build=25&pets=1&casing=1"></script>
-  <script src="js/systems/prestige.js?build=3"></script>
-  <script src="js/systems/operations.js?build=2"></script>
-  <script src="js/systems/expeditions.js?build=11&pets=1"></script>
-  <script src="js/systems/special-rooms.js?build=4"></script>
-  <script src="js/systems/research.js?build=4"></script>
-  <script src="js/systems/merchant.js?build=4"></script>
-  <script src="js/systems/command-center.js?build=8&pets=1&casing=1"></script>
-  <script src="js/ui/visuals.js?build=29&casing=1"></script>
-  <script src="js/systems/survivor-dialogue.js?build=1"></script>
-  <script src="js/core/game.js?build=26"></script>
-  <script src="js/systems/codex.js?build=1"></script>
-  <script src="js/systems/offline.js?build=2"></script>
-  <script src="js/systems/missions.js?build=9"></script>
-  <script src="js/systems/care-package.js?build=2"></script>
-  <script src="js/audio.js?build=18&casing=2&realcasing=2"></script>
-  <script src="js/platform.js?build=3"></script>
+  <script src="js/core/brand.js?build=1"></script>
+  <script src="js/core/config.js?build=37&pets=1&brand=1"></script>
+  <script src="js/core/economy.js?build=3&brand=1"></script>
+  <script src="js/core/numbers.js?build=2&brand=1"></script>
+  <script src="js/core/state.js?build=26&pets=1&casing=1&brand=1"></script>
+  <script src="js/systems/prestige.js?build=4&brand=1"></script>
+  <script src="js/systems/operations.js?build=3&brand=1"></script>
+  <script src="js/systems/expeditions.js?build=12&pets=1&brand=1"></script>
+  <script src="js/systems/special-rooms.js?build=5&brand=1"></script>
+  <script src="js/systems/research.js?build=5&brand=1"></script>
+  <script src="js/systems/merchant.js?build=5&brand=1"></script>
+  <script src="js/systems/command-center.js?build=9&pets=1&casing=1&brand=1"></script>
+  <script src="js/ui/visuals.js?build=30&casing=1&brand=1"></script>
+  <script src="js/systems/survivor-dialogue.js?build=2&brand=1"></script>
+  <script src="js/core/game.js?build=27&brand=1"></script>
+  <script src="js/systems/codex.js?build=2&brand=1"></script>
+  <script src="js/systems/offline.js?build=3&brand=1"></script>
+  <script src="js/systems/missions.js?build=10&brand=1"></script>
+  <script src="js/systems/care-package.js?build=3&brand=1"></script>
+  <script src="js/audio.js?build=19&casing=2&realcasing=2&brand=1"></script>
+  <script src="js/platform.js?build=4&brand=1"></script>
 </body>
 </html>

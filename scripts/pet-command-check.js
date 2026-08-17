@@ -3,7 +3,7 @@ const fs=require('fs'),path=require('path'),vm=require('vm');
 const root=path.resolve(__dirname,'..'),read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(`Pet Command: ${message}`)};
 const sandbox={window:{}};vm.createContext(sandbox);vm.runInContext(read('js/core/config.js'),sandbox,{filename:'config.js'});
-const config=sandbox.window.AfterlightConfig,pets=config.EXPEDITION_COMPANIONS,zones=Object.values(config.EXPEDITIONS),ranger=pets.find(pet=>pet.id==='ranger-dog');
+const config=sandbox.window.BunkrConfig,pets=config.EXPEDITION_COMPANIONS,zones=Object.values(config.EXPEDITIONS),ranger=pets.find(pet=>pet.id==='ranger-dog');
 assert(pets.length===20,'the non-exotic launch roster must contain 20 pets');
 assert(ranger?.starter===true&&ranger.unlockPrestige===0&&ranger.benefit===null,'Ranger must be a free benefit-free starter');
 assert(pets.filter(pet=>pet.id!=='ranger-dog').every(pet=>pet.benefit&&pet.benefitLabel&&pet.benefitDescription),'every recovered pet except Ranger needs a visible gameplay benefit');
@@ -17,5 +17,5 @@ for(const [pattern,message] of [[/schema:20/,'save schema 20 is required'],[/com
 for(const [pattern,message] of [[/function companionBenefits\(/,'active pet benefits need a central calculator'],[/petBenefit=companionBenefits\(\)/,'expeditions must snapshot the equipped pet'],[/petBenefit\.coinMultiplier/,'pet coin rewards are not applied'],[/petBenefit\.scrapMultiplier/,'pet Scrap rewards are not applied'],[/pet\.unlockPrestige/,'expedition recovery must enforce pet Prestige gates'],[/Math\.min\(\.35/,'boosted pet find chance needs a hard cap'],[/root\?\.dataset\.expeditionAtlas==='ready'/,'pet switching inside Command must not overwrite the Command drawer']])assert(pattern.test(expeditions),message);
 for(const [pattern,message] of [[/TABS=\['guide','survivors','pets','prestige'/,'Pets must sit directly beside Survivors'],[/tabButton\('pets','◆','PETS'\)/,'Command needs a visible Pets tab'],[/data-pet-roster="ready"/,'Command pet roster markup is missing'],[/data-pet-select=/,'owned pets need a deployment control'],[/function selectPet\(/,'Command pet selection handler is missing']])assert(pattern.test(command),message);
 for(const selector of ['.petLoadoutHero','.currentPetArt','.petRosterGrid','.petCard.selected','.petPortrait'])assert(css.includes(selector),`${selector} styling is missing`);
-for(const marker of ['app.css?build=58','js/core/config.js?build=36','js/core/state.js?build=25','js/systems/expeditions.js?build=11','js/systems/command-center.js?build=8'])assert(html.includes(marker),`cache marker missing: ${marker}`);
+for(const marker of ['app.css?build=59','js/core/config.js?build=37','js/core/state.js?build=26','js/systems/expeditions.js?build=12','js/systems/command-center.js?build=9'])assert(html.includes(marker),`cache marker missing: ${marker}`);
 console.log('Pet Command passed: free Ranger, 19 balanced active benefits, Prestige-gated discovery and responsive Command roster.');

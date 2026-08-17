@@ -2,7 +2,7 @@
 const fs=require('fs'),path=require('path'),vm=require('vm');
 const root=path.resolve(__dirname,'..'),read=file=>fs.readFileSync(path.join(root,file),'utf8'),fail=message=>{throw new Error(`Late-game economy: ${message}`)};
 const context={window:{}};vm.runInNewContext(read('js/core/config.js'),context);vm.runInNewContext(read('js/core/economy.js'),context);
-const cfg=context.window.AfterlightConfig,economy=context.window.AfterlightEconomy,assert=(condition,message)=>{if(!condition)fail(message)};
+const cfg=context.window.BunkrConfig,economy=context.window.BunkrEconomy,assert=(condition,message)=>{if(!condition)fail(message)};
 const earlyWorkshop=economy.roomCostAt('workshop',62,1),expectedFloor=Math.floor(cfg.ROOMS.workshop.base*Math.pow(cfg.ROOM_ECONOMY.costGrowth,62));
 assert(earlyWorkshop>expectedFloor,'the calibrated cost ramp must slow the opening without changing monotonic growth');
 const lateGenerator=economy.roomCostAt('generator',1979,.6),nextGenerator=economy.roomCostAt('generator',1980,.6);
@@ -23,5 +23,5 @@ assert(!/Number\.MAX_SAFE_INTEGER/.test(game),'the exploitable 9.01Qa room-price
 assert(/ECON\.validPurchase\(quote,state\.coins,current\)/.test(game),'room purchases need an in-transaction price and balance guard');
 assert(/state\[k\]=ECON\.sanitizeResource\(state\[k\]\)/.test(state),'loaded resources must be repaired when they contain overflow values');
 assert(/lateGameEconomyTest/.test(state)&&/state\.rooms\.generator=1979/.test(state),'the localhost regression fixture must reproduce the reported save in browser tests');
-assert(html.indexOf('js/core/economy.js?build=2')<html.indexOf('js/core/state.js?build=25'),'the safe economy module must load before save-state normalization');
-console.log(`Afterlight late-game economy passed: LV 1979 costs ${lateGenerator.toExponential(3)}, calibrated MAX buys ${firstMax.count} level(s), and repeated MAX is blocked.`);
+assert(html.indexOf('js/core/economy.js?build=3')<html.indexOf('js/core/state.js?build=26'),'the safe economy module must load before save-state normalization');
+console.log(`Bunkr late-game economy passed: LV 1979 costs ${lateGenerator.toExponential(3)}, calibrated MAX buys ${firstMax.count} level(s), and repeated MAX is blocked.`);

@@ -1,10 +1,12 @@
 (()=>{'use strict';
-const CFG=window.AfterlightConfig;if(!CFG)throw new Error('AfterlightConfig must load before state.js');
-const ECON=window.AfterlightEconomy;if(!ECON)throw new Error('AfterlightEconomy must load before state.js');
-const KEY='afterlight_v4';
+const CFG=window.BunkrConfig;if(!CFG)throw new Error('BunkrConfig must load before state.js');
+const ECON=window.BunkrEconomy;if(!ECON)throw new Error('BunkrEconomy must load before state.js');
+const KEY=window.BunkrBrand?.storageKey||'bunkr_last_shelter_v1',LEGACY_KEY=window.BunkrBrand?.legacyStorageKey||'afterlight_v4';
 let resetInProgress=false,saveTimer=0;
 const parse=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}};
-const isOwnedKey=key=>/^afterlight/i.test(String(key||''));
+const firstStored=(...keys)=>{for(const key of keys){const value=parse(key);if(value)return{key,value}}return{key:null,value:null}};
+const newestStored=(...keys)=>keys.map(key=>({key,value:parse(key)})).filter(entry=>entry.value).sort((a,b)=>(Number(b.value.last)||0)-(Number(a.value.last)||0))[0]||{key:null,value:null};
+const isOwnedKey=key=>/^(?:bunkr|afterlight)/i.test(String(key||''));
 function clearOwnedStorage(storage){let removed=0;try{for(let index=storage.length-1;index>=0;index--){const key=storage.key(index);if(isOwnedKey(key)){storage.removeItem(key);removed++}}}catch{}return removed}
 const defaults=()=>({
   schema:20,coins:0,total:0,food:25,water:25,power:0,scrap:0,science:0,uranium:0,kills:0,level:1,bunker:1,
@@ -25,15 +27,16 @@ const defaults=()=>({
   settings:{music:true,uiSfx:true,musicVolume:1,uiVolume:1,combatVolume:1,casingVolume:.1,rewardVolume:1,reducedEffects:false},
   last:Date.now()
 });
-const loadedAt=Date.now(),base=defaults(),old=parse(KEY)||{},previousLast=Number(old.last)||loadedAt,offlineElapsedMs=Math.max(0,loadedAt-previousLast);
+const loadedAt=Date.now(),base=defaults(),stored=newestStored(KEY,'bunkr_v4',LEGACY_KEY),old=stored.value||{},migratedFrom=stored.key&&stored.key!==KEY?stored.key:null,previousLast=Number(old.last)||loadedAt,offlineElapsedMs=Math.max(0,loadedAt-previousLast);
 const state={...base,...old,rooms:{...base.rooms,...(old.rooms||{})},research:{...base.research,...(old.research||{})},stats:{...base.stats,...(old.stats||{}),rarityKills:{...base.stats.rarityKills,...(old.stats?.rarityKills||{})}},merchant:{...base.merchant,...(old.merchant||{}),active:{...base.merchant.active,...(old.merchant?.active||{})},purchases:{...base.merchant.purchases,...(old.merchant?.purchases||{})}},carePackage:{...base.carePackage,...(old.carePackage||{})},offline:{...base.offline,...(old.offline||{})},operations:{...base.operations,...(old.operations||{}),priorities:{...base.operations.priorities,...(old.operations?.priorities||{})},paused:{...base.operations.paused,...(old.operations?.paused||{})}},prestige:{...base.prestige,...(old.prestige||{}),rooms:{...base.prestige.rooms,...(old.prestige?.rooms||{})},automation:{...base.prestige.automation,...(old.prestige?.automation||{})},run:{...base.prestige.run,...(old.prestige?.run||{})}},survivorSkins:{...base.survivorSkins,...(old.survivorSkins||{})},command:{...base.command,...(old.command||{}),account:{...base.command.account,...(old.command?.account||{})}},settings:{...base.settings,...(old.settings||{})}};
 if((Number(old.schema)||0)<19){state.food=Math.max(25,Number(state.food)||0);state.water=Math.max(25,Number(state.water)||0)}
 if((Number(old.schema)||0)<16)state.stats.lifetimeKills=Math.max(Number(state.stats.lifetimeKills)||0,Number(state.kills)||0);
 if(['localhost','127.0.0.1'].includes(location.hostname)&&new URLSearchParams(location.search).get('lateGameEconomyTest')==='1'){state.coins=5.63e152;state.total=Math.max(5.63e152,Number(state.total)||0);state.rooms.generator=1979}
-if(!old.missions){const m=parse('afterlight_missions_v1');if(m)state.missions={claimed:Array.isArray(m.claimed)?m.claimed:[],bonuses:{...(m.bon||{})}}}
-if(!old.expeditions){const x=parse('afterlight_expedition_runtime_v1');if(x)state.expeditions={active:x.active||null,survivors:Array.isArray(x.survivors)?x.survivors:[],pending:x.pending||null}}
-if(!old.specialRooms){const r=parse('afterlight_special_rooms_v1');if(r?.rooms)state.specialRooms={...r.rooms}}
-if(old.settings?.music==null){const legacyMusic=localStorage.getItem('afterlight_music');if(legacyMusic)state.settings.music=legacyMusic!=='off'}
+if(!old.missions){const m=firstStored('bunkr_missions_v1','afterlight_missions_v1').value;if(m)state.missions={claimed:Array.isArray(m.claimed)?m.claimed:[],bonuses:{...(m.bon||{})}}}
+if(!old.expeditions){const x=firstStored('bunkr_expedition_runtime_v1','afterlight_expedition_runtime_v1').value;if(x)state.expeditions={active:x.active||null,survivors:Array.isArray(x.survivors)?x.survivors:[],pending:x.pending||null}}
+if(!old.specialRooms){const r=firstStored('bunkr_special_rooms_v1','afterlight_special_rooms_v1').value;if(r?.rooms)state.specialRooms={...r.rooms}}
+if(old.settings?.music==null){const legacyMusic=localStorage.getItem('bunkr_music')||localStorage.getItem('afterlight_music');if(legacyMusic)state.settings.music=legacyMusic!=='off'}
+if(!localStorage.getItem('bunkr_prestige_backup_v1')){const legacyBackup=localStorage.getItem('afterlight_prestige_backup_v1');if(legacyBackup)localStorage.setItem('bunkr_prestige_backup_v1',legacyBackup)}
 function normalize(){
   state.schema=20;
   state.rooms={...base.rooms,...(state.rooms||{})};for(const id of Object.keys(base.rooms))state.rooms[id]=ECON.sanitizeRoomLevel(state.rooms[id]);state.research={...base.research,...(state.research||{})};state.stats={...base.stats,...(state.stats||{}),rarityKills:{...base.stats.rarityKills,...(state.stats?.rarityKills||{})}};state.stats.discovered=Array.isArray(state.stats.discovered)?[...new Set(state.stats.discovered.filter(id=>base.stats.rarityKills[id]!=null))]:[];for(const [id,count] of Object.entries(state.stats.rarityKills))if(Number(count)>0&&!state.stats.discovered.includes(id))state.stats.discovered.push(id);
@@ -49,12 +52,12 @@ function normalize(){
   for(const k of ['coins','total','food','water','power','scrap','science','uranium','kills'])state[k]=ECON.sanitizeResource(state[k]);
 }
 function save(){if(resetInProgress)return false;normalize();state.last=Date.now();localStorage.setItem(KEY,JSON.stringify(state));return true}
-function notify(reason='state'){window.dispatchEvent(new CustomEvent('afterlight:state',{detail:{reason}}))}
+function notify(reason='state'){window.dispatchEvent(new CustomEvent('bunkr:state',{detail:{reason}}))}
 function update(reason,fn,{saveNow=true,notifyNow=true}={}){if(typeof fn==='function')fn(state);normalize();if(saveNow)save();if(notifyNow)notify(reason);return state}
 function bonus(name){const v=Number(state.missions?.bonuses?.[name]);return Number.isFinite(v)&&v>0?v:1}
 function saveWhenHidden(){if(document.hidden)save()}
 function resetAll(token){if(token!=='RESET'||resetInProgress)return false;resetInProgress=true;clearInterval(saveTimer);window.removeEventListener('pagehide',save);document.removeEventListener('visibilitychange',saveWhenHidden);clearOwnedStorage(localStorage);if(typeof sessionStorage!=='undefined')clearOwnedStorage(sessionStorage);const clean=new URL(location.href);clean.search='';clean.hash='';clean.searchParams.set('reset',String(Date.now()));location.replace(clean.href);return true}
 normalize();
-window.AfterlightState={KEY,get:()=>state,save,update,notify,bonus,resetAll,isResetting:()=>resetInProgress,loadedAt,previousLast,offlineElapsedMs,snapshot:()=>JSON.parse(JSON.stringify(state))};
+window.BunkrState={KEY,LEGACY_KEY,migratedFrom,get:()=>state,save,update,notify,bonus,resetAll,isResetting:()=>resetInProgress,loadedAt,previousLast,offlineElapsedMs,snapshot:()=>JSON.parse(JSON.stringify(state))};
 save();saveTimer=setInterval(save,4000);window.addEventListener('pagehide',save);document.addEventListener('visibilitychange',saveWhenHidden);
 })();

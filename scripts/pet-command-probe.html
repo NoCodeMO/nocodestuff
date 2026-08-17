@@ -1,23 +1,23 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><title>Afterlight Pet Command probe</title><style>html,body{margin:0;background:#050705}.probe{position:absolute;inset:0;border:0}</style></head>
+<head><meta charset="utf-8"><title>Bunkr Pet Command probe</title><style>html,body{margin:0;background:#050705}.probe{position:absolute;inset:0;border:0}</style></head>
 <body data-pet-command-probe="running">
   <iframe class="probe" width="390" height="844" title="Portrait Pet Command probe"></iframe>
   <output id="petCommandReport" hidden></output>
   <script>
     (()=>{'use strict';
       const frame=document.querySelector('iframe'),report=document.getElementById('petCommandReport'),wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-      for(let index=localStorage.length-1;index>=0;index--){const key=localStorage.key(index);if(/^afterlight/i.test(key||''))localStorage.removeItem(key)}
+      for(let index=localStorage.length-1;index>=0;index--){const key=localStorage.key(index);if(/^bunkr/i.test(key||''))localStorage.removeItem(key)}
       async function inspect(){
-        const win=frame.contentWindow,doc=frame.contentDocument,state=win.AfterlightState.get(),commandTab=doc.querySelector('[data-tab="command"]');
+        const win=frame.contentWindow,doc=frame.contentDocument,state=win.BunkrState.get(),commandTab=doc.querySelector('[data-tab="command"]');
         commandTab.click();await wait(180);const root=doc.getElementById('drawerBody'),tabs=[...root.querySelectorAll('[data-command-tab]')],petsTab=root.querySelector('[data-command-tab="pets"]');petsTab.click();await wait(180);
         const cards=[...root.querySelectorAll('[data-pet-slot]')],ranger=root.querySelector('[data-pet-slot="ranger-dog"]'),hero=root.querySelector('.currentPetArt>i'),stagePet=doc.querySelector('.companionUnit'),before={schema:state.schema,owned:[...state.expeditions.companions],selected:state.expeditions.selectedCompanion,stage:stagePet?.dataset.companionId,cards:cards.length,discoverable:root.querySelectorAll('.petCard.discoverable').length,locked:root.querySelectorAll('.petCard.locked').length,tabOrder:tabs.map(tab=>tab.dataset.commandTab),rangerDeployed:ranger?.classList.contains('selected')&&ranger.querySelector('button')?.disabled,animation:getComputedStyle(hero).animationName,noOverflow:root.scrollWidth<=root.clientWidth+2};
-        win.AfterlightState.update('pet-probe-unlock',game=>{if(!game.expeditions.companions.includes('bolt'))game.expeditions.companions.push('bolt')});win.AfterlightCommandCenter.setTab('pets',root);root.querySelector('[data-pet-select="bolt"]')?.click();await wait(180);
-        const afterState=win.AfterlightState.get(),bolt=root.querySelector('[data-pet-slot="bolt"]'),after={selected:afterState.expeditions.selectedCompanion,stage:stagePet?.dataset.companionId,command:root.dataset.commandCenter,atlas:root.dataset.expeditionAtlas||null,boltSelected:bolt?.classList.contains('selected')&&bolt.querySelector('button')?.disabled,lastTab:afterState.command.lastTab};
+        win.BunkrState.update('pet-probe-unlock',game=>{if(!game.expeditions.companions.includes('bolt'))game.expeditions.companions.push('bolt')});win.BunkrCommandCenter.setTab('pets',root);root.querySelector('[data-pet-select="bolt"]')?.click();await wait(180);
+        const afterState=win.BunkrState.get(),bolt=root.querySelector('[data-pet-slot="bolt"]'),after={selected:afterState.expeditions.selectedCompanion,stage:stagePet?.dataset.companionId,command:root.dataset.commandCenter,atlas:root.dataset.expeditionAtlas||null,boltSelected:bolt?.classList.contains('selected')&&bolt.querySelector('button')?.disabled,lastTab:afterState.command.lastTab};
         const passed=before.schema===20&&before.owned.join(',')==='ranger-dog'&&before.selected==='ranger-dog'&&before.stage==='ranger-dog'&&before.cards===20&&before.discoverable===4&&before.locked===15&&before.tabOrder.indexOf('pets')===before.tabOrder.indexOf('survivors')+1&&before.rangerDeployed&&before.animation==='companionIdleFrames'&&before.noOverflow&&after.selected==='bolt'&&after.stage==='bolt'&&after.command==='ready'&&!after.atlas&&after.boltSelected&&after.lastTab==='pets';
-        document.body.dataset.petCommandProbe=passed?'passed':'failed';report.textContent='AFTERLIGHT_PET_COMMAND_'+(passed?'PASS ':'FAIL ')+JSON.stringify({before,after});
+        document.body.dataset.petCommandProbe=passed?'passed':'failed';report.textContent='BUNKR_PET_COMMAND_'+(passed?'PASS ':'FAIL ')+JSON.stringify({before,after});
       }
-      frame.addEventListener('load',()=>setTimeout(()=>inspect().catch(error=>{document.body.dataset.petCommandProbe='failed';report.textContent='AFTERLIGHT_PET_COMMAND_FAIL '+error.stack}),900));frame.src='../index.html?v=pet-command-probe';
+      frame.addEventListener('load',()=>setTimeout(()=>inspect().catch(error=>{document.body.dataset.petCommandProbe='failed';report.textContent='BUNKR_PET_COMMAND_FAIL '+error.stack}),900));frame.src='../index.html?v=pet-command-probe';
     })();
   </script>
 </body>

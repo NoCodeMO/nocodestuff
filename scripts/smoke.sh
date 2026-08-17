@@ -2,21 +2,21 @@
 set -euo pipefail
 
 PORT="${PORT:-4173}"
-DOM_FILE="${TMPDIR:-/tmp}/afterlight-dom.html"
-LANDSCAPE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-landscape-dom.html"
-PORTRAIT_COMBAT_DOM_FILE="${TMPDIR:-/tmp}/afterlight-portrait-combat-dom.html"
-STATIC_WORLD_DOM_FILE="${TMPDIR:-/tmp}/afterlight-static-world-dom.html"
-ARCHITECT_DOM_FILE="${TMPDIR:-/tmp}/afterlight-architect-dom.html"
-PRESTIGE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-prestige-dom.html"
-RESET_DOM_FILE="${TMPDIR:-/tmp}/afterlight-account-reset-dom.html"
-DEATH_DOM_FILE="${TMPDIR:-/tmp}/afterlight-drifter-death-dom.html"
-EXPEDITION_ART_DOM_FILE="${TMPDIR:-/tmp}/afterlight-expedition-art-dom.html"
-COMPANION_IDLE_DOM_FILE="${TMPDIR:-/tmp}/afterlight-companion-idle-dom.html"
-PET_COMMAND_DOM_FILE="${TMPDIR:-/tmp}/afterlight-pet-command-dom.html"
-CASING_FEEDBACK_DOM_FILE="${TMPDIR:-/tmp}/afterlight-casing-feedback-dom.html"
-CHROME_LOG="${TMPDIR:-/tmp}/afterlight-chrome.log"
+DOM_FILE="${TMPDIR:-/tmp}/bunkr-dom.html"
+LANDSCAPE_DOM_FILE="${TMPDIR:-/tmp}/bunkr-landscape-dom.html"
+PORTRAIT_COMBAT_DOM_FILE="${TMPDIR:-/tmp}/bunkr-portrait-combat-dom.html"
+STATIC_WORLD_DOM_FILE="${TMPDIR:-/tmp}/bunkr-static-world-dom.html"
+ARCHITECT_DOM_FILE="${TMPDIR:-/tmp}/bunkr-architect-dom.html"
+PRESTIGE_DOM_FILE="${TMPDIR:-/tmp}/bunkr-prestige-dom.html"
+RESET_DOM_FILE="${TMPDIR:-/tmp}/bunkr-account-reset-dom.html"
+DEATH_DOM_FILE="${TMPDIR:-/tmp}/bunkr-drifter-death-dom.html"
+EXPEDITION_ART_DOM_FILE="${TMPDIR:-/tmp}/bunkr-expedition-art-dom.html"
+COMPANION_IDLE_DOM_FILE="${TMPDIR:-/tmp}/bunkr-companion-idle-dom.html"
+PET_COMMAND_DOM_FILE="${TMPDIR:-/tmp}/bunkr-pet-command-dom.html"
+CASING_FEEDBACK_DOM_FILE="${TMPDIR:-/tmp}/bunkr-casing-feedback-dom.html"
+CHROME_LOG="${TMPDIR:-/tmp}/bunkr-chrome.log"
 
-python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/afterlight-server.log" 2>&1 &
+python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/bunkr-server.log" 2>&1 &
 SERVER_PID=$!
 trap 'kill "$SERVER_PID" >/dev/null 2>&1 || true' EXIT
 sleep 1
@@ -45,7 +45,10 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/casing-feedback-probe.html" >"$CASING_FEEDBACK_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
-  '<title>Afterlight Bunker</title>'
+  '<title>Bunkr: Last Shelter</title>'
+  'aria-label="Bunkr: Last Shelter"'
+  '<span>LAST SHELTER</span>'
+  'assets/branding/bunkr-icon-192.png'
   'id="spriteStage"'
   'data-survivor-asset="survivor-ranger.png"'
   'data-survivor-id="ranger-male"'
@@ -69,7 +72,7 @@ required=(
   'POWER GENERATOR'
   'id="missionBox"'
   'data-mission-count="200"'
-  '200 AFTERLIGHT DIRECTIVES'
+  '200 BUNKR DIRECTIVES'
   'specialMainCard'
   'id="musicToggle"'
   'data-ui-audio="ready"'
@@ -100,17 +103,18 @@ required=(
   'id="hordeSignal"'
   'data-tab="command"'
   'id="commandBadge"'
-  'js/core/config.js?build=36'
-  'js/core/economy.js?build=2'
-  'js/core/numbers.js?build=1'
-  'js/core/state.js?build=25'
-  'js/systems/prestige.js?build=3'
-  'js/systems/operations.js?build=2'
-  'js/systems/command-center.js?build=8'
-  'js/systems/survivor-dialogue.js?build=1'
-  'js/core/game.js?build=26'
-  'js/audio.js?build=18'
-  'js/systems/care-package.js?build=2'
+  'js/core/brand.js?build=1'
+  'js/core/config.js?build=37'
+  'js/core/economy.js?build=3'
+  'js/core/numbers.js?build=2'
+  'js/core/state.js?build=26'
+  'js/systems/prestige.js?build=4'
+  'js/systems/operations.js?build=3'
+  'js/systems/command-center.js?build=9'
+  'js/systems/survivor-dialogue.js?build=2'
+  'js/core/game.js?build=27'
+  'js/audio.js?build=19'
+  'js/systems/care-package.js?build=3'
 )
 
 for marker in "${required[@]}"; do
@@ -124,7 +128,7 @@ done
 
 if ! grep -Fq 'data-landscape-layout="passed"' "$LANDSCAPE_DOM_FILE"; then
   echo "Landscape browser smoke test failed."
-  grep -F 'AFTERLIGHT_LANDSCAPE_' "$LANDSCAPE_DOM_FILE" || true
+  grep -F 'BUNKR_LANDSCAPE_' "$LANDSCAPE_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
@@ -132,7 +136,7 @@ fi
 
 if ! grep -Fq 'data-architect-probe="passed"' "$ARCHITECT_DOM_FILE"; then
   echo "Architect browser smoke test failed."
-  grep -F 'AFTERLIGHT_ARCHITECT_' "$ARCHITECT_DOM_FILE" || true
+  grep -F 'BUNKR_ARCHITECT_' "$ARCHITECT_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
@@ -140,7 +144,7 @@ fi
 
 if ! grep -Fq 'data-portrait-combat="passed"' "$PORTRAIT_COMBAT_DOM_FILE"; then
   echo "Portrait combat browser smoke test failed."
-  grep -F 'AFTERLIGHT_PORTRAIT_COMBAT_' "$PORTRAIT_COMBAT_DOM_FILE" || true
+  grep -F 'BUNKR_PORTRAIT_COMBAT_' "$PORTRAIT_COMBAT_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
@@ -148,7 +152,7 @@ fi
 
 if ! grep -Fq 'data-static-world="passed"' "$STATIC_WORLD_DOM_FILE"; then
   echo "Static combat world browser smoke test failed."
-  grep -F 'AFTERLIGHT_STATIC_WORLD_' "$STATIC_WORLD_DOM_FILE" || true
+  grep -F 'BUNKR_STATIC_WORLD_' "$STATIC_WORLD_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
@@ -156,7 +160,7 @@ fi
 
 if ! grep -Fq 'data-prestige-probe="passed"' "$PRESTIGE_DOM_FILE"; then
   echo "Prestige browser smoke test failed."
-  grep -F 'AFTERLIGHT_PRESTIGE_' "$PRESTIGE_DOM_FILE" || true
+  grep -F 'BUNKR_PRESTIGE_' "$PRESTIGE_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
@@ -164,7 +168,7 @@ fi
 
 if ! grep -Fq 'data-account-reset-probe="passed"' "$RESET_DOM_FILE"; then
   echo "Account reset browser smoke test failed."
-  grep -F 'AFTERLIGHT_ACCOUNT_RESET_' "$RESET_DOM_FILE" || true
+  grep -F 'BUNKR_ACCOUNT_RESET_' "$RESET_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
@@ -172,7 +176,7 @@ fi
 
 if ! grep -Fq 'data-death-animation-probe="passed"' "$DEATH_DOM_FILE"; then
   echo "Drifter death animation browser smoke test failed."
-  grep -F 'AFTERLIGHT_DRIFTER_DEATH_' "$DEATH_DOM_FILE" || true
+  grep -F 'BUNKR_DRIFTER_DEATH_' "$DEATH_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
@@ -180,7 +184,7 @@ fi
 
 if ! grep -Fq 'data-expedition-art-probe="passed"' "$EXPEDITION_ART_DOM_FILE"; then
   echo "Expedition location art browser smoke test failed."
-  grep -F 'AFTERLIGHT_EXPEDITION_ART_' "$EXPEDITION_ART_DOM_FILE" || true
+  grep -F 'BUNKR_EXPEDITION_ART_' "$EXPEDITION_ART_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
@@ -188,7 +192,7 @@ fi
 
 if ! grep -Fq 'data-companion-idle-probe="passed"' "$COMPANION_IDLE_DOM_FILE"; then
   echo "Companion idle animation browser smoke test failed."
-  grep -F 'AFTERLIGHT_COMPANION_IDLE_' "$COMPANION_IDLE_DOM_FILE" || true
+  grep -F 'BUNKR_COMPANION_IDLE_' "$COMPANION_IDLE_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
@@ -196,7 +200,7 @@ fi
 
 if ! grep -Fq 'data-pet-command-probe="passed"' "$PET_COMMAND_DOM_FILE"; then
   echo "Pet Command browser smoke test failed."
-  grep -F 'AFTERLIGHT_PET_COMMAND_' "$PET_COMMAND_DOM_FILE" || true
+  grep -F 'BUNKR_PET_COMMAND_' "$PET_COMMAND_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
@@ -204,10 +208,10 @@ fi
 
 if ! grep -Fq 'data-casing-feedback-probe="passed"' "$CASING_FEEDBACK_DOM_FILE"; then
   echo "Spent-casing feedback browser smoke test failed."
-  grep -F 'AFTERLIGHT_CASING_FEEDBACK_' "$CASING_FEEDBACK_DOM_FILE" || true
+  grep -F 'BUNKR_CASING_FEEDBACK_' "$CASING_FEEDBACK_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1
 fi
 
-echo "Afterlight browser smoke test passed: core game, survivor-relative spent casings, free Ranger and Pet Command roster, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, Drifter death sequence, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."
+echo "Bunkr browser smoke test passed: core game, survivor-relative spent casings, free Ranger and Pet Command roster, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, Drifter death sequence, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."

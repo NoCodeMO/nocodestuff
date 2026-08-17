@@ -2,7 +2,7 @@
 const fs=require('fs'),path=require('path'),vm=require('vm');
 const root=path.resolve(__dirname,'..'),sandbox={window:{}};
 vm.runInNewContext(fs.readFileSync(path.join(root,'js','core','config.js'),'utf8'),sandbox,{filename:'config.js'});
-const {ENEMIES,COMBAT}=sandbox.window.AfterlightConfig||{};
+const {ENEMIES,COMBAT}=sandbox.window.BunkrConfig||{};
 const fail=message=>{throw new Error(`Combat balance: ${message}`)};
 if(!Array.isArray(ENEMIES)||ENEMIES.length!==6)fail('exactly six enemy definitions are required');
 const expected={common:55,uncommon:25,rare:12,epic:5,legendary:2,brute:1};
@@ -88,7 +88,7 @@ for(const [pattern,message] of [
   [/killCredit:horde\?COMBAT\.hordeMultiplier:1/,'hordes must award x3 kill credit'],
   [/addCoins\(Math\.max\(1,Math\.floor\(baseCoins\*streak\.multiplier\)\),false\)/,'hourly-scaled bounties must not double-apply the coin bonus'],
   [/bruteCores/,'Brute kills must award their exclusive core drop']
-  ,[/const baseDamage=tapDamage\(\),critical=criticalHit\(\),criticalMultiplier=critical\?COMBAT\.criticalMultiplier\*\(window\.AfterlightPrestige\?\.criticalMultiplier\?\.\(\)\|\|1\):1,damage=baseDamage\*criticalMultiplier/,'critical damage, including Elara, must be calculated once in core combat']
+  ,[/const baseDamage=tapDamage\(\),critical=criticalHit\(\),criticalMultiplier=critical\?COMBAT\.criticalMultiplier\*\(window\.BunkrPrestige\?\.criticalMultiplier\?\.\(\)\|\|1\):1,damage=baseDamage\*criticalMultiplier/,'critical damage, including Elara, must be calculated once in core combat']
   ,[/S\.stats\.criticals/,'lifetime critical hits must be tracked']
   ,[/function advanceStreak\(at=Date\.now\(\)\)/,'combat must own one deterministic streak calculator']
   ,[/Math\.floor\(baseCoins\*streak\.multiplier\)/,'streak multiplier must apply to kill rewards only after the kill']
@@ -134,7 +134,7 @@ if(!html.includes('assets/enemy-legendary-gilded-warden-death.png'))fail('The Gi
 if(!html.includes('assets/enemy-brute-breaker-death.png'))fail('The Breaker death sheet must be preloaded');
 if(!/id="hordeSignal"/.test(html)||!/GUARANTEED IN/.test(game)||!/#hordeSignal\.detected/.test(css))fail('players need a visible horde signal and a distinct detected state');
 if(!/@keyframes criticalNumberRise/.test(css)||!/CRIT -/.test(visuals))fail('critical hits need distinct visual feedback');
-if(!/id='combatStreak'/.test(visuals)||!/afterlight:streak/.test(visuals)||!/@keyframes streakDrain/.test(css))fail('kill streak HUD and timer feedback are missing');
+if(!/id='combatStreak'/.test(visuals)||!/bunkr:streak/.test(visuals)||!/@keyframes streakDrain/.test(css))fail('kill streak HUD and timer feedback are missing');
 if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \+ 100%\)/.test(css))fail('spawn entrance must start beyond the right edge');
 if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow must remain disabled');
 if(!/@keyframes drifterDeathFrames/.test(css)||!/\.enemyDeathUnit\.horde \.enemyDeathSprite:nth-child\(3\)/.test(css))fail('The Drifter death frames must animate for both single encounters and three-member hordes');
@@ -147,10 +147,10 @@ if(!/data-death-sequence="epic"\]:not\(\.horde\) \.enemyDeathSprite\{height:148%
 if(!/data-death-sequence="legendary"\]:not\(\.horde\) \.enemyDeathSprite\{height:113%\}/.test(css)||!/data-death-sequence="legendary"\]\.horde \.enemyDeathSprite\{height:97%\}/.test(css))fail('The Gilded Warden death sequence must preserve its live visual scale in single encounters and hordes');
 if(!/data-death-sequence="brute"\] \.enemyDeathSprite\{height:107%\}/.test(css))fail('The Breaker death sequence must preserve its boss-sized live scale');
 if(!/bruteDeathImpact/.test(visuals)||!/@keyframes bruteGroundRing/.test(css)||!/@keyframes bruteGroundDust/.test(css)||!/@keyframes bruteCombatImpact/.test(css)||!/#spriteStage\.bruteDeathImpact \.survivorUnit/.test(css))fail('The Breaker corpse landing requires a unique ground ring, dust burst and combatant-only impact');
-const audio=fs.readFileSync(path.join(root,'js','audio.js'),'utf8');if(!/function bruteDeathSound\(event\)/.test(audio)||!/event\.detail\?\.brute/.test(audio)||!/afterlight:enemy-killed',bruteDeathSound/.test(audio))fail('The Breaker corpse landing requires its dedicated low boss thud');
+const audio=fs.readFileSync(path.join(root,'js','audio.js'),'utf8');if(!/function bruteDeathSound\(event\)/.test(audio)||!/event\.detail\?\.brute/.test(audio)||!/bunkr:enemy-killed',bruteDeathSound/.test(audio))fail('The Breaker corpse landing requires its dedicated low boss thud');
 if(!/\.enemyUnit:is\([^}]+\) \.enemySprite\{filter:[^}]+var\(--enemy-glow\)/.test(css))fail('rarity glow must follow each sprite alpha instead of its layout container');
 const survivorAsset=path.join(root,'assets','survivor-ranger.png');if(!fs.existsSync(survivorAsset))fail('missing approved survivor-ranger.png');
 const survivorBuffer=fs.readFileSync(survivorAsset);if(!survivorBuffer.subarray(1,4).equals(Buffer.from('PNG'))||survivorBuffer[25]!==6)fail('survivor-ranger.png must be a real RGBA PNG');
 if(!/\.survivorUnit \.muzzleFx\{left:var\(--muzzle-x,77\.5%\);top:var\(--muzzle-y,20\.5%\)/.test(css))fail('muzzle effect must use the selected sprite-relative rifle barrel anchor');
 if(!/clip-path:polygon\(/.test(css))fail('muzzle flash must use a sharp pixel burst instead of the old fireball');
-console.log(`Afterlight combat balance passed: ${total}% rarity table, ${ENEMIES.length} sprites, 800 coins at 1M/hour, hordes x${COMBAT.hordeMultiplier}.`);
+console.log(`Bunkr combat balance passed: ${total}% rarity table, ${ENEMIES.length} sprites, 800 coins at 1M/hour, hordes x${COMBAT.hordeMultiplier}.`);

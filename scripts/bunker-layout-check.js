@@ -26,4 +26,4 @@ for(const [pattern,message] of [
   [/\.bunkerOpen #rooms\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,'portrait bunker must retain a readable two-column overview'],
   [/#app\.bunkerOpen #bunker\{left:var\(--landscape-nav\)!important/,'landscape BUNKER must expand beyond the permanent room deck']
 ])if(!pattern.test(css))fail(message);
-console.log('Afterlight bunker layout passed: renamed navigation, portrait combat separation and fullscreen responsive room deck.');
+console.log('Bunkr bunker layout passed: renamed navigation, portrait combat separation and fullscreen responsive room deck.');

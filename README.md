@@ -1,4 +1,4 @@
-# Afterlight Bunker
+# Bunkr: Last Shelter
 
 Post-apocalyptic idle clicker and bunker builder, deployed as a static GitHub Pages app.
 
@@ -56,4 +56,4 @@ Pushes to `main` deploy through `.github/workflows/pages.yml`. The workflow vali
 
 ## Persistence
 
-The game uses one authoritative runtime state through `window.AfterlightState`. The storage key remains `afterlight_v4` so existing players keep their save; current data is migrated to schema 5 automatically.
+The game uses one authoritative runtime state through `window.BunkrState`. The canonical storage key is `bunkr_last_shelter_v1`; existing `afterlight_v4` saves migrate automatically without deleting the rollback copy. Current data is normalized to schema 20.

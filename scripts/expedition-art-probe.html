@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Afterlight expedition art probe</title>
+  <title>Bunkr expedition art probe</title>
   <style>html,body{margin:0;background:#080a08;color:#fff;font:12px monospace}.probe{position:absolute;left:0;top:0;border:0}.portrait,.landscape{visibility:hidden}</style>
 </head>
 <body data-expedition-art-probe="running">
@@ -13,17 +13,17 @@
   <script>
     (()=>{'use strict';
       const frames=[...document.querySelectorAll('iframe')],wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)),report=document.getElementById('artReport');
-      localStorage.setItem('afterlight_v4',JSON.stringify({schema:12,prestige:{level:5},last:Date.now()}));
+      localStorage.setItem('bunkr_last_shelter_v1',JSON.stringify({schema:12,prestige:{level:5},last:Date.now()}));
       const loadImage=src=>new Promise(resolve=>{const image=new Image();image.onload=()=>resolve({src,width:image.naturalWidth,height:image.naturalHeight,ok:image.naturalWidth>=1280&&image.naturalHeight>=850});image.onerror=()=>resolve({src,width:0,height:0,ok:false});image.src='../'+src});
       async function inspect(frame){
         const doc=frame.contentDocument,win=frame.contentWindow,profile=frame.dataset.profile;
         doc.querySelector('[data-tab="expeditions"]').click();await wait(180);
-        const zones=Object.values(win.AfterlightConfig.EXPEDITIONS).sort((a,b)=>a.order-b.order),unique=new Set(zones.map(zone=>zone.art)).size===zones.length,files=await Promise.all(zones.map(zone=>loadImage(zone.art))),mapFiles=await Promise.all(zones.map(zone=>loadImage(zone.art.replace('assets/expedition-','assets/expedition-map-')))),links=[];
+        const zones=Object.values(win.BunkrConfig.EXPEDITIONS).sort((a,b)=>a.order-b.order),unique=new Set(zones.map(zone=>zone.art)).size===zones.length,files=await Promise.all(zones.map(zone=>loadImage(zone.art))),mapFiles=await Promise.all(zones.map(zone=>loadImage(zone.art.replace('assets/expedition-','assets/expedition-map-')))),links=[];
         for(const zone of zones){doc.querySelector(`[data-expedition-node="${zone.id}"]`).click();await wait(20);const image=doc.querySelector('.dossierImage img');links.push(image?.getAttribute('src')===zone.art&&image?.getAttribute('alt')?.includes(zone.name))}
         const nodes=[...doc.querySelectorAll('[data-expedition-node]')],nodeLinks=nodes.every(node=>node.querySelector('i>img')?.getAttribute('src')===`assets/expedition-map-${node.dataset.expeditionNode}.webp`),nodeBoxes=nodes.map(node=>node.querySelector('i').getBoundingClientRect()),box=doc.querySelector('.dossierImage').getBoundingClientRect(),image=doc.querySelector('.dossierImage img'),style=getComputedStyle(image),drawer=doc.getElementById('drawer').getBoundingClientRect(),viewport=doc.querySelector('.atlasViewport').getBoundingClientRect(),passed=zones.length===14&&unique&&files.every(item=>item.ok)&&mapFiles.every(item=>item.width>=320&&item.height>=180)&&links.every(Boolean)&&nodeLinks&&nodeBoxes.every(item=>item.width>=58&&item.height>=34)&&box.width>250&&box.height>=100&&box.right<=drawer.right+1&&style.objectFit==='cover'&&style.objectPosition!==''&&viewport.width>250;
         return{profile,passed,zones:zones.length,unique,loaded:files.filter(item=>item.ok).length,mapMiniatures:mapFiles.filter(item=>item.width>=320&&item.height>=180).length,node:[Math.round(nodeBoxes[0].width),Math.round(nodeBoxes[0].height)],dossier:[Math.round(box.width),Math.round(box.height)],viewport:[Math.round(viewport.width),Math.round(viewport.height)],objectFit:style.objectFit};
       }
-      Promise.all(frames.map(frame=>new Promise(resolve=>{frame.addEventListener('load',()=>setTimeout(()=>inspect(frame).then(resolve),700));frame.src='../index.html?v=expedition-art-'+frame.dataset.profile}))).then(results=>{const passed=results.every(result=>result.passed);document.body.dataset.expeditionArtProbe=passed?'passed':'failed';report.textContent='AFTERLIGHT_EXPEDITION_ART_'+(passed?'PASS ':'FAIL ')+JSON.stringify(results)}).catch(error=>{document.body.dataset.expeditionArtProbe='failed';report.textContent='AFTERLIGHT_EXPEDITION_ART_FAIL '+error.stack});
+      Promise.all(frames.map(frame=>new Promise(resolve=>{frame.addEventListener('load',()=>setTimeout(()=>inspect(frame).then(resolve),700));frame.src='../index.html?v=expedition-art-'+frame.dataset.profile}))).then(results=>{const passed=results.every(result=>result.passed);document.body.dataset.expeditionArtProbe=passed?'passed':'failed';report.textContent='BUNKR_EXPEDITION_ART_'+(passed?'PASS ':'FAIL ')+JSON.stringify(results)}).catch(error=>{document.body.dataset.expeditionArtProbe='failed';report.textContent='BUNKR_EXPEDITION_ART_FAIL '+error.stack});
     })();
   </script>
 </body>

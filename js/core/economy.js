@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const CFG=window.AfterlightConfig;if(!CFG)throw new Error('AfterlightConfig must load before economy.js');
+const CFG=window.BunkrConfig;if(!CFG)throw new Error('BunkrConfig must load before economy.js');
 const ROOMS=CFG.ROOMS,RULES=CFG.ROOM_ECONOMY||{};
 const COST_GROWTH=Math.max(1.000001,Number(RULES.costGrowth)||1.142),COST_SCALE=Math.max(1,Number(RULES.costScale)||60),COST_SCALE_RAMP=Math.max(1,Number(RULES.costScaleRamp)||25),MAX_VALUE=Math.min(Number.MAX_VALUE,Math.max(1e100,Number(RULES.maximumValue)||1e300)),MAX_ROOM_LEVEL=Math.max(1,Math.floor(Number(RULES.maximumRoomLevel)||5000));
 const LOG_MAX=Math.log(MAX_VALUE),LOG_GROWTH=Math.log(COST_GROWTH);
@@ -13,5 +13,5 @@ function roomUpgradeQuote(id,count,startLevel=0,costMultiplier=1){const from=san
 function affordableRoomLevels(id,coins,startLevel=0,costMultiplier=1,limit=RULES.maximumBulk||500){const balance=sanitizeResource(coins),from=sanitizeRoomLevel(startLevel),maximum=Math.min(Math.max(0,Math.floor(Number(limit)||0)),Math.max(0,MAX_ROOM_LEVEL-from));let count=0,total=0;while(count<maximum){const next=roomCostAt(id,from+count,costMultiplier);if(!Number.isFinite(next)||next<=0||next>balance-total)break;total+=next;count++}return{count,cost:total,from,to:from+count}}
 function validPurchase(quote,coins,currentLevel=quote?.from){const balance=sanitizeResource(coins),level=sanitizeRoomLevel(currentLevel),count=Number(quote?.count),cost=Number(quote?.cost);return Number.isInteger(count)&&count>0&&level===quote.from&&quote.to===level+count&&Number.isFinite(cost)&&cost>0&&cost<=balance&&Number.isFinite(balance-cost)&&balance-cost>=0}
 function subtractPurchase(coins,cost){const balance=sanitizeResource(coins),price=Number(cost);return Number.isFinite(price)&&price>0&&price<=balance?balance-price:balance}
-window.AfterlightEconomy=Object.freeze({MAX_VALUE,MAX_ROOM_LEVEL,sanitizeResource,sanitizeRoomLevel,safeAdd,progressionScale,transitionLevel,roomCostAt,roomUpgradeQuote,affordableRoomLevels,validPurchase,subtractPurchase});
+window.BunkrEconomy=Object.freeze({MAX_VALUE,MAX_ROOM_LEVEL,sanitizeResource,sanitizeRoomLevel,safeAdd,progressionScale,transitionLevel,roomCostAt,roomUpgradeQuote,affordableRoomLevels,validPurchase,subtractPurchase});
 })();

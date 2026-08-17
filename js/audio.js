@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const ST=window.AfterlightState,S=ST?.get?.();
+const ST=window.BunkrState,S=ST?.get?.();
 const SRC='https://opengameart.org/sites/default/files/biohazardsextended.ogg';
 const CASING_AUDIO_SRC='assets/audio/casing-drop-real.wav';
 const casingAudioBytes=fetch(CASING_AUDIO_SRC,{cache:'force-cache'}).then(response=>response.ok?response.arrayBuffer():null).catch(()=>null);
@@ -11,7 +11,7 @@ const button=document.createElement('button');button.id='musicToggle';button.typ
 function label(){button.textContent=enabled?'♫ MUSIC ON':'♫ MUSIC OFF';button.classList.toggle('off',!enabled)}
 async function play(){if(!enabled)return false;try{await audio.play();musicUnlocked=true;return true}catch{return false}}
 function pause(){audio.pause()}
-function persist(){if(S?.settings)S.settings.music=enabled;ST?.save?.();localStorage.setItem('afterlight_music',enabled?'on':'off')}
+function persist(){if(S?.settings)S.settings.music=enabled;ST?.save?.();localStorage.setItem('bunkr_music',enabled?'on':'off')}
 button.onclick=async event=>{event.stopPropagation();enabled=!enabled;persist();label();if(enabled)await play();else pause()};document.body.append(button);label();
 
 let context=null,master=null,lastSound=0,lastShot=0,lastCasing=0,lastVoice=0,casingBuffer=null,casingBufferPromise=null,casingSampleIndex=0;
@@ -75,23 +75,23 @@ function survivorVoiceBleep(event){const now=performance.now(),detail=event.deta
 function buttonKind(target){if(target.matches('#closeDrawer,#missionClose,#appModeX,.installModal button'))return'close';if(target.closest('#tabs')||target.id==='missionNav')return'nav';return'tap'}
 function onUiPointer(event){const target=event.target.closest?.('button,[role="button"]');if(!target||target.disabled||target.closest('#scene')||target.matches('[data-audio-preview]'))return;unlockUi();uiSound(buttonKind(target))}
 document.addEventListener('pointerdown',onUiPointer,true);
-window.addEventListener('afterlight:state',event=>{if(['room','special-room'].includes(event.detail?.reason))uiSound('confirm')});
-window.addEventListener('afterlight:shot',gunshot);
-window.addEventListener('afterlight:shot',casingSound);
-window.addEventListener('afterlight:enemy-killed',cashSound);
-window.addEventListener('afterlight:enemy-killed',bruteDeathSound);
-window.addEventListener('afterlight:mission-claimed',()=>rewardSound('mission'));
-window.addEventListener('afterlight:expedition-complete',()=>rewardSound('expedition'));
-window.addEventListener('afterlight:research-complete',researchSound);
-window.addEventListener('afterlight:merchant-purchase',merchantSound);
-window.addEventListener('afterlight:care-package-landed',carePackageLandSound);
-window.addEventListener('afterlight:care-package-opened',carePackageOpenSound);
-window.addEventListener('afterlight:room-upgraded',roomMilestoneSound);
-window.addEventListener('afterlight:dev-reward-claimed',()=>rewardSound('expedition'));
-window.addEventListener('afterlight:survivor-dialogue-letter',survivorVoiceBleep);
-window.addEventListener('afterlight:prestige-complete',prestigeSound);
-window.addEventListener('afterlight:prestige-contract',()=>rewardSound('mission'));
-window.addEventListener('afterlight:prestige-room',()=>uiSound('confirm'));
+window.addEventListener('bunkr:state',event=>{if(['room','special-room'].includes(event.detail?.reason))uiSound('confirm')});
+window.addEventListener('bunkr:shot',gunshot);
+window.addEventListener('bunkr:shot',casingSound);
+window.addEventListener('bunkr:enemy-killed',cashSound);
+window.addEventListener('bunkr:enemy-killed',bruteDeathSound);
+window.addEventListener('bunkr:mission-claimed',()=>rewardSound('mission'));
+window.addEventListener('bunkr:expedition-complete',()=>rewardSound('expedition'));
+window.addEventListener('bunkr:research-complete',researchSound);
+window.addEventListener('bunkr:merchant-purchase',merchantSound);
+window.addEventListener('bunkr:care-package-landed',carePackageLandSound);
+window.addEventListener('bunkr:care-package-opened',carePackageOpenSound);
+window.addEventListener('bunkr:room-upgraded',roomMilestoneSound);
+window.addEventListener('bunkr:dev-reward-claimed',()=>rewardSound('expedition'));
+window.addEventListener('bunkr:survivor-dialogue-letter',survivorVoiceBleep);
+window.addEventListener('bunkr:prestige-complete',prestigeSound);
+window.addEventListener('bunkr:prestige-contract',()=>rewardSound('mission'));
+window.addEventListener('bunkr:prestige-room',()=>uiSound('confirm'));
 document.body.dataset.uiAudio='ready';
 
 function unlockMusic(){if(musicUnlocked)return;if(enabled)play();if(musicUnlocked)removeMusicUnlock()}
@@ -99,5 +99,5 @@ function removeMusicUnlock(){document.removeEventListener('pointerdown',unlockMu
 document.addEventListener('pointerdown',unlockMusic,true);document.addEventListener('touchstart',unlockMusic,{capture:true,passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else if(enabled)play()});
 function setVolume(channel,value){if(!(channel in volumes))return false;volumes[channel]=Math.max(0,Math.min(1,Number(value)||0));if(S?.settings)S.settings[channel+'Volume']=volumes[channel];if(channel==='music')audio.volume=.18*volumes.music;ST?.save?.();return volumes[channel]}
 function preview(channel){unlockUi();if(channel==='music')return enabled?play():false;if(!effectsEnabled)return false;if(channel==='combat'){lastShot=0;gunshot();return true}if(channel==='casing'){lastCasing=0;return casingSound()}if(channel==='reward')return rewardSound('mission');return uiSound('confirm')}
-window.AfterlightAudio={play,pause,isEnabled:()=>enabled,isEffectsEnabled:()=>effectsEnabled,getVolumes:()=>({...volumes}),casingStatus:()=>({loaded:!!casingBuffer,duration:casingBuffer?.duration||0,activeVoices:casingVoices.filter(voice=>!voice.ended).length}),setVolume,preview,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},setEffectsEnabled:value=>{effectsEnabled=!!value;if(S?.settings)S.settings.uiSfx=effectsEnabled;ST?.save?.();if(effectsEnabled)setTimeout(()=>uiSound('confirm'),0);return effectsEnabled},unlockUi,uiSound,gunshot,casingSound,cashSound,bruteDeathSound,rewardSound,researchSound,merchantSound,carePackageLandSound,carePackageOpenSound,roomMilestoneSound,prestigeSound,survivorVoiceBleep};
+window.BunkrAudio={play,pause,isEnabled:()=>enabled,isEffectsEnabled:()=>effectsEnabled,getVolumes:()=>({...volumes}),casingStatus:()=>({loaded:!!casingBuffer,duration:casingBuffer?.duration||0,activeVoices:casingVoices.filter(voice=>!voice.ended).length}),setVolume,preview,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},setEffectsEnabled:value=>{effectsEnabled=!!value;if(S?.settings)S.settings.uiSfx=effectsEnabled;ST?.save?.();if(effectsEnabled)setTimeout(()=>uiSound('confirm'),0);return effectsEnabled},unlockUi,uiSound,gunshot,casingSound,cashSound,bruteDeathSound,rewardSound,researchSound,merchantSound,carePackageLandSound,carePackageOpenSound,roomMilestoneSound,prestigeSound,survivorVoiceBleep};
 })();

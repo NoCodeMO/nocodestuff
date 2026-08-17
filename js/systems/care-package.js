@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const CFG=window.AfterlightConfig,ST=window.AfterlightState,NUM=window.AfterlightNumbers,MERCHANT=window.AfterlightMerchant,GAME=window.AfterlightGame;
+const CFG=window.BunkrConfig,ST=window.BunkrState,NUM=window.BunkrNumbers,MERCHANT=window.BunkrMerchant,GAME=window.BunkrGame;
 if(!CFG||!ST||!NUM||!MERCHANT||!GAME)throw new Error('Care package dependencies missing');
 const RULES=CFG.CARE_PACKAGE,S=ST.get(),scene=document.getElementById('scene'),fmt=NUM.format;
 if(!RULES||!scene)return;
@@ -46,7 +46,7 @@ function spawn(){
   const started=now(),drop={id:`drop-${started}`,spawnedAt:started,landAt:started+RULES.fallMs,expiresAt:started+RULES.fallMs+RULES.visibleMs,reward:rollReward()};
   ST.update('care-package-spawned',state=>{state.carePackage.active=drop;state.carePackage.nextAt=0});
   renderDrop(false);
-  window.dispatchEvent(new CustomEvent('afterlight:care-package-spawned',{detail:{id:drop.id,landAt:drop.landAt,expiresAt:drop.expiresAt}}));
+  window.dispatchEvent(new CustomEvent('bunkr:care-package-spawned',{detail:{id:drop.id,landAt:drop.landAt,expiresAt:drop.expiresAt}}));
   return true;
 }
 function dustMarkup(){return `<span class="carePackageDust" aria-hidden="true">${'<i></i>'.repeat(9)}</span>`}
@@ -67,7 +67,7 @@ function land(id){
   element.disabled=false;element.dataset.phase='landed';element.classList.remove('falling');element.classList.add('landed');element.setAttribute('aria-label','Open supply drop before it expires');
   const image=element.querySelector('img');if(image)image.src=LANDED_ASSET;
   element.querySelector('.carePackageDust')?.remove();element.insertAdjacentHTML('beforeend',dustMarkup());
-  window.dispatchEvent(new CustomEvent('afterlight:care-package-landed',{detail:{id:drop.id,expiresAt:drop.expiresAt}}));
+  window.dispatchEvent(new CustomEvent('bunkr:care-package-landed',{detail:{id:drop.id,expiresAt:drop.expiresAt}}));
   updateTimer(element,drop);return true;
 }
 function updateTimer(element,drop){
@@ -79,7 +79,7 @@ function miss(){
   const drop=active();if(!drop)return false;
   const element=document.getElementById('carePackageDrop');if(element){element.disabled=true;element.classList.add('expired');setTimeout(()=>element.remove(),260)}
   ST.update('care-package-missed',state=>{state.carePackage.active=null;state.carePackage.missed=(state.carePackage.missed||0)+1;state.carePackage.nextAt=now()+intervalMs()});
-  window.dispatchEvent(new CustomEvent('afterlight:care-package-missed',{detail:{id:drop.id}}));return true;
+  window.dispatchEvent(new CustomEvent('bunkr:care-package-missed',{detail:{id:drop.id}}));return true;
 }
 function rewardRows(reward,offer){
   const secondary=RESOURCE_META[reward.secondary.resource];
@@ -100,7 +100,7 @@ function open(){
     state.stats.uraniumEarned=(state.stats.uraniumEarned||0)+reward.uranium;state.carePackage.active=null;state.carePackage.opened=(state.carePackage.opened||0)+1;state.carePackage.nextAt=now()+intervalMs();
   });
   element.classList.add('opening');setTimeout(()=>element.remove(),360);GAME.hud?.();reveal(reward,offer||null);
-  window.dispatchEvent(new CustomEvent('afterlight:care-package-opened',{detail:{id:drop.id,reward,offer:offer||null}}));return true;
+  window.dispatchEvent(new CustomEvent('bunkr:care-package-opened',{detail:{id:drop.id,reward,offer:offer||null}}));return true;
 }
 function tick(){
   const drop=active();
@@ -114,6 +114,6 @@ function init(){
   tickTimer=setInterval(tick,80);tick();document.body.dataset.carePackageSystem='ready';
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
-window.AfterlightCarePackage={spawn,open,miss,rollReward,nextAt:()=>S.carePackage.nextAt,active:()=>active()?JSON.parse(JSON.stringify(active())):null,rules:()=>({...RULES}),assets:()=>({airborne:AIRBORNE_ASSET,landed:LANDED_ASSET})};
+window.BunkrCarePackage={spawn,open,miss,rollReward,nextAt:()=>S.carePackage.nextAt,active:()=>active()?JSON.parse(JSON.stringify(active())):null,rules:()=>({...RULES}),assets:()=>({airborne:AIRBORNE_ASSET,landed:LANDED_ASSET})};
 init();
 })();
