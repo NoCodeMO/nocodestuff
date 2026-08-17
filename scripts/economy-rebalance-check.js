@@ -4,7 +4,7 @@ const root=path.resolve(__dirname,'..'),read=file=>fs.readFileSync(path.join(roo
 const context={window:{},document:{body:{dataset:{}}},CustomEvent:function(type,options){this.type=type;this.detail=options?.detail},console};context.window.dispatchEvent=()=>{};vm.runInNewContext(read('js/core/config.js'),context,{filename:'config.js'});vm.runInNewContext(read('js/core/economy.js'),context,{filename:'economy.js'});
 const cfg=context.window.BunkrConfig,economy=context.window.BunkrEconomy,rules=cfg.ROOM_ECONOMY,rooms=cfg.ROOMS,milestones=cfg.ROOM_MILESTONES;
 const operationState={rooms:{},operations:{priorities:{...cfg.OPERATIONS.defaultPriority},paused:{}},coins:0,food:0,water:0,power:0,scrap:0,science:0};context.window.BunkrState={get:()=>operationState,update:(reason,fn)=>{fn(operationState);return operationState}};vm.runInNewContext(read('js/systems/operations.js'),context,{filename:'operations.js'});const operations=context.window.BunkrOperations;
-assert(rules.masterySize===100&&rules.maximumRoomLevel>=5000,'rooms need repeatable 100-level Mastery ranks and future Prestige headroom');
+assert(rules.masterySize===100&&rules.unlimitedRoomLevels===true&&economy.MAX_ROOM_LEVEL===Number.MAX_SAFE_INTEGER,'rooms need uncapped 100-level Mastery ranks and future Prestige headroom');
 assert(JSON.stringify([...cfg.PRESTIGE.targets])===JSON.stringify([100,200,325,525,850]),'Prestige I–V target curve drifted');
 assert(cfg.PRESTIGE.targetFormula.growth>1.5&&cfg.PRESTIGE.targetFormula.growth<1.7,'future Prestige growth must remain near-exponential but tunable');
 assert(JSON.stringify(milestones.map(item=>item.level))===JSON.stringify([5,10,25,50,75,100]),'each Mastery rank needs six readable milestones');
@@ -25,4 +25,4 @@ const state=read('js/core/state.js'),command=read('js/systems/command-center.js'
 assert(/schema:20/.test(state)&&/function resetAll\(token\)/.test(state)&&/resetInProgress/.test(state),'schema 20 and autosave-safe full reset API are required');
 assert(/TYPE RESET TO ARM THE BUTTON/.test(command)&&/3000\)/.test(command)&&/setPointerCapture/.test(command)&&/data-command-reset-open/.test(command),'Account reset needs typed confirmation and a touch-stable three-second hold');
 assert(css.includes('.accountResetModal')&&css.includes('@keyframes accountResetHold'),'Account reset presentation is missing');
-console.log(`Bunkr economy rebalance passed: P1–V passive baselines ${hours.map(value=>value.toFixed(1)+'h').join(' / ')}, 100-level Masteries and bounded Dealer/missions.`);
+console.log(`Bunkr economy rebalance passed: P1–V passive baselines ${hours.map(value=>value.toFixed(1)+'h').join(' / ')}, uncapped 100-level Masteries and bounded Dealer/missions.`);

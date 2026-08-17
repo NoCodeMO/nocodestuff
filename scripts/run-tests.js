@@ -26,6 +26,7 @@ const tests=[
   'merchant-balance.js',
   'care-package-check.js',
   'room-balance.js',
+  'room-progression-check.js',
   'late-game-economy-check.js',
   'mission-balance.js',
   'command-center-check.js',

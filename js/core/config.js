@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const ROOM_ECONOMY=Object.freeze({costGrowth:1.142,costScale:125,costScaleRamp:25,rateGrowth:1.07,masterySize:100,maximumBulk:500,maximumRoomLevel:5000,maximumValue:1e300,bunkerLevelEvery:4});
+const ROOM_ECONOMY=Object.freeze({costGrowth:1.142,costScale:125,costScaleRamp:25,rateGrowth:1.07,masterySize:100,maximumBulk:500,unlimitedRoomLevels:true,maximumRoomCost:5e298,maximumValue:1e300,bunkerLevelEvery:4});
 const ROOM_MILESTONES=Object.freeze([
   Object.freeze({level:5,multiplier:1.25,tier:'CALIBRATED'}),
   Object.freeze({level:10,multiplier:1.5,tier:'INDUSTRIAL'}),

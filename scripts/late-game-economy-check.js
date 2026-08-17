@@ -15,6 +15,9 @@ assert(economy.validPurchase(firstMax,screenshotCoins,1979),'the bounded Mastery
 const remaining=economy.subtractPurchase(screenshotCoins,firstMax.cost),repeatMax=economy.affordableRoomLevels('generator',remaining,firstMax.to,.6,500);
 assert(Number.isFinite(remaining)&&remaining>=0&&remaining<screenshotCoins,'a MAX purchase must deduct a finite positive amount');
 assert(repeatMax.count===0,'the same balance must not buy unlimited repeated MAX upgrades');
+const beyondOldCap=economy.roomCostAt('generator',6000,.6),beyondOldQuote=economy.roomUpgradeQuote('generator',10,6000,.6);
+assert(Number.isFinite(beyondOldCap)&&beyondOldCap>0,'the old level-5000 ceiling must no longer stop room upgrades');
+assert(beyondOldQuote.count===10&&Number.isFinite(beyondOldQuote.cost),'bulk upgrades must remain finite beyond the old ceiling');
 for(const badCost of [Infinity,NaN,0,-1])assert(!economy.validPurchase({count:1,cost:badCost,from:10,to:11},1e200,10),'invalid prices must never pass purchase validation');
 assert(economy.sanitizeResource(Infinity)===cfg.ROOM_ECONOMY.maximumValue,'positive overflow must cap safely instead of becoming infinite money');
 assert(economy.safeAdd(cfg.ROOM_ECONOMY.maximumValue,1e299)===cfg.ROOM_ECONOMY.maximumValue,'resource additions must stay below the finite game ceiling');
@@ -24,4 +27,4 @@ assert(/ECON\.validPurchase\(quote,state\.coins,current\)/.test(game),'room purc
 assert(/state\[k\]=ECON\.sanitizeResource\(state\[k\]\)/.test(state),'loaded resources must be repaired when they contain overflow values');
 assert(/lateGameEconomyTest/.test(state)&&/state\.rooms\.generator=1979/.test(state),'the localhost regression fixture must reproduce the reported save in browser tests');
 assert(html.indexOf('js/core/economy.js?build=3')<html.indexOf('js/core/state.js?build=28'),'the safe economy module must load before save-state normalization');
-console.log(`Bunkr late-game economy passed: LV 1979 costs ${lateGenerator.toExponential(3)}, calibrated MAX buys ${firstMax.count} level(s), and repeated MAX is blocked.`);
+console.log(`Bunkr late-game economy passed: LV 1979 costs ${lateGenerator.toExponential(3)}, level 6000 remains upgradeable, calibrated MAX is exact and repeated MAX is blocked.`);

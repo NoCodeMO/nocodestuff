@@ -7,7 +7,7 @@ const ids=['generator','workshop','greenhouse','purifier','lab','living','storag
 assert(JSON.stringify(Object.keys(rooms))===JSON.stringify(ids),'Normal room table must contain the eight intended rooms in display order');
 for(const id of ids){const room=rooms[id],asset=path.join(root,room.art);assert(room.desc.length>=80,`${id} needs a useful room description`);assert(fs.existsSync(asset),`${id} room artwork is missing`);const image=fs.readFileSync(asset);assert(image.length>=90000&&image.length<=300000,`${id} artwork must be optimized but high quality`);assert(image.subarray(0,4).toString()==='RIFF'&&image.subarray(8,12).toString()==='WEBP',`${id} artwork must be WebP`)}
 assert(economy.costGrowth===1.142&&economy.rateGrowth===1.07&&economy.costScale===125,'Recalibrated room cost and production curves must remain stable');
-assert(economy.masterySize===100&&economy.maximumRoomLevel===5000,'Rooms need future-ready 100-level Mastery ranks');
+assert(economy.masterySize===100&&economy.unlimitedRoomLevels===true,'Rooms need uncapped 100-level Mastery ranks');
 assert(economy.bunkerLevelEvery===4,'Every four combined room levels must grant exactly one Bunker Level');
 assert(JSON.stringify(milestones.map(item=>[item.level,item.multiplier]))===JSON.stringify([[5,1.25],[10,1.5],[25,2],[50,3],[75,4],[100,5]]),'Room milestones must follow the repeating 5/10/25/50/75/100 curve');
 for(let index=1;index<milestones.length;index++){assert(milestones[index].level>milestones[index-1].level,'Milestone levels must increase');assert(milestones[index].multiplier>milestones[index-1].multiplier,'Milestone multipliers must increase')}
@@ -15,7 +15,7 @@ const milestoneMultiplier=level=>{let value=1;for(const item of milestones)if(le
 for(const level of [1,4,5,9,10,24,25,49,50]){const rate=rooms.generator.prod.power*level*Math.pow(economy.rateGrowth,level-1)*milestoneMultiplier(level);assert(Number.isFinite(rate)&&rate>0,`Generator rate must remain finite at level ${level}`)}
 for(const id of ids){const first=Math.floor(rooms[id].base),second=Math.floor(rooms[id].base*economy.costGrowth);assert(second>first,`${id} upgrade cost must rise`);const ten=Array.from({length:10},(_,index)=>Math.floor(rooms[id].base*Math.pow(economy.costGrowth,index))).reduce((sum,value)=>sum+value,0);assert(ten>second,`${id} ten-level quote must sum sequential costs`)}
 for(const [pattern,message] of [[/function renderRoomDetails\(k,celebrate=false\)/,'Room detail renderer is missing'],[/data-room-buy=\\?"10\\?"/,'Ten-level room upgrade control is missing'],[/data-room-buy=\\?"max\\?"/,'Maximum affordable room upgrade control is missing'],[/function affordableRoomLevels\(/,'Maximum upgrade quote must be derived from current coins'],[/bunkr:room-upgraded/,'Room upgrades must emit their existing-architecture feedback event'],[/data-room-affordability/,'Room details must expose live affordability']])assert(pattern.test(gameSource),message);
-assert(/function roomMastery\(level\)/.test(gameSource)&&/rankScale=mastery\.size/.test(gameSource),'Room production must repeat through 100-level Mastery ranks');
+assert(/function roomMastery\(level\)/.test(gameSource)&&/rankScale=mastery\.size/.test(gameSource),'Room production must continue through 100-level Mastery ranks');
 assert(/function bunkerProgress\(\)/.test(gameSource),'Bunker progress must derive from combined room levels');
 assert(/aria-valuetext/.test(gameSource),'Bunker progress needs accessible next-level context');
 assert(/id="bunkerProgress"/.test(html),'Bunker progress bar is missing from the live layout');
@@ -25,4 +25,4 @@ assert(/if\(!milestone\|\|!room\)return false/.test(visualSource),'Ordinary room
 assert(css.includes('.roomMilestoneWin')&&css.includes('@keyframes roomMilestoneParticle'),'Tier celebration styling is missing');
 assert(!/\.b64|loadFallback|applyRoomArt/.test(visualSource),'Legacy room-art fallback loader must stay removed');
 for(const selector of ['.roomDetails','.roomDetailHero','.roomMilestones','.roomBuyActions','.roomUpgradeBurst'])assert(css.includes(selector),`Missing room UI style: ${selector}`);
-console.log('Bunkr room balance passed: 8 optimized room artworks, 100-level Masteries, sequential bulk costs and live room intelligence UI.');
+console.log('Bunkr room balance passed: 8 optimized room artworks, uncapped 100-level Masteries, sequential bulk costs and live room intelligence UI.');

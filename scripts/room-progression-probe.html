@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Bunkr permanent room progression probe</title>
+  <style>html,body{margin:0;background:#080a08;color:#fff;font:12px monospace}iframe{display:block;width:390px;height:844px;border:0}</style>
+</head>
+<body data-room-progression-probe="running">
+  <iframe id="gameFrame" title="Bunkr permanent room progression probe"></iframe>
+  <output id="roomProgressionReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const frame=document.getElementById('gameFrame'),report=document.getElementById('roomProgressionReport');
+      localStorage.setItem('bunkr_last_shelter_v1',JSON.stringify({schema:20,coins:1e50,total:1e50,rooms:{generator:101},last:Date.now()}));
+      frame.src='../index.html?v=room-progression-probe';
+      function finish(){
+        try{
+          const win=frame.contentWindow,doc=frame.contentDocument,game=win.BunkrGame,state=win.BunkrState,at101=game.roomMilestone(101),next101=game.nextRoomMilestone(101),track101=game.roomMilestoneTrack(101);game.openRoomDetails('generator');
+          const initialText=doc.getElementById('roomDetails')?.textContent||'',retained=at101?.absoluteLevel===100&&at101?.multiplier===5&&at101?.label==='M1 ASCENDANT',nextContinues=next101?.absoluteLevel===105,trackContinues=track101.some(item=>item.absoluteLevel===100)&&track101.some(item=>item.absoluteLevel===105)&&!track101.some(item=>item.absoluteLevel===0),uiRetained=initialText.includes('PERMANENT MILESTONE CHAIN')&&initialText.includes('ACTIVE ×5')&&initialText.includes('LV 100')&&initialText.includes('LV 105')&&!initialText.includes('LV 0');
+          let reached=null;win.addEventListener('bunkr:room-upgraded',event=>{reached=event.detail.milestone},{once:true});state.update('room-progression-probe',save=>{save.rooms.generator=104;save.coins=1e50});game.recalc();const bought=game.buyRoom('generator',1),after=state.snapshot(),afterText=doc.getElementById('roomDetails')?.textContent||'',celebrated=reached?.absoluteLevel===105&&reached?.label==='M2 CALIBRATED'&&Math.abs(reached.multiplier-6.25)<1e-9,updated=after.rooms.generator===105&&afterText.includes('105 TOTAL LEVELS')&&afterText.includes('ACTIVE ×6.25');
+          const passed=retained&&nextContinues&&trackContinues&&uiRetained&&bought&&celebrated&&updated;document.body.dataset.roomProgressionProbe=passed?'passed':'failed';report.textContent='BUNKR_ROOM_PROGRESSION_'+(passed?'PASS ':'FAIL ')+JSON.stringify({retained,next:next101?.absoluteLevel,track:track101.map(item=>item.absoluteLevel),uiRetained,bought,celebrated,level:after.rooms.generator,updated});
+        }catch(error){document.body.dataset.roomProgressionProbe='failed';report.textContent='BUNKR_ROOM_PROGRESSION_FAIL '+error.message}
+      }
+      frame.addEventListener('load',()=>setTimeout(finish,1200));
+    })();
+  </script>
+</body>
+</html>

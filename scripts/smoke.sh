@@ -17,6 +17,7 @@ PET_COMMAND_DOM_FILE="${TMPDIR:-/tmp}/bunkr-pet-command-dom.html"
 CASING_FEEDBACK_DOM_FILE="${TMPDIR:-/tmp}/bunkr-casing-feedback-dom.html"
 RESEARCH_NETWORK_DOM_FILE="${TMPDIR:-/tmp}/bunkr-research-network-dom.html"
 RESEARCH_LANDSCAPE_DOM_FILE="${TMPDIR:-/tmp}/bunkr-research-landscape-dom.html"
+ROOM_PROGRESSION_DOM_FILE="${TMPDIR:-/tmp}/bunkr-room-progression-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/bunkr-chrome.log"
 
 PYTHON="${PYTHON:-}"
@@ -60,6 +61,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/casing-feedback-probe.html" >"$CASING_FEEDBACK_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/research-network-probe.html" >"$RESEARCH_NETWORK_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=844,390 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/research-network-probe.html?landscape=1" >"$RESEARCH_LANDSCAPE_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/room-progression-probe.html" >"$ROOM_PROGRESSION_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Bunkr: Last Shelter</title>'
@@ -132,6 +134,7 @@ required=(
   'js/core/brand.js?build=1'
   'js/core/config.js?build=38'
   'js/core/economy.js?build=3'
+  'js/core/room-progression.js?build=2'
   'js/core/numbers.js?build=2'
   'js/core/state.js?build=28'
   'js/systems/prestige.js?build=4'
@@ -264,4 +267,12 @@ if ! grep -Fq 'data-research-network-probe="passed"' "$RESEARCH_LANDSCAPE_DOM_FI
   exit 1
 fi
 
-echo "Bunkr browser smoke test passed: core game, responsive Research Network lifecycle, preloaded infected hit assets, survivor-relative spent casings, free Ranger and Pet Command roster, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, death sequences, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."
+if ! grep -Fq 'data-room-progression-probe="passed"' "$ROOM_PROGRESSION_DOM_FILE"; then
+  echo "Permanent room progression browser smoke test failed."
+  grep -F 'BUNKR_ROOM_PROGRESSION_' "$ROOM_PROGRESSION_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+echo "Bunkr browser smoke test passed: core game, permanent uncapped room milestones, responsive Research Network lifecycle, preloaded infected hit assets, survivor-relative spent casings, free Ranger and Pet Command roster, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, death sequences, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."
