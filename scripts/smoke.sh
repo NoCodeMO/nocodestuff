@@ -103,13 +103,13 @@ required=(
   'js/core/config.js?build=36'
   'js/core/economy.js?build=2'
   'js/core/numbers.js?build=1'
-  'js/core/state.js?build=24'
+  'js/core/state.js?build=25'
   'js/systems/prestige.js?build=3'
   'js/systems/operations.js?build=2'
-  'js/systems/command-center.js?build=7'
+  'js/systems/command-center.js?build=8'
   'js/systems/survivor-dialogue.js?build=1'
   'js/core/game.js?build=26'
-  'js/audio.js?build=17'
+  'js/audio.js?build=18'
   'js/systems/care-package.js?build=2'
 )
 

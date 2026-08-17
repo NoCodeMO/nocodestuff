@@ -4,7 +4,7 @@ const SRC='https://opengameart.org/sites/default/files/biohazardsextended.ogg';
 const CASING_AUDIO_SRC='assets/audio/casing-drop-real.wav';
 const casingAudioBytes=fetch(CASING_AUDIO_SRC,{cache:'force-cache'}).then(response=>response.ok?response.arrayBuffer():null).catch(()=>null);
 const volumeValue=(key,fallback=1)=>{const value=Number(S?.settings?.[key]);return Number.isFinite(value)?Math.max(0,Math.min(1,value)):fallback};
-const volumes={music:volumeValue('musicVolume'),ui:volumeValue('uiVolume'),combat:volumeValue('combatVolume'),reward:volumeValue('rewardVolume')};
+const volumes={music:volumeValue('musicVolume'),ui:volumeValue('uiVolume'),combat:volumeValue('combatVolume'),casing:volumeValue('casingVolume',.1),reward:volumeValue('rewardVolume')};
 const audio=new Audio(SRC);audio.loop=true;audio.preload='auto';audio.volume=.18*volumes.music;audio.playsInline=true;
 let enabled=S?.settings?.music!==false,effectsEnabled=S?.settings?.uiSfx!==false,musicUnlocked=false,activeChannel='ui';
 const button=document.createElement('button');button.id='musicToggle';button.type='button';
@@ -55,7 +55,7 @@ function playCasingSample(ctx,buffer,level,shotTime){
   gain.connect(master);const voice={source,ended:false};casingVoices.push(voice);source.onended=()=>{voice.ended=true};source.start(start);return true;
 }
 function casingSound(){
-  const now=performance.now();if(now-lastCasing<70)return false;lastCasing=now;const level=effectsEnabled?volumes.combat:0,ctx=unlockUi();if(!ctx||!level)return false;
+  const now=performance.now();if(now-lastCasing<70)return false;lastCasing=now;const level=effectsEnabled?volumes.casing:0,ctx=unlockUi();if(!ctx||!level)return false;
   if(casingBuffer)return playCasingSample(ctx,casingBuffer,level,now);
   prepareCasing(ctx).then(buffer=>playCasingSample(ctx,buffer,level,now));return true;
 }
@@ -98,6 +98,6 @@ function unlockMusic(){if(musicUnlocked)return;if(enabled)play();if(musicUnlocke
 function removeMusicUnlock(){document.removeEventListener('pointerdown',unlockMusic,true);document.removeEventListener('touchstart',unlockMusic,true)}
 document.addEventListener('pointerdown',unlockMusic,true);document.addEventListener('touchstart',unlockMusic,{capture:true,passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else if(enabled)play()});
 function setVolume(channel,value){if(!(channel in volumes))return false;volumes[channel]=Math.max(0,Math.min(1,Number(value)||0));if(S?.settings)S.settings[channel+'Volume']=volumes[channel];if(channel==='music')audio.volume=.18*volumes.music;ST?.save?.();return volumes[channel]}
-function preview(channel){unlockUi();if(channel==='music')return enabled?play():false;if(!effectsEnabled)return false;if(channel==='combat'){lastShot=0;lastCasing=0;gunshot();casingSound();return true}if(channel==='reward')return rewardSound('mission');return uiSound('confirm')}
+function preview(channel){unlockUi();if(channel==='music')return enabled?play():false;if(!effectsEnabled)return false;if(channel==='combat'){lastShot=0;gunshot();return true}if(channel==='casing'){lastCasing=0;return casingSound()}if(channel==='reward')return rewardSound('mission');return uiSound('confirm')}
 window.AfterlightAudio={play,pause,isEnabled:()=>enabled,isEffectsEnabled:()=>effectsEnabled,getVolumes:()=>({...volumes}),casingStatus:()=>({loaded:!!casingBuffer,duration:casingBuffer?.duration||0,activeVoices:casingVoices.filter(voice=>!voice.ended).length}),setVolume,preview,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},setEffectsEnabled:value=>{effectsEnabled=!!value;if(S?.settings)S.settings.uiSfx=effectsEnabled;ST?.save?.();if(effectsEnabled)setTimeout(()=>uiSound('confirm'),0);return effectsEnabled},unlockUi,uiSound,gunshot,casingSound,cashSound,bruteDeathSound,rewardSound,researchSound,merchantSound,carePackageLandSound,carePackageOpenSound,roomMilestoneSound,prestigeSound,survivorVoiceBleep};
 })();
