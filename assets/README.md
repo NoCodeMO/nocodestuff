@@ -5,7 +5,7 @@ This directory contains production artwork unless a file is explicitly listed as
 ## Runtime conventions
 
 - `combat-*` files are the layered road scene and combat feedback assets.
-- `enemy-*` files are living, three-frame hit or three-frame death sprite sheets. Runtime rarity glow stays outside the artwork.
+- `enemy-*` files are living, three-frame hit or three-frame death sprite sheets. Rarity color is UI-only; combat sprites have no baked or runtime glow.
 - `expedition-*.webp` files are destination dossiers; matching `expedition-map-*.webp` files are their atlas miniatures.
 - `room-*.webp` files are the authoritative normal-room artworks.
 - `survivor-*.webp` and `survivor-ranger.png` are selectable survivor sprites.

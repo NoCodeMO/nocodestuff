@@ -2334,7 +2334,6 @@ html.standalone-app #tabs {
 }
 /* ===== 11. INFECTED RARITIES, HORDES AND BRUTE ===== */
 .enemyUnit {
-  --enemy-glow:transparent;
   --enemy-accent:#b7b4a5;
   position:absolute;
   z-index:7;
@@ -2365,12 +2364,6 @@ html.standalone-app #tabs {
   animation:none!important;
   filter:drop-shadow(0 9px 5px #000b);
   image-rendering:pixelated
-}
-.enemyGlow {
-  display:none
-}
-.enemyUnit:is([data-rarity="uncommon"],[data-rarity="rare"],[data-rarity="epic"],[data-rarity="legendary"]) .enemySprite {
-  filter:drop-shadow(0 0 4px color-mix(in srgb,var(--enemy-glow) 78%,transparent)) drop-shadow(0 0 11px color-mix(in srgb,var(--enemy-glow) 42%,transparent)) drop-shadow(0 9px 5px #000b)
 }
 .enemyUnit[data-rarity="uncommon"] {
   height:min(40%,238px)

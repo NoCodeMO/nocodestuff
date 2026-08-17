@@ -71,9 +71,7 @@ for(const [id,asset] of Object.entries(normalizedHitAssets)){
   if(!buffer.subarray(1,4).equals(Buffer.from('PNG'))||buffer[25]!==6)fail(`${id} hit sheet must be a real RGBA PNG with transparent alpha`);
   if(buffer.readUInt32BE(16)!==2100||buffer.readUInt32BE(20)!==760)fail(`${id} hit sheet must contain three normalized 700x760 cells`);
 }
-if(ENEMIES.find(type=>type.id==='common').glow!=='transparent')fail('Common must not have a rarity glow');
-if(ENEMIES.find(type=>type.id==='brute').glow!=='transparent')fail('Brute must remain outside the rarity glow system');
-for(const id of ['uncommon','rare','epic','legendary'])if(ENEMIES.find(type=>type.id===id).glow==='transparent')fail(`${id} requires an in-game glow color`);
+for(const type of ENEMIES)if(Object.prototype.hasOwnProperty.call(type,'glow'))fail(`${type.id} must not expose a removed rarity glow`);
 if(COMBAT.hordeVisualCount!==3||COMBAT.hordeMultiplier!==3)fail('hordes must contain at most three infected and pay/scale at exactly x3');
 if(!(COMBAT.hordeChance>0&&COMBAT.hordeChance<1))fail('horde chance must be a probability');
 if(COMBAT.hordePityEncounters!==8)fail('a horde must be guaranteed by the eighth eligible encounter');
@@ -116,7 +114,7 @@ const visuals=fs.readFileSync(path.join(root,'js','ui','visuals.js'),'utf8');
 for(const [pattern,message] of [
   [/Math\.min\(maxHorde,Math\.max\(1,Number\(detail\.visualCount\)\|\|1\)\)/,'horde rendering must be hard-capped at the configured three zombies'],
   [/detail\.asset/,'spawn visuals must use the selected enemy asset'],
-  [/--enemy-glow/,'rarity glow must be rendered by the game'],
+  [/--enemy-accent/,'rarity color must remain available to the enemy information card'],
   [/function shotFeedback\(event\)\{clearSpawn\(\);/,'shots must clear the completed entrance state before hit feedback'],
   [/spawnClearTimer=setTimeout\(clearSpawn,500\)/,'spawn state requires a fallback cleanup'],
   [/className='enemyUnit'/,'enemy visuals must use one coordinated encounter unit'],
@@ -156,7 +154,7 @@ if(!/id="hordeSignal"/.test(html)||!/GUARANTEED IN/.test(game)||!/#hordeSignal\.
 if(!/@keyframes criticalNumberRise/.test(css)||!/CRIT -/.test(visuals))fail('critical hits need distinct visual feedback');
 if(!/id='combatStreak'/.test(visuals)||!/bunkr:streak/.test(visuals)||!/@keyframes streakDrain/.test(css))fail('kill streak HUD and timer feedback are missing');
 if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \+ 100%\)/.test(css))fail('spawn entrance must start beyond the right edge');
-if(!/\.enemyGlow\{display:none\}/.test(css))fail('the old container-sized glow must remain disabled');
+if(/enemyGlow|--enemy-glow|var\(--enemy-glow\)/.test(visuals+css))fail('zombie rarity glow markup, variables and filters must stay removed');
 if(!/@keyframes drifterDeathFrames/.test(css)||!/\.enemyDeathUnit\.horde \.enemyDeathSprite:nth-child\(3\)/.test(css))fail('The Drifter death frames must animate for both single encounters and three-member hordes');
 if(!/@keyframes drifterIdleFrames/.test(css)||!/aspect-ratio:358\/512/.test(css))fail('The Drifter idle animation must preserve the approved live scale and canvas ratio');
 if(!/\.enemyUnit\.spawn \.drifterAnimatedSprite \.drifterFrames\{background-image:var\(--drifter-walk\)/.test(css)||!/@keyframes drifterWalkFrames/.test(css))fail('The Drifter walk cycle must only run during its right-side entrance');
@@ -169,7 +167,7 @@ if(!/data-death-sequence="legendary"\]:not\(\.horde\) \.enemyDeathSprite\{height
 if(!/data-death-sequence="brute"\] \.enemyDeathSprite\{height:107%\}/.test(css))fail('The Breaker death sequence must preserve its boss-sized live scale');
 if(!/bruteDeathImpact/.test(visuals)||!/@keyframes bruteGroundRing/.test(css)||!/@keyframes bruteGroundDust/.test(css)||!/@keyframes bruteCombatImpact/.test(css)||!/#spriteStage\.bruteDeathImpact \.survivorUnit/.test(css))fail('The Breaker corpse landing requires a unique ground ring, dust burst and combatant-only impact');
 const audio=fs.readFileSync(path.join(root,'js','audio.js'),'utf8');if(!/function bruteDeathSound\(event\)/.test(audio)||!/event\.detail\?\.brute/.test(audio)||!/bunkr:enemy-killed',bruteDeathSound/.test(audio))fail('The Breaker corpse landing requires its dedicated low boss thud');
-if(!/\.enemyUnit:is\([^}]+\) \.enemySprite\{filter:[^}]+var\(--enemy-glow\)/.test(css))fail('rarity glow must follow each sprite alpha instead of its layout container');
+if(!/\.enemyUnit \.enemySprite\{[^}]*filter:drop-shadow\(0 9px 5px #000b\)/.test(css))fail('zombies must keep only their neutral ground shadow after rarity glow removal');
 const survivorAsset=path.join(root,'assets','survivor-ranger.png');if(!fs.existsSync(survivorAsset))fail('missing approved survivor-ranger.png');
 const survivorBuffer=fs.readFileSync(survivorAsset);if(!survivorBuffer.subarray(1,4).equals(Buffer.from('PNG'))||survivorBuffer[25]!==6)fail('survivor-ranger.png must be a real RGBA PNG');
 if(!/\.survivorUnit \.muzzleFx\{left:var\(--muzzle-x,77\.5%\);top:var\(--muzzle-y,20\.5%\)/.test(css))fail('muzzle effect must use the selected sprite-relative rifle barrel anchor');
