@@ -61,14 +61,16 @@ for(const [pattern,message] of [
 for(const [pattern,message] of [
   [/#drawer\.researchDrawer\{[^}]*inset:0/,'Research drawer must be fullscreen'],
   [/\.researchWorkspace\{display:grid;grid-template-columns:/,'desktop tree/inspector split is missing'],
-  [/@media\(max-width:760px\)/,'phone layout breakpoint is missing'],
-  [/\.researchBranch\.mobileActive\{display:grid/,'phone branch focus mode is missing'],
+  [/@media\(max-width:820px\)/,'phone layout breakpoint is missing'],
+  [/\.researchBranch\.mobileActive\{display:block/,'portrait branch focus mode is missing'],
+  [/border-left:2px solid #4c553d/,'portrait vertical research route is missing'],
   [/@media\(orientation:landscape\) and \(min-width:560px\) and \(max-height:600px\)/,'phone landscape layout is missing'],
+  [/grid-template-columns:repeat\(auto-fit,minmax\(90px,1fr\)\)/,'landscape branch fitting is missing'],
   [/@media\(prefers-reduced-motion:reduce\)/,'reduced-motion support is missing']
 ])assert(pattern.test(css),message);
 assert(/classList\.toggle\('researchDrawer',tab==='research'\)/.test(gameSource),'drawer routing must activate the Research fullscreen class');
 assert(/BunkrResearch\?\.productionBonus/.test(gameSource)&&/BunkrResearch\?\.hordeDamageMultiplier/.test(gameSource),'core production and combat must consume Research effects');
 assert(/BunkrResearch\?\.expeditionTimeMultiplier/.test(expeditionSource)&&/BunkrResearch\?\.companionChanceAdd/.test(expeditionSource),'expeditions must consume Field Operations research');
 assert(/data-tab="research"/.test(html)&&/id="researchBadge"/.test(html),'Research navigation and completion badge must remain available');
-assert(/research-network-probe\.html/.test(smoke)&&/data-research-network-probe="passed"/.test(smoke),'real-browser smoke must verify the funded mobile start, finish and install lifecycle');
+assert(/research-network-probe\.html/.test(smoke)&&/landscape=1/.test(smoke)&&/data-research-network-probe="passed"/.test(smoke),'real-browser smoke must verify portrait and landscape lifecycle geometry');
 console.log('Bunkr Research Network passed: 17 projects, 97 levels, coherent prerequisites, Prestige gates, economy effects and responsive fullscreen UI.');

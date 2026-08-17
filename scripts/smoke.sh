@@ -15,6 +15,7 @@ COMPANION_IDLE_DOM_FILE="${TMPDIR:-/tmp}/bunkr-companion-idle-dom.html"
 PET_COMMAND_DOM_FILE="${TMPDIR:-/tmp}/bunkr-pet-command-dom.html"
 CASING_FEEDBACK_DOM_FILE="${TMPDIR:-/tmp}/bunkr-casing-feedback-dom.html"
 RESEARCH_NETWORK_DOM_FILE="${TMPDIR:-/tmp}/bunkr-research-network-dom.html"
+RESEARCH_LANDSCAPE_DOM_FILE="${TMPDIR:-/tmp}/bunkr-research-landscape-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/bunkr-chrome.log"
 
 PYTHON="${PYTHON:-}"
@@ -56,6 +57,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=6000 --dump-dom "http://127.0.0.1:${PORT}/scripts/pet-command-probe.html" >"$PET_COMMAND_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/casing-feedback-probe.html" >"$CASING_FEEDBACK_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/research-network-probe.html" >"$RESEARCH_NETWORK_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=844,390 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/research-network-probe.html?landscape=1" >"$RESEARCH_LANDSCAPE_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Bunkr: Last Shelter</title>'
@@ -125,12 +127,12 @@ required=(
   'js/core/config.js?build=38'
   'js/core/economy.js?build=3'
   'js/core/numbers.js?build=2'
-  'js/core/state.js?build=27'
+  'js/core/state.js?build=28'
   'js/systems/prestige.js?build=4'
   'js/systems/operations.js?build=3'
   'js/systems/command-center.js?build=9'
   'js/systems/survivor-dialogue.js?build=2'
-  'js/core/game.js?build=28'
+  'js/core/game.js?build=29'
   'js/audio.js?build=19'
   'js/systems/care-package.js?build=3'
 )
@@ -235,6 +237,14 @@ fi
 if ! grep -Fq 'data-research-network-probe="passed"' "$RESEARCH_NETWORK_DOM_FILE"; then
   echo "Research Network browser smoke test failed."
   grep -F 'BUNKR_RESEARCH_NETWORK_' "$RESEARCH_NETWORK_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+if ! grep -Fq 'data-research-network-probe="passed"' "$RESEARCH_LANDSCAPE_DOM_FILE"; then
+  echo "Research Network landscape browser smoke test failed."
+  grep -F 'BUNKR_RESEARCH_NETWORK_' "$RESEARCH_LANDSCAPE_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1

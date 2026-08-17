@@ -14,7 +14,7 @@ for(const [pattern,message] of [
   [/#drawer,#drawer\.commandDrawer\{z-index:90;left:calc\(var\(--landscape-nav\) \+ 5px\);right:5px;top:55px;bottom:5px/,'system drawers must use the landscape content area'],
   [/grid-template-areas:"detailHeader detailHeader" "detailHero detailIntro" "detailHero detailOperations" "detailHero detailOutputs" "detailMilestones detailPurchase"/,'room intelligence needs its own landscape operations composition']
 ])if(!pattern.test(css))fail(message);
-if(!/app\.css\?build=60/.test(html))fail('index must cache-bust the current responsive stylesheet');
+if(!/app\.css\?build=61/.test(html))fail('index must cache-bust the current responsive stylesheet');
 if(!/landscape-probe\.html/.test(smoke)||!/data-landscape-layout="passed"/.test(smoke))fail('browser smoke test must run the computed-layout probe');
 if(!fs.existsSync(path.join(root,'scripts','landscape-probe.html')))fail('computed-layout probe is missing');
 console.log('Bunkr landscape layout passed: full-width combat, vertical navigation and on-demand four-column BUNKER intelligence.');
