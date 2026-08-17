@@ -16,6 +16,7 @@ const tests=[
   'account-reset-check.js',
   'operations-balance-check.js',
   'cross-system-balance-check.js',
+  'research-network-check.js',
   'expedition-atlas-check.js',
   'companion-idle-check.js',
   'pet-command-check.js',

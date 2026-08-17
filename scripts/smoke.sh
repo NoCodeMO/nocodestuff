@@ -14,15 +14,27 @@ EXPEDITION_ART_DOM_FILE="${TMPDIR:-/tmp}/bunkr-expedition-art-dom.html"
 COMPANION_IDLE_DOM_FILE="${TMPDIR:-/tmp}/bunkr-companion-idle-dom.html"
 PET_COMMAND_DOM_FILE="${TMPDIR:-/tmp}/bunkr-pet-command-dom.html"
 CASING_FEEDBACK_DOM_FILE="${TMPDIR:-/tmp}/bunkr-casing-feedback-dom.html"
+RESEARCH_NETWORK_DOM_FILE="${TMPDIR:-/tmp}/bunkr-research-network-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/bunkr-chrome.log"
 
-python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/bunkr-server.log" 2>&1 &
+PYTHON="${PYTHON:-}"
+if [[ -z "$PYTHON" ]]; then
+  for candidate in python3 python python.exe; do
+    if command -v "$candidate" >/dev/null 2>&1; then PYTHON="$candidate"; break; fi
+  done
+fi
+if [[ -z "$PYTHON" ]]; then
+  echo "No supported Python binary found."
+  exit 1
+fi
+
+"$PYTHON" -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/bunkr-server.log" 2>&1 &
 SERVER_PID=$!
 trap 'kill "$SERVER_PID" >/dev/null 2>&1 || true' EXIT
 sleep 1
 
 CHROME=""
-for candidate in google-chrome google-chrome-stable chromium chromium-browser; do
+for candidate in google-chrome google-chrome-stable chromium chromium-browser chrome chrome.exe msedge msedge.exe; do
   if command -v "$candidate" >/dev/null 2>&1; then CHROME="$candidate"; break; fi
 done
 
@@ -43,6 +55,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1200,900 --virtual-time-budget=12000 --dump-dom "http://127.0.0.1:${PORT}/scripts/companion-idle-probe.html" >"$COMPANION_IDLE_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=6000 --dump-dom "http://127.0.0.1:${PORT}/scripts/pet-command-probe.html" >"$PET_COMMAND_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/casing-feedback-probe.html" >"$CASING_FEEDBACK_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/research-network-probe.html" >"$RESEARCH_NETWORK_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Bunkr: Last Shelter</title>'
@@ -109,15 +122,15 @@ required=(
   'data-tab="command"'
   'id="commandBadge"'
   'js/core/brand.js?build=1'
-  'js/core/config.js?build=37'
+  'js/core/config.js?build=38'
   'js/core/economy.js?build=3'
   'js/core/numbers.js?build=2'
-  'js/core/state.js?build=26'
+  'js/core/state.js?build=27'
   'js/systems/prestige.js?build=4'
   'js/systems/operations.js?build=3'
   'js/systems/command-center.js?build=9'
   'js/systems/survivor-dialogue.js?build=2'
-  'js/core/game.js?build=27'
+  'js/core/game.js?build=28'
   'js/audio.js?build=19'
   'js/systems/care-package.js?build=3'
 )
@@ -219,4 +232,12 @@ if ! grep -Fq 'data-casing-feedback-probe="passed"' "$CASING_FEEDBACK_DOM_FILE";
   exit 1
 fi
 
-echo "Bunkr browser smoke test passed: core game, preloaded infected hit assets, survivor-relative spent casings, free Ranger and Pet Command roster, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, death sequences, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."
+if ! grep -Fq 'data-research-network-probe="passed"' "$RESEARCH_NETWORK_DOM_FILE"; then
+  echo "Research Network browser smoke test failed."
+  grep -F 'BUNKR_RESEARCH_NETWORK_' "$RESEARCH_NETWORK_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+echo "Bunkr browser smoke test passed: core game, responsive Research Network lifecycle, preloaded infected hit assets, survivor-relative spent casings, free Ranger and Pet Command roster, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, death sequences, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."

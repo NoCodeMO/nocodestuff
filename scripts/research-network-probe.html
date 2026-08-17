@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Bunkr Research Network probe</title><style>html,body{margin:0;background:#050705}.probe{position:absolute;inset:0;border:0}</style></head>
+<body data-research-network-probe="running">
+  <iframe class="probe" width="390" height="844" title="Portrait Research Network probe"></iframe>
+  <output id="researchNetworkReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const frame=document.querySelector('iframe'),report=document.getElementById('researchNetworkReport'),wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+      for(let index=localStorage.length-1;index>=0;index--){const key=localStorage.key(index);if(/^bunkr/i.test(key||''))localStorage.removeItem(key)}
+      async function inspect(){
+        const win=frame.contentWindow,doc=frame.contentDocument,state=win.BunkrState.get(),drawer=doc.getElementById('drawer');
+        doc.querySelector('[data-tab="research"]').click();await wait(180);
+        const root=doc.getElementById('drawerBody'),nodes=[...root.querySelectorAll('[data-research-node]')],branches=[...root.querySelectorAll('[data-research-branch-row]')],visibleBranches=branches.filter(branch=>getComputedStyle(branch).display!=='none'),treeViewport=root.querySelector('.researchTreeViewport'),start=root.querySelector('[data-research-action="filters"]'),before={drawer:drawer.classList.contains('researchDrawer'),command:root.dataset.researchCommand,nodes:nodes.length,branches:branches.length,visibleBranches:visibleBranches.length,level:state.research.filters,scrap:state.scrap,science:state.science,noPageOverflow:root.scrollWidth<=root.clientWidth+2,treeScrolls:treeViewport.scrollWidth>treeViewport.clientWidth,startEnabled:!!start&&!start.disabled};
+        start.click();const active={id:state.researchRuntime.active?.id,scrapCost:state.researchRuntime.active?.scrapCost,scienceCost:state.researchRuntime.active?.scienceCost,scrapReduced:state.scrap<=before.scrap-27,scienceReduced:state.science<before.science,bar:!!root.querySelector('[data-research-progress]')};
+        state.researchRuntime.active.end=Date.now()-1;win.BunkrResearch.finish();await wait(80);const ready={id:state.researchRuntime.ready?.id,badge:doc.getElementById('researchBadge').classList.contains('visible'),install:!!root.querySelector('[data-research-claim]')};
+        win.BunkrResearch.claim();await wait(80);const installed={level:state.research.filters,ready:state.researchRuntime.ready,badge:doc.getElementById('researchBadge').classList.contains('visible')};
+        const passed=before.drawer&&before.command==='ready'&&before.nodes===17&&before.branches===4&&before.visibleBranches===1&&before.level===2&&before.noPageOverflow&&before.treeScrolls&&before.startEnabled&&active.id==='filters'&&active.scrapCost===27&&active.scienceCost===6&&active.scrapReduced&&active.scienceReduced&&active.bar&&ready.id==='filters'&&ready.badge&&ready.install&&installed.level===3&&installed.ready===null&&!installed.badge;
+        document.body.dataset.researchNetworkProbe=passed?'passed':'failed';report.textContent='BUNKR_RESEARCH_NETWORK_'+(passed?'PASS ':'FAIL ')+JSON.stringify({before,active,ready,installed});
+      }
+      frame.addEventListener('load',()=>setTimeout(()=>inspect().catch(error=>{document.body.dataset.researchNetworkProbe='failed';report.textContent='BUNKR_RESEARCH_NETWORK_FAIL '+error.stack}),900));frame.src='../index.html?v=research-network-probe&researchNetworkTest=1';
+    })();
+  </script>
+</body>
+</html>

@@ -11223,3 +11223,892 @@ html.reducedEffects #spriteStage.bruteDeathImpact .survivorUnit,html.reducedEffe
     animation:none
   }
 }
+/* 34. Fullscreen Research Command network */
+#drawer.researchDrawer {
+  z-index:111;
+  inset:0;
+  max-height:none;
+  overflow:hidden;
+  border:0;
+  background:#080b09;
+  box-shadow:none
+}
+#drawer.researchDrawer .drawerHead {
+  height:46px;
+  box-sizing:border-box;
+  padding:8px 12px;
+  background:linear-gradient(90deg,#111913,#171a13,#11130f);
+  border-bottom:1px solid #786437
+}
+#drawer.researchDrawer .drawerHead b {
+  color:#f0cf6b;
+  letter-spacing:2px
+}
+#drawer.researchDrawer .drawerHead button {
+  border-color:#79663b;
+  color:#e6cd7c;
+  background:#24261c
+}
+#drawer.researchDrawer #drawerBody {
+  height:calc(100% - 46px);
+  overflow:auto;
+  background:#080b09;
+  scrollbar-color:#806a37 #0d110d;
+  overscroll-behavior:contain
+}
+#drawerBody[data-research-command="ready"] {
+  min-height:100%;
+  padding:0
+}
+.researchCommand {
+  min-height:100%;
+  color:#d9ddce;
+  background:radial-gradient(circle at 80% 0,#5b2a1917,transparent 28%),linear-gradient(#0c100d,#080b09);
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace
+}
+.researchCommand button {
+  font-family:inherit
+}
+.researchCommandHeader {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  min-height:78px;
+  padding:10px 15px;
+  box-sizing:border-box;
+  background:linear-gradient(110deg,#151d17,#12150f 63%,#211811);
+  border-bottom:1px solid #4a4c37
+}
+.researchCommandHeader>div>small {
+  color:#a98b43;
+  font-size:7px;
+  letter-spacing:1.6px
+}
+.researchCommandHeader h1 {
+  margin:2px 0;
+  color:#f2d16f;
+  font-size:22px;
+  letter-spacing:2.5px
+}
+.researchCommandHeader p {
+  margin:0;
+  color:#818a7c;
+  font-size:7px
+}
+.researchCommandHeader>section {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(100px,1fr));
+  gap:6px
+}
+.researchCommandHeader>section>span {
+  min-width:100px;
+  padding:7px 9px;
+  box-sizing:border-box;
+  background:#0d120f;
+  border:1px solid #3c4637
+}
+.researchCommandHeader>section small,.researchCommandHeader>section b {
+  display:block
+}
+.researchCommandHeader>section small {
+  color:#987f42;
+  font-size:6px;
+  letter-spacing:1.1px
+}
+.researchCommandHeader>section b {
+  margin-top:3px;
+  color:#ead27d;
+  font-size:9px
+}
+.researchCommandHeader>section b.online {
+  color:#9bc85b
+}
+.researchCommandHeader>section b.offline {
+  color:#db6550
+}
+.researchActivity {
+  display:grid;
+  grid-template-columns:minmax(180px,260px) minmax(180px,1fr) 55px 78px;
+  align-items:center;
+  gap:12px;
+  min-height:49px;
+  padding:7px 16px;
+  box-sizing:border-box;
+  background:#11150f;
+  border-bottom:1px solid #66532c
+}
+.researchActivity>span small,.researchActivity>span b {
+  display:block
+}
+.researchActivity>span small {
+  color:#9b8040;
+  font-size:6px;
+  letter-spacing:1.1px
+}
+.researchActivity>span b {
+  margin-top:2px;
+  color:#e8ca69;
+  font-size:9px;
+  letter-spacing:.8px
+}
+.researchActivityTrack {
+  height:9px;
+  padding:1px;
+  background:#080b08;
+  border:1px solid #495039;
+  overflow:hidden
+}
+.researchActivityTrack>i {
+  display:block;
+  width:0;
+  height:100%;
+  background:linear-gradient(90deg,#667b31,#d2ae43,#df7248);
+  transition:width .5s linear
+}
+.researchActivity>strong,.researchActivity>em {
+  color:#e5c65e;
+  font-size:9px;
+  font-style:normal;
+  text-align:right
+}
+.researchActivity.idle>strong,.researchActivity.idle>em {
+  color:#77816f
+}
+.researchActivity.ready {
+  border-bottom-color:#b34b37;
+  background:linear-gradient(90deg,#19150f,#251610,#11150f)
+}
+.researchActivity.ready button {
+  min-height:29px;
+  border:1px solid #a35c36;
+  background:#7c3427;
+  color:#ffe39a;
+  font-size:7px;
+  font-weight:1000;
+  cursor:pointer
+}
+.researchWorkspace {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(290px,31%);
+  min-height:565px;
+  border-bottom:1px solid #4c4d37
+}
+.researchTreeViewport {
+  position:relative;
+  min-width:0;
+  overflow:auto;
+  background-image:linear-gradient(#51604b0d 1px,transparent 1px),linear-gradient(90deg,#51604b0d 1px,transparent 1px),radial-gradient(circle at 12% 50%,#5f6d361c,transparent 26%);
+  background-size:25px 25px,25px 25px,auto;
+  scrollbar-color:#756238 #0d110d
+}
+.researchTree {
+  display:grid;
+  grid-template-columns:138px minmax(930px,1fr);
+  align-items:center;
+  min-width:1080px;
+  min-height:520px;
+  padding:14px 16px 40px;
+  box-sizing:border-box
+}
+.researchCore {
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:112px;
+  height:112px;
+  justify-self:center;
+  color:#d8c985;
+  background:#171d15;
+  border:2px solid #67704d;
+  outline:1px solid #252b21;
+  box-shadow:inset 0 0 0 7px #0b0f0b
+}
+.researchCore:after {
+  content:"";
+  position:absolute;
+  left:100%;
+  top:50%;
+  width:42px;
+  border-top:2px solid #58613f
+}
+.researchCore>i {
+  font-style:normal;
+  font-size:22px
+}
+.researchCore>b {
+  margin-top:6px;
+  font-size:10px;
+  letter-spacing:1px
+}
+.researchCore>small {
+  margin-top:3px;
+  color:#77816e;
+  font-size:5px
+}
+.researchBranches {
+  display:grid;
+  grid-template-rows:repeat(4,minmax(112px,1fr));
+  gap:7px
+}
+.researchBranch {
+  display:grid;
+  grid-template-columns:145px 1fr;
+  align-items:stretch;
+  min-width:0
+}
+.researchBranch>header {
+  display:flex;
+  gap:7px;
+  align-items:center;
+  padding:8px;
+  background:#121711;
+  border:1px solid #394233
+}
+.researchBranch>header>i {
+  color:#c0a557;
+  font-style:normal;
+  font-size:20px
+}
+.researchBranch>header b,.researchBranch>header small {
+  display:block
+}
+.researchBranch>header b {
+  color:#d4bd73;
+  font-size:8px;
+  line-height:1.25
+}
+.researchBranch>header small {
+  margin-top:4px;
+  color:#687164;
+  font-size:5px;
+  line-height:1.35
+}
+.researchBranchPath {
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:28px;
+  min-width:max-content;
+  padding:6px 13px 6px 28px
+}
+.researchBranchPath:before {
+  content:"";
+  position:absolute;
+  left:0;
+  right:12px;
+  top:50%;
+  border-top:2px solid #4c553d
+}
+.researchCoreLink {
+  display:none
+}
+.researchNode,.researchFuture {
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:30px minmax(70px,1fr) 13px;
+  gap:6px;
+  align-items:center;
+  width:138px;
+  min-height:69px;
+  padding:7px;
+  box-sizing:border-box;
+  color:#cbd0c1;
+  text-align:left;
+  background:#111610;
+  border:1px solid #46503e;
+  cursor:pointer
+}
+.researchNode:before,.researchFuture:before {
+  content:"";
+  position:absolute;
+  right:100%;
+  top:50%;
+  width:29px;
+  border-top:2px solid #4c553d
+}
+.researchNode>i {
+  color:#c5af67;
+  font-style:normal;
+  font-size:19px;
+  text-align:center
+}
+.researchNode span b,.researchNode span small {
+  display:block
+}
+.researchNode span b {
+  font-size:7px;
+  line-height:1.25
+}
+.researchNode span small {
+  margin-top:4px;
+  color:#788173;
+  font-size:5.5px;
+  line-height:1.2
+}
+.researchNode>em {
+  color:#8e967f;
+  font-size:8px;
+  font-style:normal;
+  text-align:right
+}
+.researchNode:hover,.researchNode:focus-visible,.researchNode.selected {
+  z-index:3;
+  outline:0;
+  border-color:#d1aa42;
+  background:#1a1d13;
+  box-shadow:inset 3px 0 #d4ad43
+}
+.researchNode.completed {
+  background:#182117;
+  border-color:#647844
+}
+.researchNode.completed>em,.researchNode.completed span small {
+  color:#91bd52
+}
+.researchNode.available {
+  border-color:#ad8e3b
+}
+.researchNode.researching {
+  border-color:#d27438;
+  box-shadow:inset 3px 0 #dd7437
+}
+.researchNode.researching span small {
+  color:#e5974f
+}
+.researchNode.ready {
+  border-color:#d44e3a;
+  background:#251510;
+  animation:researchReadyPulse 1.2s steps(2,end) infinite
+}
+.researchNode.ready>em {
+  color:#f46b52
+}
+.researchNode.locked,.researchNode.busy {
+  color:#747a70;
+  background:#0d110d;
+  border-color:#30362e
+}
+.researchNode.locked>i,.researchNode.busy>i {
+  color:#60675d
+}
+.researchNode.locked span small {
+  color:#985a4b
+}
+.researchFuture {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  width:112px;
+  color:#5f675d;
+  border-style:dashed;
+  cursor:default
+}
+.researchFuture i {
+  font-style:normal;
+  letter-spacing:4px
+}
+.researchFuture b {
+  margin-top:3px;
+  font-size:6px
+}
+.researchFuture small {
+  margin-top:3px;
+  font-size:5px
+}
+.researchLegend {
+  position:sticky;
+  left:0;
+  bottom:0;
+  display:flex;
+  gap:14px;
+  width:max-content;
+  min-width:100%;
+  padding:7px 10px;
+  box-sizing:border-box;
+  color:#777f72;
+  background:#0c100ded;
+  border-top:1px solid #343a30;
+  font-size:5.5px
+}
+.researchLegend span {
+  display:flex;
+  align-items:center;
+  gap:4px
+}
+.researchLegend i {
+  width:8px;
+  height:8px;
+  background:#111610;
+  border:1px solid #3c4437
+}
+.researchLegend i.completed {
+  background:#465d2d;
+  border-color:#718c46
+}
+.researchLegend i.available {
+  border-color:#c5a03b
+}
+.researchLegend i.researching {
+  background:#9e572d;
+  border-color:#dc7b3d
+}
+.researchLegend i.prestige {
+  background:#4c1f1a;
+  border-color:#a3493a
+}
+.researchInspector {
+  min-width:0;
+  padding:13px;
+  background:#0e120f;
+  border-left:1px solid #4b4d38;
+  overflow:auto
+}
+.researchInspector>header {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:start;
+  padding-bottom:10px;
+  border-bottom:1px solid #353c31
+}
+.researchInspector>header small {
+  color:#b05a45;
+  font-size:6px;
+  letter-spacing:1px
+}
+.researchInspector>header h2 {
+  margin:5px 0 0;
+  color:#efcd68;
+  font-size:17px;
+  letter-spacing:1.2px
+}
+.researchInspector>header>span {
+  padding:4px 6px;
+  color:#d6ba62;
+  border:1px solid #5b5131;
+  font-size:7px
+}
+.researchInspectorIntro {
+  display:grid;
+  grid-template-columns:55px 1fr;
+  gap:10px;
+  align-items:center;
+  padding:13px 0
+}
+.researchInspectorIntro>i {
+  display:grid;
+  place-items:center;
+  width:53px;
+  height:53px;
+  color:#d3ba70;
+  background:#151a13;
+  border:1px solid #645638;
+  font-size:26px;
+  font-style:normal
+}
+.researchInspectorIntro p {
+  margin:0;
+  color:#a3aa9a;
+  font-size:7px;
+  line-height:1.6
+}
+.researchBenefit {
+  display:block;
+  padding:9px;
+  color:#9ac557;
+  background:#151c12;
+  border-left:3px solid #7d9c43;
+  font-size:8px;
+  line-height:1.4
+}
+.researchEffect {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+  margin-top:9px
+}
+.researchEffect>span {
+  padding:8px;
+  background:#111610;
+  border:1px solid #333a30
+}
+.researchEffect small,.researchEffect b {
+  display:block
+}
+.researchEffect small,.researchInspector h3 {
+  color:#937c3f;
+  font-size:5.5px;
+  letter-spacing:1px
+}
+.researchEffect b {
+  margin-top:4px;
+  color:#c8cdbf;
+  font-size:6px;
+  line-height:1.4
+}
+.researchInspector h3 {
+  margin:12px 0 6px
+}
+.researchRequirements>span,.researchUnlocks>span {
+  display:block;
+  padding:6px 7px;
+  color:#899184;
+  background:#111510;
+  border-bottom:1px solid #2c322a;
+  font-size:6px
+}
+.researchRequirements>span.met {
+  color:#91b85b
+}
+.researchRequirements>span.unmet {
+  color:#d1634c
+}
+.researchFunding>div {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:5px
+}
+.researchFunding>div>span {
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:2px 5px;
+  padding:7px;
+  background:#111610;
+  border:1px solid #333a30
+}
+.researchFunding i {
+  grid-row:1/3;
+  align-self:center;
+  color:#d2b255;
+  font-style:normal
+}
+.researchFunding small,.researchFunding b,.researchFunding em {
+  display:block
+}
+.researchFunding small {
+  color:#788073;
+  font-size:5px
+}
+.researchFunding b {
+  color:#d8c173;
+  font-size:7px
+}
+.researchFunding em {
+  grid-column:1/3;
+  margin-top:3px;
+  color:#7d9e50;
+  font-size:5px;
+  font-style:normal
+}
+.researchStart {
+  width:100%;
+  min-height:39px;
+  margin-top:11px;
+  color:#11150e;
+  background:#b89b43;
+  border:1px solid #e0bf5d;
+  font-size:8px;
+  font-weight:1000;
+  letter-spacing:1px;
+  cursor:pointer
+}
+.researchStart.ready {
+  color:#ffe29a;
+  background:#8d382a;
+  border-color:#d05c44
+}
+.researchStart:disabled {
+  color:#666d64;
+  background:#171b16;
+  border-color:#343a31;
+  cursor:not-allowed
+}
+.researchLockReason {
+  margin:6px 0 0;
+  color:#bd5a47;
+  font-size:6px;
+  text-align:center
+}
+.researchBranchNav {
+  display:grid;
+  grid-template-columns:repeat(5,minmax(100px,1fr)) minmax(180px,1.2fr);
+  gap:6px;
+  padding:8px 10px;
+  background:#0b0f0c
+}
+.researchBranchNav>button,.researchBranchNav>div {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:48px;
+  padding:7px 9px;
+  box-sizing:border-box;
+  color:#989f90;
+  text-align:left;
+  background:#111610;
+  border:1px solid #394033
+}
+.researchBranchNav>button {
+  cursor:pointer
+}
+.researchBranchNav>button.active {
+  color:#efd06c;
+  border-color:#a58b3e;
+  box-shadow:inset 0 3px #d3ad43
+}
+.researchBranchNav i {
+  color:#b9a15d;
+  font-size:17px;
+  font-style:normal
+}
+.researchBranchNav small,.researchBranchNav b {
+  display:block
+}
+.researchBranchNav small {
+  color:#747c70;
+  font-size:5px
+}
+.researchBranchNav b {
+  margin-top:3px;
+  font-size:7px
+}
+.researchBranchNav>div {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center
+}
+.researchBranchNav>div>b {
+  color:#d5bb69
+}
+.researchBranchNav>div>small {
+  color:#b55343
+}
+@keyframes researchReadyPulse {
+  50% {
+    filter:brightness(1.2)
+  }
+}
+@media(max-width:900px) {
+  .researchCommandHeader>section {
+    grid-template-columns:repeat(2,minmax(95px,1fr))
+  }
+  .researchWorkspace {
+    grid-template-columns:minmax(0,1fr) 285px
+  }
+  .researchBranchNav {
+    grid-template-columns:repeat(5,minmax(90px,1fr));
+    overflow-x:auto
+  }
+  .researchBranchNav>div {
+    min-width:170px
+  }
+}
+@media(max-width:760px) {
+  .researchCommandHeader {
+    align-items:start;
+    min-height:108px;
+    padding:9px 10px
+  }
+  .researchCommandHeader h1 {
+    font-size:17px
+  }
+  .researchCommandHeader p {
+    display:none
+  }
+  .researchCommandHeader>section {
+    grid-template-columns:repeat(2,minmax(82px,1fr));
+    gap:4px
+  }
+  .researchCommandHeader>section>span {
+    min-width:82px;
+    padding:5px 6px
+  }
+  .researchActivity {
+    grid-template-columns:minmax(130px,1fr) minmax(90px,1fr) 40px 62px;
+    gap:6px;
+    min-height:45px;
+    padding:6px 8px
+  }
+  .researchWorkspace {
+    display:block;
+    min-height:0
+  }
+  .researchTreeViewport {
+    height:43vh;
+    min-height:305px;
+    border-bottom:1px solid #4b4d38
+  }
+  .researchTree {
+    display:block;
+    min-width:880px;
+    min-height:285px;
+    padding:11px 12px 37px
+  }
+  .researchCore {
+    display:none
+  }
+  .researchBranches {
+    display:block
+  }
+  .researchBranch {
+    display:none;
+    grid-template-columns:135px 1fr;
+    min-height:235px
+  }
+  .researchBranch.mobileActive {
+    display:grid
+  }
+  .researchBranchPath {
+    padding-right:20px
+  }
+  .researchInspector {
+    max-height:none;
+    border-left:0;
+    border-top:1px solid #4b4d38
+  }
+  .researchBranchNav {
+    position:sticky;
+    bottom:0;
+    z-index:5;
+    grid-template-columns:repeat(5,105px) 170px;
+    padding:6px;
+    overflow-x:auto
+  }
+  .researchBranchNav>button,.researchBranchNav>div {
+    min-height:44px
+  }
+}
+@media(max-width:430px) {
+  #drawer.researchDrawer .drawerHead {
+    height:40px;
+    padding:6px 8px
+  }
+  #drawer.researchDrawer #drawerBody {
+    height:calc(100% - 40px)
+  }
+  .researchCommandHeader {
+    display:block;
+    min-height:130px
+  }
+  .researchCommandHeader>section {
+    margin-top:7px
+  }
+  .researchActivity {
+    grid-template-columns:1fr 1fr 37px;
+    padding:5px 7px
+  }
+  .researchActivity>em,.researchActivity>button {
+    grid-column:1/4;
+    width:100%;
+    min-height:21px;
+    text-align:center
+  }
+  .researchActivity.idle>em {
+    display:none
+  }
+  .researchTreeViewport {
+    height:38vh;
+    min-height:275px
+  }
+  .researchTree {
+    min-width:845px;
+    min-height:255px
+  }
+  .researchBranch {
+    grid-template-columns:120px 1fr;
+    min-height:215px
+  }
+  .researchNode {
+    width:132px
+  }
+  .researchInspector>header h2 {
+    font-size:15px
+  }
+  .researchFunding>div {
+    grid-template-columns:1fr
+  }
+}
+@media(orientation:landscape) and (min-width:560px) and (max-height:600px) {
+  #drawer.researchDrawer {
+    left:var(--landscape-nav,0)
+  }
+  #drawer.researchDrawer .drawerHead {
+    height:38px;
+    padding:5px 9px
+  }
+  #drawer.researchDrawer #drawerBody {
+    height:calc(100% - 38px)
+  }
+  .researchCommandHeader {
+    min-height:61px;
+    padding:6px 9px
+  }
+  .researchCommandHeader h1 {
+    font-size:16px
+  }
+  .researchCommandHeader p {
+    display:none
+  }
+  .researchCommandHeader>section>span {
+    padding:5px 6px
+  }
+  .researchActivity {
+    min-height:39px;
+    padding:4px 9px
+  }
+  .researchWorkspace {
+    min-height:330px;
+    grid-template-columns:minmax(0,1fr) 265px
+  }
+  .researchTree {
+    min-height:330px;
+    padding-top:7px;
+    padding-bottom:34px
+  }
+  .researchBranches {
+    grid-template-rows:repeat(4,75px);
+    gap:4px
+  }
+  .researchBranch>header {
+    padding:5px
+  }
+  .researchBranch>header small {
+    display:none
+  }
+  .researchNode,.researchFuture {
+    min-height:59px
+  }
+  .researchInspector {
+    padding:8px
+  }
+  .researchInspectorIntro {
+    padding:7px 0
+  }
+  .researchEffect,.researchRequirements,.researchUnlocks {
+    display:none
+  }
+  .researchFunding>div>span {
+    padding:5px
+  }
+  .researchBranchNav {
+    padding:5px 7px
+  }
+  .researchBranchNav>button,.researchBranchNav>div {
+    min-height:38px;
+    padding:4px 6px
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .researchNode.ready {
+    animation:none
+  }
+  .researchActivityTrack>i {
+    transition:none
+  }
+}

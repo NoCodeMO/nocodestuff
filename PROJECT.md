@@ -30,7 +30,7 @@ This file is the fastest entry point for any future development session. Read th
 - `js/systems/missions.js` - 200-mission campaign: the original 50-save-compatible chain plus 15 operations chapters with 150 late-game objectives.
 - `js/systems/expeditions.js` - fullscreen 14-location Prestige atlas, graph-based mirrored outbound/return routes, Food/Water deployment, sustainable rewards, Uranium, specialists and rare companions.
 - `js/systems/special-rooms.js` - classified rooms unlocked by specialists.
-- `js/systems/research.js` - timed, dual Scrap/Science-funded research, completion badge and claiming.
+- `js/systems/research.js` - fullscreen four-branch Research Network, 17 prerequisite-driven projects, 97 levels, dual Scrap/Science funding, persisted timers, completion badge, installation and shared gameplay-effect APIs.
 - `js/systems/merchant.js` - Uranium wallet, Dealer stock, temporary boost timers, purchase rules and runtime multipliers.
 - `js/systems/command-center.js` - How to Play, persistent survivor roster, advanced Stats, official messages/rewards, settings and local Commander login/logout.
 - `js/systems/offline.js` - persisted, claimable offline production using sustainable no-reserve rates, Dealer exclusion and a 12-hour safety cap.
@@ -67,6 +67,7 @@ This file is the fastest entry point for any future development session. Read th
 - `scripts/death-animation-probe.html` - real-browser Common-horde kill probe that verifies three synchronized death frames, corpse persistence, fast respawn and cleanup.
 - `scripts/operations-balance-check.js` - Power/Water/Food/Scrap/Science/Workforce allocation, reserve drain, priority order, pause/resume and underperformance UI guardrails.
 - `scripts/cross-system-balance-check.js` - executable dual-cost Research, ration-funded Expedition, Dealer-free reward, sustainable offline and attention-reward math.
+- `scripts/research-network-check.js` and `scripts/research-network-probe.html` - all four branches, 17 project IDs, 97 levels, prerequisites, Prestige gates, save migration, timer/claim lifecycle, gameplay effects and a real 390×844 funded start/finish/install browser probe.
 - `scripts/expedition-atlas-check.js` - exact 4+2-per-Prestige location structure, parent-route integrity, cycle prevention, mirrored return phases, save fields, art and fullscreen UI guardrails.
 - `scripts/prestige-balance-check.js` - all five targets, survivors, active/permanent perk math, capped Core curve, reset boundaries, room costs and cross-system multiplier wiring.
 - `scripts/prestige-probe.html` - real-browser schema-15 migration plus transactional Prestige I–V reset, preservation, recovery backup, unlock, art, muzzle-anchor and multiplier probe.
@@ -263,7 +264,7 @@ Official Command Center messages are release-configured in `COMMAND_MESSAGES`. A
 
 The Command survivor roster is configured once in `SURVIVOR_SKINS`. Both Ranger starters are permanently unlocked for new and old saves and are cosmetic/economically equal. Gideon Rook, The Architect, is permanently added to an old or new save at Bunker Level 100. While selected, he grants +0.5% all passive production per Bunker Level: exactly +50% at unlock, capped at +100% from Level 200 onward. The five Prestige survivors stay visually classified until unlocked: Mara Voss (Rare, +40% Scrap), Knox Ward (Rare, -12% room cost), Malik Graves (Epic, -25% expedition time and +30% loot), Cole Ash (Epic, +50% damage and infected loot) and Dr. Elara Sable (Legendary, -25% research cost/time and +50% critical damage). Every selectable survivor shares the same shot event, recoil and short muzzle animation while using per-skin normalized muzzle metadata. `SURVIVOR_DIALOGUE` gives all eight characters a distinct voice and short pools for idle, normal kill, streak, horde and Brute contexts; new lines belong in that config instead of the presentation or audio modules.
 
-Research projects spend both Scrap and Science up front in one state transaction. Both prices scale exponentially with project level, while the persisted wall-clock timer and red claim notification retain the existing one-project-at-a-time loop. This makes the Research Lab's Science output a progression input rather than another passive score.
+Research is a fullscreen four-branch network: Survival Systems, Power & Industry, Combat Engineering and Field Operations. Its 17 projects contain 97 levels with explicit same-branch prerequisites and selected Prestige I, III and V gates. Projects spend both Scrap and Science up front in one state transaction; prices and time scale exponentially by project level while the persisted wall-clock timer and red claim notification retain the one-project-at-a-time loop. Installed effects are consumed by the authoritative economy, combat and expedition systems, including Food/Water/Scrap production, room costs, critical chance, horde/Brute damage, route duration/rewards and rare companion/specialist discovery. The six legacy project IDs remain unchanged so old saves migrate without losing Research progress.
 
 Expeditions use one fullscreen world atlas with 14 connected destinations: four Ashlands locations at Prestige 0 and exactly two additional locations at each Prestige I–V. Every node has an explicit parent, so all paths resolve to the bunker without loops. A deployment spends its displayed Food and Water, spends 42% of its persisted wall-clock duration walking outward, 16% searching and 42% following the same route in reverse. Rewards cannot complete before the returning scout reaches Bunkr. Coin and Scrap capture sustainable permanent production at deployment and ignore Dealer boosts. Uranium value remains bounded per active hour while individual late-zone hauls grow much larger; deeper zones progressively improve specialist odds and introduce very rare permanent companion discoveries.
 
@@ -296,7 +297,7 @@ Only active assets remain in `assets/`:
 
 ## Current intentional limitations
 
-- One research project can run at a time. It spends Scrap and Science up front, completes against a persisted wall-clock deadline and must be installed from the red Research notification.
+- One of the 17 Research Network projects can run at a time. It spends Scrap and Science up front, completes against a persisted wall-clock deadline and must be installed from the red Research notification; future nodes intentionally continue after the current 97-level launch network.
 - Offline earnings are claimable and persisted; production beyond the 12-hour cap is intentionally discarded.
 - Combat gun SFX is synthesized through `bunkr:shot`, unlocked by a user gesture and protected by a short spam limit.
 - Survivor dialogue uses original synthesized retro bleeps, follows the UI SFX setting and cannot unlock WebAudio without a user gesture. It is intentionally short-form ambient flavor rather than a branching conversation system.
