@@ -14,7 +14,8 @@ This file is the fastest entry point for any future development session. Read th
 
 ### Entry and styling
 - `index.html` - DOM shell and explicit script load order.
-- `app.css` - the only production stylesheet. It is sectioned by system.
+- `styles/app.css` - authoritative readable stylesheet, sectioned by owning system. Edit this file.
+- `app.css` - generated compact production stylesheet loaded by `index.html`. Never edit it directly; `npm run format:css` formats the source and rebuilds this file, while the test suite rejects source/build drift.
 - `manifest.webmanifest` - PWA/home-screen metadata.
 
 ### Core
@@ -45,6 +46,9 @@ This file is the fastest entry point for any future development session. Read th
 - `js/platform.js` - standalone/fullscreen install helpers.
 
 ### Validation
+- `scripts/run-tests.js` - one ordered zero-dependency static test manifest. Pass a name fragment such as `npm test -- research` to run only relevant checks while developing.
+- `scripts/format-css.js` - deterministic readable-source formatter, compact production compiler and source/build drift check.
+- `scripts/asset-audit-check.js` - runtime asset graph, dynamically derived expedition miniature rules, source-master exceptions and temporary cache-compatibility exceptions.
 - `scripts/validate.js` - zero-dependency JS syntax, local reference and legacy-file checks.
 - `scripts/combat-balance.js` - deterministic enemy rarity, live/death asset, horde, glow, death timing and income-scaled bounty checks.
 - `scripts/merchant-balance.js` - Dealer inventory, boost stacking, Uranium sources, timers and economy guardrails.
@@ -266,6 +270,7 @@ Offline production starts after one minute away and is capped at 12 hours per lo
 ## Assets
 
 Only active assets remain in `assets/`:
+- `assets/README.md` defines the runtime naming rules, source masters and the two temporary cache-compatibility exceptions. The automated asset audit rejects unexplained files.
 - `survivor-ranger.png`, `survivor-ranger-female.webp`, `survivor-architect.webp`, `survivor-prestige-mara.webp`, `survivor-prestige-knox.webp`, `survivor-prestige-malik.webp`, `survivor-prestige-cole.webp`, `survivor-prestige-elara.webp` - transparent selectable survivor art. The two Rangers are starter cosmetics; the Architect is the Bunker Level 100 reward; the remaining five unlock sequentially through Prestige. Their muzzle flash stays a separate short-lived game effect anchored from each skin's responsive unit coordinates, so recoil and scaling cannot detach it from the weapon. Rare/Epic/Legendary glow is rendered at runtime rather than baked into the sprite.
 - `enemy-common-drifter.webp`, `enemy-uncommon-cinderback.webp`, `enemy-rare-blue-shield.webp`, `enemy-epic-bloater.webp`, `enemy-legendary-gilded-warden.webp`, `enemy-brute-breaker.webp` - transparent, left-facing enemy art with no baked rarity glow; glow is rendered by CSS at runtime
 - `enemy-common-drifter-death.png` - true-alpha three-frame Impact/Collapse/Corpse sheet for the Common Drifter; the game crops its cells at runtime so it loads once for single encounters and hordes
@@ -282,6 +287,7 @@ Only active assets remain in `assets/`:
 - `room-generator.webp`, `room-workshop.webp`, `room-greenhouse.webp`, `room-purifier.webp`, `room-lab.webp`, `room-living.webp`, `room-storage.webp`, `room-turret.webp` - one crop-safe 1600×508 WebP set shared by room cards and the large room-intelligence screen
 - `care-package-airborne.png`, `care-package-crate.png` - true-alpha matching care-package states; the parachute is used only during descent and the closed crate receives its glow, dust, timer and reward effects at runtime
 - `expedition-world-atlas.png` - text-free high-definition retro wasteland atlas layer; all routes, nodes, locks, the survivor scout and dossier UI are rendered live above it for responsive accuracy
+- `pets/pet-*-idle-v2.webp` - the authoritative three-frame companion sheets. The superseded non-V2 exports were removed after runtime-reference verification.
 
 `survivor-final.webp` and `walker-final.webp` are retained only as unused legacy assets so existing cached sessions cannot request missing files; new combat references neither one.
 
@@ -308,7 +314,7 @@ Only active assets remain in `assets/`:
 4. Put persistent gameplay data in `BunkrState`.
 5. Prefer runtime events/APIs over duplicate DOM listeners and polling.
 6. Delete replaced code after the replacement is verified.
-7. Keep `index.html` readable and keep production CSS in `app.css` unless CSS becomes large enough to justify clear feature files.
+7. Edit CSS only in `styles/app.css`, keep its numbered feature sections intact and run `npm run format:css` to rebuild the compact root `app.css` used by production.
 8. Preserve old save compatibility or add an explicit migration in `state.js`.
 9. Run `npm run test:all` after structural or cross-system changes. At minimum run `npm test` after small code changes.
 10. Do not reintroduce a service worker during rapid development without an explicit cache/version strategy.
@@ -317,7 +323,7 @@ Only active assets remain in `assets/`:
 
 1. Read this file.
 2. Read `index.html` only if load order/layout entry points matter.
-3. Read the one owning JS module and the relevant section of `app.css`.
+3. Read the one owning JS module and the relevant section of `styles/app.css`.
 4. Implement the feature using existing config/state/APIs/events.
 5. Verify the relevant tests. Use `npm run test:all` for structural or major changes.
 6. Confirm the GitHub Pages workflow and deployment succeeded before saying a change is live.

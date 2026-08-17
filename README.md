@@ -12,9 +12,12 @@ For development, read **`PROJECT.md` first**. It contains the current architectu
 
 ```text
 index.html
-app.css
+app.css                 # generated compact production build
+styles/app.css          # authoritative readable CSS source
 manifest.webmanifest
 PROJECT.md
+.gitattributes
+.gitignore
 
 js/
   core/
@@ -32,6 +35,9 @@ js/
 
 assets/
 scripts/
+  run-tests.js
+  asset-audit-check.js
+  format-css.js
   validate.js
   smoke.sh
 ```
@@ -44,11 +50,13 @@ No npm dependencies are required.
 
 ```bash
 npm test              # JS syntax + file/reference checks
+npm test -- economy   # run only matching checks while developing
+npm run format:css    # format styles/app.css and rebuild app.css
 npm run test:browser  # boots the real game in headless Chrome
 npm run test:all      # both
 ```
 
-The browser smoke test verifies that the core game and dynamic systems actually initialize. GitHub Pages only deploys after both validation layers pass.
+The static runner also rejects missing or unexplained assets and unformatted CSS. The browser smoke test verifies that the core game and dynamic systems actually initialize. GitHub Pages only deploys after both validation layers pass.
 
 ## Deployment
 
