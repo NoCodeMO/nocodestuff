@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Afterlight casing feedback probe</title><style>html,body{margin:0;background:#050705}iframe{position:absolute;inset:0;border:0}</style></head>
+<body data-casing-feedback-probe="running">
+  <iframe width="390" height="844" title="Portrait casing feedback probe"></iframe>
+  <output id="casingReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const frame=document.querySelector('iframe'),report=document.getElementById('casingReport'),wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+      localStorage.removeItem('afterlight_v4');
+      frame.addEventListener('load',async()=>{try{
+        const win=frame.contentWindow,doc=frame.contentDocument,stage=doc.getElementById('spriteStage'),survivor=doc.querySelector('.survivorUnit');
+        await wait(900);
+        const event=()=>new win.CustomEvent('afterlight:shot',{detail:{damage:1,baseDamage:1,critical:false,enemy:{id:'common'}}});
+        for(let index=0;index<24;index++)win.dispatchEvent(event());
+        await wait(30);
+        const shells=[...stage.querySelectorAll('.shellCasing')],stageBox=stage.getBoundingClientRect(),survivorBox=survivor.getBoundingClientRect(),style=shells[0]?win.getComputedStyle(shells[0]):null,startX=Number.parseFloat(shells.at(-1)?.style.left||'0'),startY=Number.parseFloat(shells.at(-1)?.style.top||'0'),survivorTop=survivorBox.top-stageBox.top,survivorBottom=survivorBox.bottom-stageBox.top,anchorNearWeapon=startX>survivorBox.left-stageBox.left+survivorBox.width*.35&&startX<survivorBox.right-stageBox.left&&startY>survivorTop&&startY<survivorBottom,initial={count:shells.length,animation:style?.animationName||'',asset:style?.backgroundImage||'',anchorNearWeapon,lastAnchor:stage.dataset.lastCasingAnchor||''};
+        await wait(390);
+        const flying=[...stage.querySelectorAll('.shellCasing')].map(shell=>shell.getBoundingClientRect()),flightInsideStage=flying.length>0&&flying.every(box=>box.left>=stageBox.left-8&&box.right<=stageBox.right+8&&box.top>=stageBox.top-8&&box.bottom<=stageBox.bottom+8);
+        await wait(500);
+        const cleaned=stage.querySelectorAll('.shellCasing').length===0;
+        doc.documentElement.classList.add('reducedEffects');win.dispatchEvent(event());await wait(40);const reduced=stage.querySelectorAll('.shellCasing').length===0;
+        const passed=initial.count===12&&initial.animation==='casingFlight'&&initial.asset.includes('combat-brass-casing.webp')&&initial.anchorNearWeapon&&!!initial.lastAnchor&&flightInsideStage&&cleaned&&reduced;
+        document.body.dataset.casingFeedbackProbe=passed?'passed':'failed';report.textContent='AFTERLIGHT_CASING_FEEDBACK_'+(passed?'PASS ':'FAIL ')+JSON.stringify({initial,flightInsideStage,cleaned,reduced});
+      }catch(error){document.body.dataset.casingFeedbackProbe='failed';report.textContent='AFTERLIGHT_CASING_FEEDBACK_FAIL '+error.stack}});
+      frame.src='../index.html?v=casing-feedback-probe';
+    })();
+  </script>
+</body>
+</html>

@@ -12,7 +12,7 @@ function pause(){audio.pause()}
 function persist(){if(S?.settings)S.settings.music=enabled;ST?.save?.();localStorage.setItem('afterlight_music',enabled?'on':'off')}
 button.onclick=async event=>{event.stopPropagation();enabled=!enabled;persist();label();if(enabled)await play();else pause()};document.body.append(button);label();
 
-let context=null,master=null,lastSound=0,lastShot=0,lastVoice=0;
+let context=null,master=null,lastSound=0,lastShot=0,lastCasing=0,lastVoice=0,casingToneIndex=0;
 const AudioContext=window.AudioContext||window.webkitAudioContext;
 function unlockUi(){if(!AudioContext)return null;if(!context){context=new AudioContext();master=context.createDynamicsCompressor();master.threshold.value=-12;master.knee.value=10;master.ratio.value=5;master.attack.value=.003;master.release.value=.12;master.connect(context.destination)}if(context.state==='suspended')context.resume().catch(()=>{});return context}
 function channelSound(channel,callback){const previous=activeChannel;activeChannel=channel;try{return callback()}finally{activeChannel=previous}}
@@ -40,6 +40,9 @@ function uiSound(kind='tap'){
 function gunshot(){
   const now=performance.now();if(now-lastShot<38)return false;lastShot=now;return channelSound('combat',()=>{noise(.085,.2,0,2400);tone(150,.085,.16,0,'sawtooth',48);noise(.055,.07,.025,800);return true});
 }
+function casingSound(){
+  const now=performance.now();if(now-lastCasing<70)return false;lastCasing=now;const frequencies=[2180,2460,1920,2640],frequency=frequencies[casingToneIndex++%frequencies.length];return channelSound('combat',()=>{tone(frequency,.026,.019,.24,'triangle',frequency*.62);tone(frequency*.43,.026,.012,.252,'square',frequency*.31);noise(.018,.008,.242,6200);return true});
+}
 function cashSound(){return channelSound('combat',()=>{tone(740,.07,.075,0,'square',980);tone(1100,.09,.07,.055,'sine',1420);tone(1560,.12,.055,.11,'sine',1900);noise(.045,.035,.03,4200);return true})}
 function bruteDeathSound(event){if(!event.detail?.brute)return false;return channelSound('combat',()=>{noise(.28,.19,.24,520);tone(58,.32,.17,.24,'sine',31);noise(.12,.07,.29,1600);return true})}
 function rewardSound(kind='mission'){
@@ -58,6 +61,7 @@ function onUiPointer(event){const target=event.target.closest?.('button,[role="b
 document.addEventListener('pointerdown',onUiPointer,true);
 window.addEventListener('afterlight:state',event=>{if(['room','special-room'].includes(event.detail?.reason))uiSound('confirm')});
 window.addEventListener('afterlight:shot',gunshot);
+window.addEventListener('afterlight:shot',casingSound);
 window.addEventListener('afterlight:enemy-killed',cashSound);
 window.addEventListener('afterlight:enemy-killed',bruteDeathSound);
 window.addEventListener('afterlight:mission-claimed',()=>rewardSound('mission'));
@@ -78,6 +82,6 @@ function unlockMusic(){if(musicUnlocked)return;if(enabled)play();if(musicUnlocke
 function removeMusicUnlock(){document.removeEventListener('pointerdown',unlockMusic,true);document.removeEventListener('touchstart',unlockMusic,true)}
 document.addEventListener('pointerdown',unlockMusic,true);document.addEventListener('touchstart',unlockMusic,{capture:true,passive:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else if(enabled)play()});
 function setVolume(channel,value){if(!(channel in volumes))return false;volumes[channel]=Math.max(0,Math.min(1,Number(value)||0));if(S?.settings)S.settings[channel+'Volume']=volumes[channel];if(channel==='music')audio.volume=.18*volumes.music;ST?.save?.();return volumes[channel]}
-function preview(channel){unlockUi();if(channel==='music')return enabled?play():false;if(!effectsEnabled)return false;if(channel==='combat'){lastShot=0;return gunshot()}if(channel==='reward')return rewardSound('mission');return uiSound('confirm')}
-window.AfterlightAudio={play,pause,isEnabled:()=>enabled,isEffectsEnabled:()=>effectsEnabled,getVolumes:()=>({...volumes}),setVolume,preview,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},setEffectsEnabled:value=>{effectsEnabled=!!value;if(S?.settings)S.settings.uiSfx=effectsEnabled;ST?.save?.();if(effectsEnabled)setTimeout(()=>uiSound('confirm'),0);return effectsEnabled},unlockUi,uiSound,gunshot,cashSound,bruteDeathSound,rewardSound,researchSound,merchantSound,carePackageLandSound,carePackageOpenSound,roomMilestoneSound,prestigeSound,survivorVoiceBleep};
+function preview(channel){unlockUi();if(channel==='music')return enabled?play():false;if(!effectsEnabled)return false;if(channel==='combat'){lastShot=0;lastCasing=0;gunshot();casingSound();return true}if(channel==='reward')return rewardSound('mission');return uiSound('confirm')}
+window.AfterlightAudio={play,pause,isEnabled:()=>enabled,isEffectsEnabled:()=>effectsEnabled,getVolumes:()=>({...volumes}),setVolume,preview,setEnabled:value=>{enabled=!!value;persist();label();return enabled?play():(pause(),Promise.resolve(false))},setEffectsEnabled:value=>{effectsEnabled=!!value;if(S?.settings)S.settings.uiSfx=effectsEnabled;ST?.save?.();if(effectsEnabled)setTimeout(()=>uiSound('confirm'),0);return effectsEnabled},unlockUi,uiSound,gunshot,casingSound,cashSound,bruteDeathSound,rewardSound,researchSound,merchantSound,carePackageLandSound,carePackageOpenSound,roomMilestoneSound,prestigeSound,survivorVoiceBleep};
 })();
