@@ -46,11 +46,11 @@ function gunshot(){
 }
 function playCasingSample(ctx,buffer,level,shotTime){
   if(!buffer||!level||performance.now()-shotTime>280)return false;
-  const rates=[.97,1.035,.995,1.065,.945],gains=[.31,.27,.295,.255,.285],pans=[-.1,.07,-.035,.11,-.075],variant=casingSampleIndex++%rates.length;
+  const CASING_VOLUME=.75,rates=[.97,1.035,.995,1.065,.945],gains=[.31,.27,.295,.255,.285],pans=[-.1,.07,-.035,.11,-.075],variant=casingSampleIndex++%rates.length;
   for(let index=casingVoices.length-1;index>=0;index--)if(casingVoices[index].ended)casingVoices.splice(index,1);
   while(casingVoices.length>=6){const oldest=casingVoices.shift();try{oldest.source.stop()}catch{}}
   const elapsed=(performance.now()-shotTime)/1000,startDelay=Math.max(0,.16-elapsed),start=ctx.currentTime+startDelay,source=ctx.createBufferSource(),gain=ctx.createGain(),panner=ctx.createStereoPanner?.();
-  source.buffer=buffer;source.playbackRate.value=rates[variant];gain.gain.value=gains[variant]*level/Math.sqrt(1+casingVoices.length*.28);
+  source.buffer=buffer;source.playbackRate.value=rates[variant];gain.gain.value=gains[variant]*CASING_VOLUME*level/Math.sqrt(1+casingVoices.length*.28);
   if(panner){panner.pan.value=pans[variant];source.connect(panner).connect(gain)}else source.connect(gain);
   gain.connect(master);const voice={source,ended:false};casingVoices.push(voice);source.onended=()=>{voice.ended=true};source.start(start);return true;
 }

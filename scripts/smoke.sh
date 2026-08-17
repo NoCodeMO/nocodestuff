@@ -109,7 +109,7 @@ required=(
   'js/systems/command-center.js?build=7'
   'js/systems/survivor-dialogue.js?build=1'
   'js/core/game.js?build=26'
-  'js/audio.js?build=16'
+  'js/audio.js?build=17'
   'js/systems/care-package.js?build=2'
 )
 
