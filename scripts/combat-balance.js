@@ -56,6 +56,21 @@ if(brute.deathAsset!=='assets/enemy-brute-breaker-death.png')fail('The Breaker m
 const bruteAsset=path.join(root,brute.deathAsset);if(!fs.existsSync(bruteAsset))fail(`missing death sprite ${brute.deathAsset}`);
 const bruteBuffer=fs.readFileSync(bruteAsset);if(!bruteBuffer.subarray(1,4).equals(Buffer.from('PNG'))||bruteBuffer[25]!==6)fail('The Breaker death sheet must be a real RGBA PNG with transparent alpha');
 if(bruteBuffer.readUInt32BE(16)!==2100||bruteBuffer.readUInt32BE(20)!==760)fail('The Breaker death sheet must contain three normalized 700x760 cells');
+const normalizedHitAssets={
+  uncommon:'assets/enemy-uncommon-cinderback-hit.png',
+  rare:'assets/enemy-rare-blue-shield-hit.png',
+  epic:'assets/enemy-epic-bloater-hit.png',
+  legendary:'assets/enemy-legendary-gilded-warden-hit.png',
+  brute:'assets/enemy-brute-breaker-hit.png'
+};
+for(const [id,asset] of Object.entries(normalizedHitAssets)){
+  const type=ENEMIES.find(entry=>entry.id===id);
+  if(type.hitAsset!==asset)fail(`${id} must expose its approved three-frame hit sheet`);
+  const file=path.join(root,asset);if(!fs.existsSync(file))fail(`missing hit sprite ${asset}`);
+  const buffer=fs.readFileSync(file);
+  if(!buffer.subarray(1,4).equals(Buffer.from('PNG'))||buffer[25]!==6)fail(`${id} hit sheet must be a real RGBA PNG with transparent alpha`);
+  if(buffer.readUInt32BE(16)!==2100||buffer.readUInt32BE(20)!==760)fail(`${id} hit sheet must contain three normalized 700x760 cells`);
+}
 if(ENEMIES.find(type=>type.id==='common').glow!=='transparent')fail('Common must not have a rarity glow');
 if(ENEMIES.find(type=>type.id==='brute').glow!=='transparent')fail('Brute must remain outside the rarity glow system');
 for(const id of ['uncommon','rare','epic','legendary'])if(ENEMIES.find(type=>type.id===id).glow==='transparent')fail(`${id} requires an in-game glow color`);
@@ -94,6 +109,7 @@ for(const [pattern,message] of [
   ,[/Math\.floor\(baseCoins\*streak\.multiplier\)/,'streak multiplier must apply to kill rewards only after the kill']
   ,[/streakCount:streak\.count,streakMultiplier:streak\.multiplier/,'kill events must expose their exact streak reward']
   ,[/deathAsset:type\.deathAsset\|\|null/,'encounters must expose their configured death sheet']
+  ,[/hitAsset:type\.hitAsset\|\|null/,'encounters must expose their configured hit sheet']
   ,[/setTimeout\(spawn,COMBAT\.nextSpawnMs\)/,'the next encounter must wait for the complete death sequence']
 ])if(!pattern.test(game))fail(message);
 const visuals=fs.readFileSync(path.join(root,'js','ui','visuals.js'),'utf8');
@@ -114,6 +130,7 @@ for(const [pattern,message] of [
   [/enemyUnit\.classList\.remove\('dead','hit','defeated'\)/,'a newly spawned infected must always restore the live encounter unit']
 ])if(!pattern.test(visuals))fail(message);
 if(!/function createEnemySprite\(detail,index\)/.test(visuals)||!/configured\.id==='common'&&idleAsset/.test(visuals)||!/className='drifterFrames'/.test(visuals))fail('The Drifter must render through its dedicated animated sprite wrapper');
+if(!/className='enemySprite infectedAnimatedSprite'/.test(visuals)||!/className='infectedBaseSprite'/.test(visuals)||!/className='infectedHitFrames'/.test(visuals))fail('Every non-Drifter infected must preserve its live sprite and swap to a shared hit-frame wrapper');
 const css=fs.readFileSync(path.join(root,'app.css'),'utf8');
 if(!/float\.className='damageNumber'\+\(detail\.critical/.test(visuals)||!/if\(active\.length>8\)active\[0\]\.remove\(\)/.test(visuals))fail('per-shot damage feedback must exist and remain spam-safe');
 if(!/HIT_PIXEL_STYLES=Object\.freeze\(\{common:/.test(visuals)||!/[,{]uncommon:\{/.test(visuals)||!/[,{]rare:\{/.test(visuals)||!/[,{]epic:\{/.test(visuals)||!/[,{]legendary:\{/.test(visuals)||!/[,{]brute:\{/.test(visuals))fail('all six infected types require their own hit-pixel palette and weight');
@@ -121,12 +138,15 @@ if(!/function enemyImpactPoint\(detail=\{\}\)/.test(visuals)||!/enemyStack\.quer
 if(!/function hitPixels\(event,point=enemyImpactPoint\(event\.detail\)\)/.test(visuals)||!/while\(active\.length>48\)active\.shift\(\)\?\.remove\(\)/.test(visuals)||!/damageFloat\(event,point\);hitPixels\(event,point\)/.test(visuals))fail('hit pixels must share the exact shot-impact point and remain capped under spam');
 if(/#[0-9a-f]{6}'[^\n}]*(?:blue|gold|purple)|sparks:/i.test(visuals.match(/const HIT_PIXEL_STYLES=.*?\);/s)?.[0]||''))fail('all infected blood pixels must use a red-only palette');
 if(!/@keyframes damageNumberRise/.test(css))fail('floating damage animation is missing');
-if(!/@keyframes hitPixelBurst/.test(css)||!/@keyframes cinderbackHit/.test(css)||!/@keyframes blueShieldHit/.test(css)||!/@keyframes bloaterHit/.test(css)||!/@keyframes wardenHit/.test(css)||!/@keyframes bruteHit/.test(css))fail('infected hit pixels and character-specific recoil animations are incomplete');
+if(!/@keyframes hitPixelBurst/.test(css)||!/@keyframes infectedHitFrames/.test(css)||!/\.enemyUnit\.hit \.infectedAnimatedSprite \.infectedHitFrames/.test(css))fail('infected hit pixels and the shared three-frame shock renderer are incomplete');
+if(!/animation-duration:\.24s/.test(css)||!/@keyframes bruteShotImpact/.test(css)||!/impact\.classList\.toggle\('brute',brute\)/.test(visuals))fail('The Breaker requires a longer hit sheet and a heavier shot impact');
+if(!/clearTimeout\(hitClearTimer\)/.test(visuals)||!/duration=brute\?240:180/.test(visuals))fail('rapid shots must not let an older timer interrupt the current hit sheet');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 if(!html.includes('assets/enemy-common-drifter-death.png'))fail('The Drifter death sheet must be preloaded');
 if(!html.includes('assets/enemy-common-drifter-idle.png'))fail('The Drifter idle sheet must be preloaded');
 if(!html.includes('assets/enemy-common-drifter-walk.png'))fail('The Drifter walk sheet must be preloaded');
 if(!html.includes('assets/enemy-common-drifter-hit.png'))fail('The Drifter hit sheet must be preloaded');
+for(const asset of Object.values(normalizedHitAssets))if(!html.includes(asset))fail(`${asset} must be preloaded`);
 if(!html.includes('assets/enemy-uncommon-cinderback-death.png'))fail('The Cinderback death sheet must be preloaded');
 if(!html.includes('assets/enemy-rare-blue-shield-death.png'))fail('The Blue Shield death sheet must be preloaded');
 if(!html.includes('assets/enemy-epic-bloater-death.png'))fail('The Bloater death sheet must be preloaded');
@@ -141,6 +161,7 @@ if(!/@keyframes drifterDeathFrames/.test(css)||!/\.enemyDeathUnit\.horde \.enemy
 if(!/@keyframes drifterIdleFrames/.test(css)||!/aspect-ratio:358\/512/.test(css))fail('The Drifter idle animation must preserve the approved live scale and canvas ratio');
 if(!/\.enemyUnit\.spawn \.drifterAnimatedSprite \.drifterFrames\{background-image:var\(--drifter-walk\)/.test(css)||!/@keyframes drifterWalkFrames/.test(css))fail('The Drifter walk cycle must only run during its right-side entrance');
 if(!/\.enemyUnit\.hit\[data-rarity="common"\]\{animation:none\}/.test(css)||!/background-image:var\(--drifter-hit\)/.test(css)||!/@keyframes drifterHitFrames/.test(css))fail('The Drifter must use its dedicated three-frame shot shock without shifting the impact container');
+if(!/aspect-ratio:700\/760/.test(css)||!/@keyframes infectedHitFrames\{0%,32%\{transform:translateX\(0\)\}33%,65%\{transform:translateX\(-33\.3333%\)\}66%,100%\{transform:translateX\(-66\.6667%\)\}\}/.test(css))fail('normalized hit sheets must advance through all three equal cells without changing the encounter layout');
 if(!/67%,100%\{aspect-ratio:700\/631;background-size:253\.5% auto;background-position:100% 52%\}/.test(css))fail('the corpse frame must include the complete Drifter skull and preserve the shared ground baseline');
 if(!/data-death-sequence="uncommon"/.test(css)||!/data-death-sequence="rare"/.test(css)||!/data-death-sequence="epic"/.test(css)||!/data-death-sequence="legendary"/.test(css)||!/data-death-sequence="brute"/.test(css)||!/@keyframes normalizedDeathFrames\{0%,30%\{background-position:0 50%\}31%,66%\{background-position:50% 50%\}67%,100%\{background-position:100% 50%\}\}/.test(css))fail('All five normalized infected death sheets must animate through their three cells');
 if(!/data-death-sequence="epic"\]:not\(\.horde\) \.enemyDeathSprite\{height:148%\}/.test(css)||!/data-death-sequence="epic"\]\.horde \.enemyDeathSprite\{height:127%\}/.test(css))fail('The Bloater death sequence must preserve its live visual scale in single encounters and hordes');

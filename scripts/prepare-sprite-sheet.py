@@ -14,6 +14,48 @@ def is_background(pixel: tuple[int, int, int]) -> bool:
     return darkest >= 225 and max(pixel) - darkest <= 18
 
 
+def remove_neutral_matte(image: Image.Image, max_passes: int = 12) -> int:
+    """Peel the pale checker matte without flood-filling gray sprite details."""
+    pixels = image.load()
+    removed = 0
+    for _ in range(max_passes):
+        alpha = image.getchannel("A")
+        alpha_pixels = alpha.load()
+        fringe: list[tuple[int, int]] = []
+        for y in range(1, image.height - 1):
+            for x in range(1, image.width - 1):
+                if not alpha_pixels[x, y]:
+                    continue
+                red, green, blue, _ = pixels[x, y]
+                darkest = min(red, green, blue)
+                # The checker is neutral gray, so its antialiasing ramp can be
+                # much darker than the background itself. Preserve the black
+                # pixel-art contour and colored sprite pixels, but peel the
+                # neutral gray ramp all the way back to that contour.
+                neutral_light = darkest >= 36 and max(red, green, blue) - darkest <= 18
+                touches_alpha = any(
+                    not alpha_pixels[nx, ny]
+                    for nx, ny in (
+                        (x - 1, y - 1),
+                        (x, y - 1),
+                        (x + 1, y - 1),
+                        (x - 1, y),
+                        (x + 1, y),
+                        (x - 1, y + 1),
+                        (x, y + 1),
+                        (x + 1, y + 1),
+                    )
+                )
+                if neutral_light and touches_alpha:
+                    fringe.append((x, y))
+        if not fringe:
+            break
+        for x, y in fringe:
+            pixels[x, y] = (0, 0, 0, 0)
+        removed += len(fringe)
+    return removed
+
+
 def extract_edge_background(image: Image.Image) -> Image.Image:
     rgb = image.convert("RGB")
     width, height = rgb.size
@@ -48,26 +90,36 @@ def extract_edge_background(image: Image.Image) -> Image.Image:
             if exterior[row + x]:
                 output[x, y] = (0, 0, 0, 0)
 
-    # Remove only a one-pixel neutral checker fringe. Applying the relaxed
-    # threshold as a flood fill would eat connected gray clothing details.
-    alpha = rgba.getchannel("A")
-    alpha_pixels = alpha.load()
-    fringe: list[tuple[int, int]] = []
-    for y in range(1, height - 1):
-        for x in range(1, width - 1):
-            if not alpha_pixels[x, y]:
-                continue
-            pixel = pixels[x, y]
-            neutral_light = min(pixel) >= 160 and max(pixel) - min(pixel) <= 25
-            touches_alpha = any(
-                not alpha_pixels[nx, ny]
-                for nx, ny in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1))
-            )
-            if neutral_light and touches_alpha:
-                fringe.append((x, y))
-    for x, y in fringe:
-        output[x, y] = (0, 0, 0, 0)
+    # Image generation can bake several pale antialiasing pixels into the
+    # silhouette. Peel only neutral pixels that touch transparency; unlike a
+    # relaxed flood fill this stops as soon as it reaches the colored/dark
+    # outline and preserves enclosed armor, teeth and clothing details.
+    remove_neutral_matte(rgba)
     return rgba
+
+
+def clear_background_region(image: Image.Image, seed_x: int, seed_y: int) -> int:
+    if not 0 <= seed_x < image.width or not 0 <= seed_y < image.height:
+        raise ValueError(f"clear seed is outside the output canvas: {seed_x},{seed_y}")
+    pixels = image.load()
+
+    def is_light_neutral(x: int, y: int) -> bool:
+        red, green, blue, alpha = pixels[x, y]
+        return alpha > 0 and min(red, green, blue) >= 225 and max(red, green, blue) - min(red, green, blue) <= 18
+
+    if not is_light_neutral(seed_x, seed_y):
+        raise ValueError(f"clear seed does not point at light checker background: {seed_x},{seed_y}")
+    queue: deque[tuple[int, int]] = deque([(seed_x, seed_y)])
+    visited = {(seed_x, seed_y)}
+    while queue:
+        x, y = queue.popleft()
+        pixels[x, y] = (0, 0, 0, 0)
+        for nx, ny in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
+            point = (nx, ny)
+            if 0 <= nx < image.width and 0 <= ny < image.height and point not in visited and is_light_neutral(nx, ny):
+                visited.add(point)
+                queue.append(point)
+    return len(visited)
 
 
 def occupied_x_groups(image: Image.Image, minimum_gap: int = 8) -> list[tuple[int, int]]:
@@ -118,8 +170,18 @@ def source_frame_ranges(image: Image.Image, frames: int) -> list[tuple[int, int]
     return list(zip(cuts, cuts[1:]))
 
 
-def normalize_frames(image: Image.Image, frames: int, cell_width: int, canvas_height: int, baseline: int) -> Image.Image:
-    groups = source_frame_ranges(image, frames)
+def normalize_frames(
+    image: Image.Image,
+    frames: int,
+    cell_width: int,
+    canvas_height: int,
+    baseline: int,
+    source_ranges: list[tuple[int, int]] | None = None,
+    target_height: int | None = None,
+) -> Image.Image:
+    groups = source_ranges or source_frame_ranges(image, frames)
+    if len(groups) != frames:
+        raise ValueError(f"expected {frames} source ranges, received {len(groups)}")
 
     sheet = Image.new("RGBA", (frames * cell_width, canvas_height), (0, 0, 0, 0))
     for index, (left, right) in enumerate(groups):
@@ -128,6 +190,9 @@ def normalize_frames(image: Image.Image, frames: int, cell_width: int, canvas_he
         if bbox is None:
             raise ValueError(f"frame {index + 1} is empty")
         sprite = region.crop(bbox)
+        if target_height:
+            target_width = round(sprite.width * target_height / sprite.height)
+            sprite = sprite.resize((target_width, target_height), Image.Resampling.NEAREST)
         if sprite.width > cell_width - 20 or sprite.height > baseline - 10:
             raise ValueError(f"frame {index + 1} does not fit the normalized cell: {sprite.size}")
         x = index * cell_width + (cell_width - sprite.width) // 2
@@ -144,17 +209,52 @@ def main() -> None:
     parser.add_argument("--cell-width", type=int, default=600)
     parser.add_argument("--height", type=int, default=760)
     parser.add_argument("--baseline", type=int, default=735)
+    parser.add_argument(
+        "--ranges",
+        metavar="LEFT-RIGHT,...",
+        help="explicit source x-ranges for tightly spaced frames",
+    )
+    parser.add_argument(
+        "--target-height",
+        type=int,
+        help="normalize every extracted frame to this pixel height using nearest-neighbor scaling",
+    )
     parser.add_argument("--clear", action="append", default=[], metavar="X1,Y1,X2,Y2")
+    parser.add_argument("--clear-seed", action="append", default=[], metavar="X,Y")
     args = parser.parse_args()
 
     source = Image.open(args.input)
     transparent = extract_edge_background(source)
-    sheet = normalize_frames(transparent, args.frames, args.cell_width, args.height, args.baseline)
+    source_ranges = None
+    if args.ranges:
+        source_ranges = []
+        for raw_range in args.ranges.split(","):
+            left, right = (int(value) for value in raw_range.split("-", 1))
+            if not 0 <= left < right <= source.width:
+                raise ValueError(f"invalid --ranges entry: {raw_range}")
+            source_ranges.append((left, right))
+    sheet = normalize_frames(
+        transparent,
+        args.frames,
+        args.cell_width,
+        args.height,
+        args.baseline,
+        source_ranges,
+        args.target_height,
+    )
     for raw_box in args.clear:
         box = tuple(int(value) for value in raw_box.split(","))
         if len(box) != 4:
             raise ValueError(f"invalid --clear box: {raw_box}")
         sheet.paste((0, 0, 0, 0), box)
+    for raw_seed in args.clear_seed:
+        seed = tuple(int(value) for value in raw_seed.split(","))
+        if len(seed) != 2:
+            raise ValueError(f"invalid --clear-seed: {raw_seed}")
+        clear_background_region(sheet, *seed)
+    # A cleared enclosed checker region can expose its own pale edge. Run the
+    # same bounded cleanup once more on the final normalized sheet.
+    remove_neutral_matte(sheet)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(args.output, optimize=True)
     print(f"prepared {args.output}: {sheet.width}x{sheet.height}, {args.frames} equal alpha frames")

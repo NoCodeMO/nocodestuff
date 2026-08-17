@@ -2502,6 +2502,41 @@ html.standalone-app #tabs {
   background-image:var(--drifter-hit);
   animation:drifterHitFrames .18s steps(1,end) both
 }
+.enemyUnit .infectedAnimatedSprite {
+  aspect-ratio:700/760;
+  overflow:hidden
+}
+.infectedAnimatedSprite .infectedBaseSprite {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center bottom;
+  image-rendering:pixelated
+}
+.infectedAnimatedSprite .infectedHitFrames {
+  position:absolute;
+  inset:0 auto 0 0;
+  width:300%;
+  height:100%;
+  background-position:0 0;
+  background-repeat:no-repeat;
+  background-size:100% 100%;
+  opacity:0;
+  transform-origin:left bottom;
+  will-change:transform
+}
+.enemyUnit.hit .infectedAnimatedSprite .infectedBaseSprite {
+  opacity:0
+}
+.enemyUnit.hit .infectedAnimatedSprite .infectedHitFrames {
+  opacity:1;
+  animation:infectedHitFrames .18s steps(1,end) both
+}
+.enemyUnit.hit[data-rarity="brute"] .infectedAnimatedSprite .infectedHitFrames {
+  animation-duration:.24s
+}
 @keyframes drifterIdleFrames {
   0%,32% {
     transform:translateX(0)
@@ -2531,6 +2566,17 @@ html.standalone-app #tabs {
   }
 }
 @keyframes drifterHitFrames {
+  0%,32% {
+    transform:translateX(0)
+  }
+  33%,65% {
+    transform:translateX(-33.3333%)
+  }
+  66%,100% {
+    transform:translateX(-66.6667%)
+  }
+}
+@keyframes infectedHitFrames {
   0%,32% {
     transform:translateX(0)
   }
@@ -2588,7 +2634,7 @@ html.standalone-app #tabs {
   .enemyUnit.dead {
     animation:enemyDeathReduced .18s linear
   }
-  .drifterAnimatedSprite .drifterFrames,.enemyUnit.hit .drifterAnimatedSprite .drifterFrames {
+  .drifterAnimatedSprite .drifterFrames,.enemyUnit.hit .drifterAnimatedSprite .drifterFrames,.enemyUnit.hit .infectedAnimatedSprite .infectedHitFrames {
     animation:none
   }
   @keyframes enemyEnterReduced {
@@ -2765,70 +2811,30 @@ html.reducedEffects .shellCasing {
     width:17px
   }
 }
-.enemyUnit.hit[data-rarity="uncommon"] {
-  animation-name:cinderbackHit
+.enemyUnit.hit:is([data-rarity="uncommon"],[data-rarity="rare"],[data-rarity="epic"],[data-rarity="legendary"],[data-rarity="brute"]) {
+  animation:none
 }
-.enemyUnit.hit[data-rarity="rare"] {
-  animation-name:blueShieldHit
+.impactFx.brute {
+  width:46px;
+  height:46px;
+  background:radial-gradient(circle,#fff 0 5%,#ffd469 8% 17%,#d65c34 21% 32%,#87312088 36% 48%,transparent 52%);
+  filter:drop-shadow(0 0 8px #e2683eaa)
 }
-.enemyUnit.hit[data-rarity="epic"] {
-  animation-name:bloaterHit
+.impactFx.brute.pop {
+  animation:bruteShotImpact .24s steps(5,end)
 }
-.enemyUnit.hit[data-rarity="legendary"] {
-  animation-name:wardenHit
-}
-.enemyUnit.hit[data-rarity="brute"] {
-  animation-name:bruteHit
-}
-@keyframes cinderbackHit {
-  0%,100% {
-    transform:none
+@keyframes bruteShotImpact {
+  0% {
+    opacity:1;
+    transform:scale(.28) rotate(0)
   }
   45% {
-    transform:translateX(9px) rotate(-1deg) scale(.97);
-    filter:brightness(1.65) sepia(.35)
+    opacity:1;
+    transform:scale(1.45) rotate(8deg)
   }
-}
-@keyframes blueShieldHit {
-  0%,100% {
-    transform:none
-  }
-  42% {
-    transform:translateX(5px) rotate(.4deg);
-    filter:brightness(1.45) drop-shadow(0 0 7px #5da9ef)
-  }
-}
-@keyframes bloaterHit {
-  0%,100% {
-    transform:none
-  }
-  35% {
-    transform:translateX(7px) scale(1.025,.96) rotate(.7deg);
-    filter:brightness(1.5)
-  }
-  68% {
-    transform:translateX(-2px) scale(.99,1.015)
-  }
-}
-@keyframes wardenHit {
-  0%,100% {
-    transform:none
-  }
-  42% {
-    transform:translateX(13px) rotate(1.4deg) scale(.95);
-    filter:brightness(1.75) sepia(.3)
-  }
-}
-@keyframes bruteHit {
-  0%,100% {
-    transform:none
-  }
-  38% {
-    transform:translateX(4px) scale(.99);
-    filter:brightness(1.55)
-  }
-  65% {
-    transform:translateX(-1px)
+  100% {
+    opacity:0;
+    transform:scale(.78) rotate(-5deg)
   }
 }
 /* Time-limited combat streak */

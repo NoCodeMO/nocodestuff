@@ -14,6 +14,7 @@ EXPEDITION_ART_DOM_FILE="${TMPDIR:-/tmp}/bunkr-expedition-art-dom.html"
 COMPANION_IDLE_DOM_FILE="${TMPDIR:-/tmp}/bunkr-companion-idle-dom.html"
 PET_COMMAND_DOM_FILE="${TMPDIR:-/tmp}/bunkr-pet-command-dom.html"
 CASING_FEEDBACK_DOM_FILE="${TMPDIR:-/tmp}/bunkr-casing-feedback-dom.html"
+HIT_ANIMATION_DOM_FILE="${TMPDIR:-/tmp}/bunkr-hit-animation-dom.html"
 CHROME_LOG="${TMPDIR:-/tmp}/bunkr-chrome.log"
 
 python3 -m http.server "$PORT" --bind 127.0.0.1 >"${TMPDIR:-/tmp}/bunkr-server.log" 2>&1 &
@@ -43,6 +44,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1200,900 --virtual-time-budget=12000 --dump-dom "http://127.0.0.1:${PORT}/scripts/companion-idle-probe.html" >"$COMPANION_IDLE_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=6000 --dump-dom "http://127.0.0.1:${PORT}/scripts/pet-command-probe.html" >"$PET_COMMAND_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=5000 --dump-dom "http://127.0.0.1:${PORT}/scripts/casing-feedback-probe.html" >"$CASING_FEEDBACK_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,900 --virtual-time-budget=6000 --dump-dom "http://127.0.0.1:${PORT}/scripts/hit-animation-probe.html" >"$HIT_ANIMATION_DOM_FILE" 2>>"$CHROME_LOG"
 
 required=(
   '<title>Bunkr: Last Shelter</title>'
@@ -64,6 +66,11 @@ required=(
   'assets/combat-clouds.webp'
   'assets/combat-bunker-clean.webp'
   'assets/enemy-common-drifter-death.png'
+  'assets/enemy-uncommon-cinderback-hit.png'
+  'assets/enemy-rare-blue-shield-hit.png'
+  'assets/enemy-epic-bloater-hit.png'
+  'assets/enemy-legendary-gilded-warden-hit.png'
+  'assets/enemy-brute-breaker-hit.png'
   'assets/enemy-uncommon-cinderback-death.png'
   'assets/enemy-rare-blue-shield-death.png'
   'assets/enemy-epic-bloater-death.png'
@@ -214,4 +221,12 @@ if ! grep -Fq 'data-casing-feedback-probe="passed"' "$CASING_FEEDBACK_DOM_FILE";
   exit 1
 fi
 
-echo "Bunkr browser smoke test passed: core game, survivor-relative spent casings, free Ranger and Pet Command roster, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, Drifter death sequence, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."
+if ! grep -Fq 'data-hit-animation="passed"' "$HIT_ANIMATION_DOM_FILE"; then
+  echo "Infected hit-animation browser smoke test failed."
+  grep -F 'BUNKR_HIT_ANIMATION_' "$HIT_ANIMATION_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+echo "Bunkr browser smoke test passed: core game, all infected hit sheets, survivor-relative spent casings, free Ranger and Pet Command roster, 20 three-frame companions, static combat world, responsive expedition art, safe portrait combat, death sequences, landscape deck, survivor unlocks, Prestige resets and full account factory reset rendered correctly."

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Bunkr infected hit animation probe</title>
+  <style>html,body{margin:0;background:#000;color:#fff;font:12px monospace}iframe{position:absolute;left:0;top:0;border:0;visibility:hidden}</style>
+</head>
+<body data-hit-animation="running">
+  <output id="hitReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const cases=[
+        {id:'common',horde:false,frames:'drifterFrames',animation:'drifterHitFrames',duration:180},
+        {id:'uncommon',horde:true,frames:'infectedHitFrames',animation:'infectedHitFrames',duration:180},
+        {id:'rare',horde:false,frames:'infectedHitFrames',animation:'infectedHitFrames',duration:180},
+        {id:'epic',horde:true,frames:'infectedHitFrames',animation:'infectedHitFrames',duration:180},
+        {id:'legendary',horde:false,frames:'infectedHitFrames',animation:'infectedHitFrames',duration:180},
+        {id:'brute',horde:false,frames:'infectedHitFrames',animation:'infectedHitFrames',duration:240}
+      ],results=[];
+      const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+      const finish=()=>{
+        if(results.length!==cases.length)return;
+        const passed=results.every(result=>result.passed);
+        document.body.dataset.hitAnimation=passed?'passed':'failed';
+        document.getElementById('hitReport').textContent='BUNKR_HIT_ANIMATION_'+(passed?'PASS ':'FAIL ')+JSON.stringify(results);
+      };
+      for(const test of cases){
+        const frame=document.createElement('iframe'),params=new URLSearchParams({v:'hit-probe-'+test.id,enemy:test.id,crit:'0'});
+        if(test.horde)params.set('horde','1');
+        frame.width=390;frame.height=844;frame.style.width='390px';frame.style.height='844px';frame.src='../index.html?'+params;
+        frame.addEventListener('load',async()=>{
+          await pause(900);
+          try{
+            const win=frame.contentWindow,doc=frame.contentDocument,unit=doc.querySelector('.enemyUnit'),sprites=[...doc.querySelectorAll('.enemyUnit .enemySprite')],framePlayers=[...doc.querySelectorAll('.'+test.frames)],expectedCount=test.horde?3:1;
+            win.BunkrVisuals.shotFeedback({detail:{damage:1,critical:false,enemy:{id:test.id}}});
+            await pause(24);
+            const active=unit.classList.contains('hit'),names=framePlayers.map(node=>getComputedStyle(node).animationName),starts=framePlayers.map(node=>getComputedStyle(node).transform),bases=[...doc.querySelectorAll('.infectedBaseSprite')].map(node=>getComputedStyle(node).opacity);
+            await pause(Math.round(test.duration*.48));
+            const middles=framePlayers.map(node=>getComputedStyle(node).transform);
+            await pause(Math.round(test.duration*.38));
+            const ends=framePlayers.map(node=>getComputedStyle(node).transform);
+            await pause(75);
+            const restored=!unit.classList.contains('hit')&&[...doc.querySelectorAll('.infectedBaseSprite')].every(node=>getComputedStyle(node).opacity==='1'),advanced=starts.every((value,index)=>value!==middles[index]&&middles[index]!==ends[index]);
+            results.push({id:test.id,passed:sprites.length===expectedCount&&framePlayers.length===expectedCount&&active&&names.every(name=>name===test.animation)&&(!bases.length||bases.every(value=>value==='0'))&&advanced&&restored,count:sprites.length,players:framePlayers.length,active,names,advanced,restored});
+          }catch(error){results.push({id:test.id,passed:false,error:String(error)})}
+          finish();
+        });
+        document.body.append(frame);
+      }
+    })();
+  </script>
+</body>
+</html>
