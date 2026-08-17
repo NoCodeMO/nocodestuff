@@ -19,12 +19,17 @@
   <link rel="preload" as="image" href="assets/enemy-common-drifter-idle.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-common-drifter-walk.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-common-drifter-hit.png" type="image/png">
+  <link rel="preload" as="image" href="assets/enemy-common-zouki.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/enemy-common-zouki-idle.png" type="image/png">
+  <link rel="preload" as="image" href="assets/enemy-common-zouki-walk.png" type="image/png">
+  <link rel="preload" as="image" href="assets/enemy-common-zouki-hit.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-uncommon-cinderback-hit.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-rare-blue-shield-hit.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-epic-bloater-hit.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-legendary-gilded-warden-hit.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-brute-breaker-hit.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-common-drifter-death.png" type="image/png">
+  <link rel="preload" as="image" href="assets/enemy-common-zouki-death.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-uncommon-cinderback-death.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-rare-blue-shield-death.png" type="image/png">
   <link rel="preload" as="image" href="assets/enemy-epic-bloater-death.png" type="image/png">
@@ -35,7 +40,7 @@
   <link rel="preload" as="image" href="assets/care-package-airborne.png" type="image/png">
   <link rel="preload" as="image" href="assets/care-package-crate.png" type="image/png">
   <link rel="preload" as="image" href="assets/room-generator.webp" type="image/webp">
-  <link rel="stylesheet" href="app.css?build=62&pets=1&casing=1&brand=1&hit=1&noglow=1&research=1&mobilefix=2">
+  <link rel="stylesheet" href="app.css?build=62&pets=1&casing=1&brand=1&hit=1&noglow=1&research=1&mobilefix=2&zouki=1">
 </head>
 <body>
   <main id="app">
@@ -92,10 +97,10 @@
 
   <!-- Load order is documented in PROJECT.md. -->
   <script src="js/core/brand.js?build=1"></script>
-  <script src="js/core/config.js?build=38&pets=1&brand=1&hit=1&noglow=1&research=1"></script>
+  <script src="js/core/config.js?build=38&pets=1&brand=1&hit=1&noglow=1&research=1&zouki=1"></script>
   <script src="js/core/economy.js?build=3&brand=1"></script>
   <script src="js/core/numbers.js?build=2&brand=1"></script>
-  <script src="js/core/state.js?build=28&pets=1&casing=1&brand=1&research=1&researchmobile=1"></script>
+  <script src="js/core/state.js?build=28&pets=1&casing=1&brand=1&research=1&researchmobile=1&zouki=1"></script>
   <script src="js/systems/prestige.js?build=4&brand=1"></script>
   <script src="js/systems/operations.js?build=3&brand=1"></script>
   <script src="js/systems/expeditions.js?build=13&pets=1&brand=1&research=1"></script>
@@ -103,12 +108,12 @@
   <script src="js/systems/research.js?build=6&brand=1&network=1"></script>
   <script src="js/systems/merchant.js?build=5&brand=1"></script>
   <script src="js/systems/command-center.js?build=9&pets=1&casing=1&brand=1"></script>
-  <script src="js/ui/visuals.js?build=30&casing=1&brand=1&hit=1&noglow=1"></script>
+  <script src="js/ui/visuals.js?build=30&casing=1&brand=1&hit=1&noglow=1&zouki=1"></script>
   <script src="js/systems/survivor-dialogue.js?build=2&brand=1"></script>
-  <script src="js/core/game.js?build=29&brand=1&hit=1&noglow=1&research=1&researchmobile=1"></script>
-  <script src="js/systems/codex.js?build=2&brand=1"></script>
+  <script src="js/core/game.js?build=29&brand=1&hit=1&noglow=1&research=1&researchmobile=1&zouki=1"></script>
+  <script src="js/systems/codex.js?build=2&brand=1&zouki=1"></script>
   <script src="js/systems/offline.js?build=3&brand=1"></script>
-  <script src="js/systems/missions.js?build=10&brand=1"></script>
+  <script src="js/systems/missions.js?build=10&brand=1&zouki=1"></script>
   <script src="js/systems/care-package.js?build=3&brand=1"></script>
   <script src="js/audio.js?build=19&casing=2&realcasing=2&brand=1"></script>
   <script src="js/platform.js?build=4&brand=1"></script>

@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const ST=window.BunkrState,NUM=window.BunkrNumbers;if(!ST||!NUM)throw new Error('Mission state dependency missing');
+const CFG=window.BunkrConfig,ST=window.BunkrState,NUM=window.BunkrNumbers;if(!CFG||!ST||!NUM)throw new Error('Mission state dependency missing');
 const S=ST.get(),M=S.missions,fmt=NUM.format;
 
 // The original 50 IDs remain unchanged so every existing save keeps its progress.
@@ -38,7 +38,8 @@ function boundedBonus(type,current,value){const next=(Number(current)||1)*(Numbe
 function rebuiltBonuses(claimed=M.claimed){const out={};for(const id of claimed){const mission=Q.find(item=>item[0]===id);if(mission&&bonusTypes.has(mission[4]))out[mission[4]]=boundedBonus(mission[4],out[mission[4]],mission[5])}return out}
 const roomTotal=()=>Object.values(S.rooms||{}).reduce((sum,value)=>sum+(Number(value)||0),0);
 const researchTotal=()=>Object.values(S.research||{}).reduce((sum,value)=>sum+(Number(value)||0),0);
-const val=q=>q[2]==='kills'?(S.kills||0):q[2]==='bosses'?(S.stats?.bosses||0):q[2]==='hordes'?(S.stats?.hordes||0):q[2]==='shots'?(S.stats?.clicks||0):q[2]==='bunker'?(S.bunker||1):q[2]==='roomtotal'?roomTotal():q[2]==='researchtotal'?researchTotal():q[2].startsWith('rarity:')?(S.stats?.rarityKills?.[q[2].slice(7)]||0):(S.rooms?.[q[2]]||0);
+const rarityKills=rarity=>(CFG.ENEMIES||[]).filter(type=>(type.tier||type.id)===rarity).reduce((sum,type)=>sum+(Number(S.stats?.rarityKills?.[type.id])||0),0);
+const val=q=>q[2]==='kills'?(S.kills||0):q[2]==='bosses'?(S.stats?.bosses||0):q[2]==='hordes'?(S.stats?.hordes||0):q[2]==='shots'?(S.stats?.clicks||0):q[2]==='bunker'?(S.bunker||1):q[2]==='roomtotal'?roomTotal():q[2]==='researchtotal'?researchTotal():q[2].startsWith('rarity:')?rarityKills(q[2].slice(7)):(S.rooms?.[q[2]]||0);
 
 function baseRate(resource){const rate=Number(window.BunkrGame?.rates?.({useReserves:false,cache:false})?.[resource]||0),dealer=Math.max(1,Number(window.BunkrMerchant?.multiplier?.(resource)||1));return rate/dealer}
 function cachePayout(q){

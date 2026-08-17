@@ -2467,33 +2467,36 @@ html.standalone-app #tabs {
     transform:rotate(76deg) translate(30px,18px) scale(.82)
   }
 }
-.enemyUnit .drifterAnimatedSprite {
+.enemyUnit .commonAnimatedSprite {
   aspect-ratio:358/512;
   overflow:hidden
 }
-.drifterAnimatedSprite .drifterFrames {
+.enemyUnit .commonAnimatedSprite[data-enemy-id="zouki"] {
+  aspect-ratio:700/760
+}
+.commonAnimatedSprite .commonFrames {
   position:absolute;
   inset:0 auto 0 0;
   width:300%;
   height:100%;
-  background-image:var(--drifter-idle);
+  background-image:var(--enemy-idle);
   background-position:0 0;
   background-repeat:no-repeat;
   background-size:100% 100%;
-  animation:drifterIdleFrames 1.5s steps(1,end) infinite;
+  animation:commonIdleFrames 1.5s steps(1,end) infinite;
   transform-origin:left bottom;
   will-change:transform
 }
-.enemyUnit.spawn .drifterAnimatedSprite .drifterFrames {
-  background-image:var(--drifter-walk);
-  animation:drifterWalkFrames .33s steps(1,end) infinite
+.enemyUnit.spawn .commonAnimatedSprite .commonFrames {
+  background-image:var(--enemy-walk);
+  animation:commonWalkFrames .33s steps(1,end) infinite
 }
 .enemyUnit.hit[data-rarity="common"] {
   animation:none
 }
-.enemyUnit.hit .drifterAnimatedSprite .drifterFrames {
-  background-image:var(--drifter-hit);
-  animation:drifterHitFrames .18s steps(1,end) both
+.enemyUnit.hit .commonAnimatedSprite .commonFrames {
+  background-image:var(--enemy-hit);
+  animation:commonHitFrames .18s steps(1,end) both
 }
 .enemyUnit .infectedAnimatedSprite {
   aspect-ratio:700/760;
@@ -2530,7 +2533,7 @@ html.standalone-app #tabs {
 .enemyUnit.hit[data-rarity="brute"] .infectedAnimatedSprite .infectedHitFrames {
   animation-duration:.24s
 }
-@keyframes drifterIdleFrames {
+@keyframes commonIdleFrames {
   0%,32% {
     transform:translateX(0)
   }
@@ -2544,7 +2547,7 @@ html.standalone-app #tabs {
     transform:translateX(0)
   }
 }
-@keyframes drifterWalkFrames {
+@keyframes commonWalkFrames {
   0%,32% {
     transform:translateX(0)
   }
@@ -2558,7 +2561,7 @@ html.standalone-app #tabs {
     transform:translateX(0)
   }
 }
-@keyframes drifterHitFrames {
+@keyframes commonHitFrames {
   0%,32% {
     transform:translateX(0)
   }
@@ -2627,7 +2630,7 @@ html.standalone-app #tabs {
   .enemyUnit.dead {
     animation:enemyDeathReduced .18s linear
   }
-  .drifterAnimatedSprite .drifterFrames,.enemyUnit.hit .drifterAnimatedSprite .drifterFrames,.enemyUnit.hit .infectedAnimatedSprite .infectedHitFrames {
+  .commonAnimatedSprite .commonFrames,.enemyUnit.hit .commonAnimatedSprite .commonFrames,.enemyUnit.hit .infectedAnimatedSprite .infectedHitFrames {
     animation:none
   }
   @keyframes enemyEnterReduced {
@@ -8649,12 +8652,15 @@ body:has(#drawer:not(.hidden)) #appModeBanner,body:has(#missionBox.open) #appMod
 .enemyDeathUnit.play .enemyDeathSprite {
   animation:drifterDeathFrames var(--death-duration,390ms) steps(1,end) forwards
 }
-.enemyDeathUnit:is([data-death-sequence="uncommon"],[data-death-sequence="rare"],[data-death-sequence="epic"],[data-death-sequence="legendary"],[data-death-sequence="brute"]) .enemyDeathSprite {
+.enemyDeathUnit:is([data-death-sequence="zouki"],[data-death-sequence="uncommon"],[data-death-sequence="rare"],[data-death-sequence="epic"],[data-death-sequence="legendary"],[data-death-sequence="brute"]) .enemyDeathSprite {
   aspect-ratio:700/760;
   background-size:300% auto;
   background-position:0 50%
 }
-.enemyDeathUnit.play:is([data-death-sequence="uncommon"],[data-death-sequence="rare"],[data-death-sequence="epic"],[data-death-sequence="legendary"],[data-death-sequence="brute"]) .enemyDeathSprite {
+.enemyDeathUnit[data-death-sequence="zouki"] .enemyDeathSprite {
+  aspect-ratio:740/760
+}
+.enemyDeathUnit.play:is([data-death-sequence="zouki"],[data-death-sequence="uncommon"],[data-death-sequence="rare"],[data-death-sequence="epic"],[data-death-sequence="legendary"],[data-death-sequence="brute"]) .enemyDeathSprite {
   animation-name:normalizedDeathFrames
 }
 .enemyDeathUnit.horde .enemyDeathSprite {
@@ -8723,10 +8729,13 @@ body:has(#drawer:not(.hidden)) #appModeBanner,body:has(#missionBox.open) #appMod
     background-size:253.5% auto;
     background-position:100% 52%
   }
-  .enemyDeathUnit:is([data-death-sequence="uncommon"],[data-death-sequence="rare"],[data-death-sequence="epic"],[data-death-sequence="legendary"],[data-death-sequence="brute"]) .enemyDeathSprite {
+  .enemyDeathUnit:is([data-death-sequence="zouki"],[data-death-sequence="uncommon"],[data-death-sequence="rare"],[data-death-sequence="epic"],[data-death-sequence="legendary"],[data-death-sequence="brute"]) .enemyDeathSprite {
     aspect-ratio:700/760;
     background-size:300% auto;
     background-position:100% 50%
+  }
+  .enemyDeathUnit[data-death-sequence="zouki"] .enemyDeathSprite {
+    aspect-ratio:740/760
   }
   .enemyDeathUnit.fade {
     animation:none;

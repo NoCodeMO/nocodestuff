@@ -4,6 +4,7 @@ const root=path.resolve(__dirname,'..'),read=file=>fs.readFileSync(path.join(roo
 const state={coins:0,total:0,scrap:0,food:0,uranium:0,kills:0,bunker:1,rooms:{generator:1,workshop:0,greenhouse:0,purifier:0,lab:0,living:0,storage:0,turret:0},research:{tools:0,solar:0,hydro:0,filters:0,automation:0,walls:0},stats:{clicks:0,bosses:0,hordes:0,uraniumEarned:0,rarityKills:{}},missions:{claimed:[],bonuses:{}},merchant:{legacyMissionGrantDone:true}};
 const element=()=>({dataset:{},classList:{add(){},remove(){},toggle(){}},querySelector:()=>({}),querySelectorAll:()=>[],append(){},remove(){},innerHTML:'',id:'',className:''});
 const sandbox={window:{BunkrState:{get:()=>state,update:(reason,fn)=>fn(state),save(){},notify(){}},addEventListener(){},dispatchEvent(){}},document:{body:{append(){}},getElementById:()=>null,querySelectorAll:()=>[],createElement:element},CustomEvent:function(){},setInterval(){},setTimeout(){},console};
+vm.runInNewContext(read('js/core/config.js'),sandbox,{filename:'config.js'});
 vm.runInNewContext(read('js/core/numbers.js'),sandbox,{filename:'numbers.js'});
 vm.runInNewContext(read('js/systems/missions.js'),sandbox,{filename:'missions.js'});
 const api=sandbox.window.BunkrMissions,missions=api?.all?.()||[],operations=missions.filter(mission=>mission[0].startsWith('ops-'));

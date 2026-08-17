@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Bunkr Zouki full animation probe</title>
+  <style>html,body{margin:0;background:#080a08;color:#fff;font:12px monospace}iframe{display:block;width:390px;height:844px;border:0}</style>
+</head>
+<body data-zouki-animation-probe="running">
+  <iframe id="gameFrame" title="Bunkr Zouki full animation probe"></iframe>
+  <output id="zoukiAnimationReport" hidden></output>
+  <script>
+    (()=>{'use strict';
+      const frame=document.getElementById('gameFrame'),report=document.getElementById('zoukiAnimationReport'),pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+      localStorage.removeItem('bunkr_last_shelter_v1');
+      frame.src='../index.html?enemy=zouki&horde=1&crit=0&v=zouki-animation-probe';
+      frame.addEventListener('load',async()=>{
+        await pause(950);
+        const win=frame.contentWindow,doc=frame.contentDocument,game=win.BunkrGame,configured=win.BunkrConfig.ENEMIES.find(type=>type.id==='zouki'),unit=doc.querySelector('.enemyUnit');
+        const players=()=>[...doc.querySelectorAll('.enemyUnit .commonFrames')];
+        const animationNames=()=>players().map(node=>getComputedStyle(node).animationName);
+        const initial=game.enemy(),sprites=[...doc.querySelectorAll('.enemyUnit .commonAnimatedSprite')],stageRect=doc.getElementById('spriteStage').getBoundingClientRect(),rects=sprites.map(sprite=>sprite.getBoundingClientRect()),inside=rects.every(rect=>rect.left>=stageRect.left-2&&rect.right<=stageRect.right+2&&rect.top>=stageRect.top-2&&rect.bottom<=stageRect.bottom+2),ratios=rects.map(rect=>Number((rect.width/rect.height).toFixed(3))),idle=animationNames();
+        win.BunkrVisuals.renderEnemy({detail:{...configured,tier:'common',horde:true,visualCount:3}});
+        const walking=animationNames();
+        win.BunkrVisuals.shotFeedback({detail:{damage:1,critical:false,enemy:{id:'zouki',tier:'common',brute:false}}});
+        const hit=animationNames();
+        await pause(230);
+        const recovered=animationNames();
+        let shots=0;while(game.enemy()&&!game.enemy().dead&&shots<100){game.attack();shots++}
+        await pause(40);
+        const death=doc.querySelector('.enemyDeathUnit[data-death-sequence="zouki"]'),deathFrames=death?.querySelectorAll('.enemyDeathSprite').length||0,deathNames=[...death?.querySelectorAll('.enemyDeathSprite')||[]].map(node=>getComputedStyle(node).animationName),rewards=doc.querySelector('.killRewards.corpseRewards'),hidden=unit.classList.contains('defeated');
+        const passed=initial?.id==='zouki'&&initial?.tier==='common'&&initial?.horde===true&&configured?.chance===27.5&&sprites.length===3&&players().length===3&&inside&&ratios.every(ratio=>Math.abs(ratio-700/760)<.02)&&idle.every(name=>name==='commonIdleFrames')&&walking.every(name=>name==='commonWalkFrames')&&hit.every(name=>name==='commonHitFrames')&&recovered.every(name=>name==='commonIdleFrames')&&deathFrames===3&&deathNames.every(name=>name==='normalizedDeathFrames')&&!!rewards&&hidden;
+        const result={passed,initial:{id:initial?.id,tier:initial?.tier,horde:initial?.horde},sprites:sprites.length,inside,ratios,idle,walking,hit,recovered,shots,deathFrames,deathNames,rewards:!!rewards,hidden};
+        document.body.dataset.zoukiAnimationProbe=passed?'passed':'failed';
+        report.textContent='BUNKR_ZOUKI_ANIMATION_'+(passed?'PASS ':'FAIL ')+JSON.stringify(result);
+      });
+    })();
+  </script>
+</body>
+</html>

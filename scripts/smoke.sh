@@ -10,6 +10,7 @@ ARCHITECT_DOM_FILE="${TMPDIR:-/tmp}/bunkr-architect-dom.html"
 PRESTIGE_DOM_FILE="${TMPDIR:-/tmp}/bunkr-prestige-dom.html"
 RESET_DOM_FILE="${TMPDIR:-/tmp}/bunkr-account-reset-dom.html"
 DEATH_DOM_FILE="${TMPDIR:-/tmp}/bunkr-drifter-death-dom.html"
+ZOUKI_DOM_FILE="${TMPDIR:-/tmp}/bunkr-zouki-animation-dom.html"
 EXPEDITION_ART_DOM_FILE="${TMPDIR:-/tmp}/bunkr-expedition-art-dom.html"
 COMPANION_IDLE_DOM_FILE="${TMPDIR:-/tmp}/bunkr-companion-idle-dom.html"
 PET_COMMAND_DOM_FILE="${TMPDIR:-/tmp}/bunkr-pet-command-dom.html"
@@ -52,6 +53,7 @@ fi
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/prestige-probe.html" >"$PRESTIGE_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=8000 --dump-dom "http://127.0.0.1:${PORT}/scripts/account-reset-probe.html" >"$RESET_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1000,760 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/death-animation-probe.html" >"$DEATH_DOM_FILE" 2>>"$CHROME_LOG"
+"$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=4000 --dump-dom "http://127.0.0.1:${PORT}/scripts/zouki-animation-probe.html" >"$ZOUKI_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1200,900 --virtual-time-budget=12000 --dump-dom "http://127.0.0.1:${PORT}/scripts/expedition-art-probe.html" >"$EXPEDITION_ART_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=1200,900 --virtual-time-budget=12000 --dump-dom "http://127.0.0.1:${PORT}/scripts/companion-idle-probe.html" >"$COMPANION_IDLE_DOM_FILE" 2>>"$CHROME_LOG"
 "$CHROME" --headless --no-sandbox --disable-gpu --window-size=390,844 --virtual-time-budget=6000 --dump-dom "http://127.0.0.1:${PORT}/scripts/pet-command-probe.html" >"$PET_COMMAND_DOM_FILE" 2>>"$CHROME_LOG"
@@ -79,6 +81,10 @@ required=(
   'assets/combat-clouds.webp'
   'assets/combat-bunker-clean.webp'
   'assets/enemy-common-drifter-death.png'
+  'assets/enemy-common-zouki-idle.png'
+  'assets/enemy-common-zouki-walk.png'
+  'assets/enemy-common-zouki-hit.png'
+  'assets/enemy-common-zouki-death.png'
   'assets/enemy-uncommon-cinderback-hit.png'
   'assets/enemy-rare-blue-shield-hit.png'
   'assets/enemy-epic-bloater-hit.png'
@@ -197,6 +203,14 @@ fi
 if ! grep -Fq 'data-death-animation-probe="passed"' "$DEATH_DOM_FILE"; then
   echo "Drifter death animation browser smoke test failed."
   grep -F 'BUNKR_DRIFTER_DEATH_' "$DEATH_DOM_FILE" || true
+  echo "---- Chrome log ----"
+  cat "$CHROME_LOG" || true
+  exit 1
+fi
+
+if ! grep -Fq 'data-zouki-animation-probe="passed"' "$ZOUKI_DOM_FILE"; then
+  echo "Zouki full animation browser smoke test failed."
+  grep -F 'BUNKR_ZOUKI_ANIMATION_' "$ZOUKI_DOM_FILE" || true
   echo "---- Chrome log ----"
   cat "$CHROME_LOG" || true
   exit 1

@@ -4,10 +4,13 @@ const root=path.resolve(__dirname,'..'),sandbox={window:{}};
 vm.runInNewContext(fs.readFileSync(path.join(root,'js','core','config.js'),'utf8'),sandbox,{filename:'config.js'});
 const {ENEMIES,COMBAT}=sandbox.window.BunkrConfig||{};
 const fail=message=>{throw new Error(`Combat balance: ${message}`)};
-if(!Array.isArray(ENEMIES)||ENEMIES.length!==6)fail('exactly six enemy definitions are required');
-const expected={common:55,uncommon:25,rare:12,epic:5,legendary:2,brute:1};
+if(!Array.isArray(ENEMIES)||ENEMIES.length!==7)fail('exactly seven enemy definitions are required after Zouki joins the roster');
+const expected={common:27.5,zouki:27.5,uncommon:25,rare:12,epic:5,legendary:2,brute:1};
+const expectedTiers={common:55,uncommon:25,rare:12,epic:5,legendary:2,brute:1};
 const total=ENEMIES.reduce((sum,type)=>sum+type.chance,0);
 if(total!==100)fail(`spawn chances must total 100%, received ${total}%`);
+const tierTotals=ENEMIES.reduce((totals,type)=>{const tier=type.tier||type.id;totals[tier]=(totals[tier]||0)+type.chance;return totals},{});
+for(const [tier,chance] of Object.entries(expectedTiers))if(tierTotals[tier]!==chance)fail(`${tier} tier must keep its approved ${chance}% total chance`);
 for(const type of ENEMIES){
   if(type.chance!==expected[type.id])fail(`${type.id} must keep its approved ${expected[type.id]}% chance`);
   if(!fs.existsSync(path.join(root,type.asset)))fail(`missing sprite ${type.asset}`);
@@ -31,6 +34,19 @@ if(hitBuffer.readUInt32BE(16)!==1881||hitBuffer.readUInt32BE(20)!==836)fail('The
 if(common.deathAsset!=='assets/enemy-common-drifter-death.png')fail('The Drifter must expose its approved three-frame death sheet');
 const deathAsset=path.join(root,common.deathAsset);if(!fs.existsSync(deathAsset))fail(`missing death sprite ${common.deathAsset}`);
 const deathBuffer=fs.readFileSync(deathAsset);if(!deathBuffer.subarray(1,4).equals(Buffer.from('PNG'))||deathBuffer[25]!==6)fail('The Drifter death sheet must be a real RGBA PNG with transparent alpha');
+const zouki=ENEMIES.find(type=>type.id==='zouki');
+if(!zouki||zouki.tier!=='common'||zouki.tierShare!==.5||zouki.name!=='ZOUKI')fail('Zouki must be a distinct Common infected sharing the 55% tier evenly with The Drifter');
+for(const [key,asset,width,height] of [
+  ['idleAsset','assets/enemy-common-zouki-idle.png',2100,760],
+  ['walkAsset','assets/enemy-common-zouki-walk.png',2100,760],
+  ['hitAsset','assets/enemy-common-zouki-hit.png',2100,760],
+  ['deathAsset','assets/enemy-common-zouki-death.png',2220,760]
+]){
+  if(zouki[key]!==asset)fail(`Zouki ${key} must reference ${asset}`);
+  const file=path.join(root,asset);if(!fs.existsSync(file))fail(`missing Zouki animation ${asset}`);
+  const buffer=fs.readFileSync(file);if(!buffer.subarray(1,4).equals(Buffer.from('PNG'))||buffer[25]!==6)fail(`${asset} must be a real RGBA PNG`);
+  if(buffer.readUInt32BE(16)!==width||buffer.readUInt32BE(20)!==height)fail(`${asset} must contain three normalized equal cells at ${width}x${height}`);
+}
 const uncommon=ENEMIES.find(type=>type.id==='uncommon');
 if(uncommon.deathAsset!=='assets/enemy-uncommon-cinderback-death.png')fail('The Cinderback must expose its approved three-frame death sheet');
 const cinderAsset=path.join(root,uncommon.deathAsset);if(!fs.existsSync(cinderAsset))fail(`missing death sprite ${uncommon.deathAsset}`);
@@ -127,7 +143,7 @@ for(const [pattern,message] of [
   [/while\(corpses\.length>limit\)corpses\.shift\(\)\?\.remove\(\)/,'old corpses must be capped for spam safety'],
   [/enemyUnit\.classList\.remove\('dead','hit','defeated'\)/,'a newly spawned infected must always restore the live encounter unit']
 ])if(!pattern.test(visuals))fail(message);
-if(!/function createEnemySprite\(detail,index\)/.test(visuals)||!/configured\.id==='common'&&idleAsset/.test(visuals)||!/className='drifterFrames'/.test(visuals))fail('The Drifter must render through its dedicated animated sprite wrapper');
+if(!/function createEnemySprite\(detail,index\)/.test(visuals)||!/if\(idleAsset\)/.test(visuals)||!/className='commonFrames'/.test(visuals)||!/className='enemySprite commonAnimatedSprite'/.test(visuals))fail('The Drifter and Zouki must render through the shared fully animated Common sprite wrapper');
 if(!/className='enemySprite infectedAnimatedSprite'/.test(visuals)||!/className='infectedBaseSprite'/.test(visuals)||!/className='infectedHitFrames'/.test(visuals))fail('Every non-Drifter infected must preserve its live sprite and swap to a shared hit-frame wrapper');
 const css=fs.readFileSync(path.join(root,'app.css'),'utf8');
 if(!/float\.className='damageNumber'\+\(detail\.critical/.test(visuals)||!/if\(active\.length>8\)active\[0\]\.remove\(\)/.test(visuals))fail('per-shot damage feedback must exist and remain spam-safe');
@@ -144,6 +160,7 @@ if(!html.includes('assets/enemy-common-drifter-death.png'))fail('The Drifter dea
 if(!html.includes('assets/enemy-common-drifter-idle.png'))fail('The Drifter idle sheet must be preloaded');
 if(!html.includes('assets/enemy-common-drifter-walk.png'))fail('The Drifter walk sheet must be preloaded');
 if(!html.includes('assets/enemy-common-drifter-hit.png'))fail('The Drifter hit sheet must be preloaded');
+for(const asset of ['assets/enemy-common-zouki.webp','assets/enemy-common-zouki-idle.png','assets/enemy-common-zouki-walk.png','assets/enemy-common-zouki-hit.png','assets/enemy-common-zouki-death.png'])if(!html.includes(asset))fail(`${asset} must be preloaded`);
 for(const asset of Object.values(normalizedHitAssets))if(!html.includes(asset))fail(`${asset} must be preloaded`);
 if(!html.includes('assets/enemy-uncommon-cinderback-death.png'))fail('The Cinderback death sheet must be preloaded');
 if(!html.includes('assets/enemy-rare-blue-shield-death.png'))fail('The Blue Shield death sheet must be preloaded');
@@ -156,12 +173,12 @@ if(!/id='combatStreak'/.test(visuals)||!/bunkr:streak/.test(visuals)||!/@keyfram
 if(!/@keyframes enemyEnter\{from\{opacity:0;transform:translate3d\(calc\(100vw \+ 100%\)/.test(css))fail('spawn entrance must start beyond the right edge');
 if(/enemyGlow|--enemy-glow|var\(--enemy-glow\)/.test(visuals+css))fail('zombie rarity glow markup, variables and filters must stay removed');
 if(!/@keyframes drifterDeathFrames/.test(css)||!/\.enemyDeathUnit\.horde \.enemyDeathSprite:nth-child\(3\)/.test(css))fail('The Drifter death frames must animate for both single encounters and three-member hordes');
-if(!/@keyframes drifterIdleFrames/.test(css)||!/aspect-ratio:358\/512/.test(css))fail('The Drifter idle animation must preserve the approved live scale and canvas ratio');
-if(!/\.enemyUnit\.spawn \.drifterAnimatedSprite \.drifterFrames\{background-image:var\(--drifter-walk\)/.test(css)||!/@keyframes drifterWalkFrames/.test(css))fail('The Drifter walk cycle must only run during its right-side entrance');
-if(!/\.enemyUnit\.hit\[data-rarity="common"\]\{animation:none\}/.test(css)||!/background-image:var\(--drifter-hit\)/.test(css)||!/@keyframes drifterHitFrames/.test(css))fail('The Drifter must use its dedicated three-frame shot shock without shifting the impact container');
+if(!/@keyframes commonIdleFrames/.test(css)||!/aspect-ratio:358\/512/.test(css)||!/commonAnimatedSprite\[data-enemy-id="zouki"\]\{aspect-ratio:700\/760\}/.test(css))fail('Both Common idle animations must preserve their approved live canvas ratios');
+if(!/\.enemyUnit\.spawn \.commonAnimatedSprite \.commonFrames\{background-image:var\(--enemy-walk\)/.test(css)||!/@keyframes commonWalkFrames/.test(css))fail('Common walk cycles must only run during their right-side entrance');
+if(!/\.enemyUnit\.hit\[data-rarity="common"\]\{animation:none\}/.test(css)||!/background-image:var\(--enemy-hit\)/.test(css)||!/@keyframes commonHitFrames/.test(css))fail('Common infected must use dedicated three-frame shot shocks without shifting the impact container');
 if(!/aspect-ratio:700\/760/.test(css)||!/@keyframes infectedHitFrames\{0%,32%\{transform:translateX\(0\)\}33%,65%\{transform:translateX\(-33\.3333%\)\}66%,100%\{transform:translateX\(-66\.6667%\)\}\}/.test(css))fail('normalized hit sheets must advance through all three equal cells without changing the encounter layout');
 if(!/67%,100%\{aspect-ratio:700\/631;background-size:253\.5% auto;background-position:100% 52%\}/.test(css))fail('the corpse frame must include the complete Drifter skull and preserve the shared ground baseline');
-if(!/data-death-sequence="uncommon"/.test(css)||!/data-death-sequence="rare"/.test(css)||!/data-death-sequence="epic"/.test(css)||!/data-death-sequence="legendary"/.test(css)||!/data-death-sequence="brute"/.test(css)||!/@keyframes normalizedDeathFrames\{0%,30%\{background-position:0 50%\}31%,66%\{background-position:50% 50%\}67%,100%\{background-position:100% 50%\}\}/.test(css))fail('All five normalized infected death sheets must animate through their three cells');
+if(!/data-death-sequence="zouki"/.test(css)||!/data-death-sequence="uncommon"/.test(css)||!/data-death-sequence="rare"/.test(css)||!/data-death-sequence="epic"/.test(css)||!/data-death-sequence="legendary"/.test(css)||!/data-death-sequence="brute"/.test(css)||!/@keyframes normalizedDeathFrames\{0%,30%\{background-position:0 50%\}31%,66%\{background-position:50% 50%\}67%,100%\{background-position:100% 50%\}\}/.test(css))fail('All six normalized infected death sheets must animate through their three cells');
 if(!/data-death-sequence="epic"\]:not\(\.horde\) \.enemyDeathSprite\{height:148%\}/.test(css)||!/data-death-sequence="epic"\]\.horde \.enemyDeathSprite\{height:127%\}/.test(css))fail('The Bloater death sequence must preserve its live visual scale in single encounters and hordes');
 if(!/data-death-sequence="legendary"\]:not\(\.horde\) \.enemyDeathSprite\{height:113%\}/.test(css)||!/data-death-sequence="legendary"\]\.horde \.enemyDeathSprite\{height:97%\}/.test(css))fail('The Gilded Warden death sequence must preserve its live visual scale in single encounters and hordes');
 if(!/data-death-sequence="brute"\] \.enemyDeathSprite\{height:107%\}/.test(css))fail('The Breaker death sequence must preserve its boss-sized live scale');

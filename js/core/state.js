@@ -13,7 +13,7 @@ const defaults=()=>({
   rooms:{generator:1,workshop:0,greenhouse:0,purifier:0,lab:0,living:0,storage:0,turret:0},
   research:Object.fromEntries((CFG.RESEARCH||[]).map(item=>[item.id,0])),
   researchRuntime:{active:null,ready:null},
-  stats:{clicks:0,criticals:0,bestStreak:0,bosses:0,hordes:0,hordePity:0,bruteCores:0,uraniumEarned:0,uraniumSpent:0,lifetimeKills:0,prestigeResets:0,discovered:[],rarityKills:{common:0,uncommon:0,rare:0,epic:0,legendary:0,brute:0}},
+  stats:{clicks:0,criticals:0,bestStreak:0,bosses:0,hordes:0,hordePity:0,bruteCores:0,uraniumEarned:0,uraniumSpent:0,lifetimeKills:0,prestigeResets:0,discovered:[],rarityKills:{common:0,zouki:0,uncommon:0,rare:0,epic:0,legendary:0,brute:0}},
   merchant:{active:{},purchases:{},spent:0,freeActivations:0,legacyMissionGrantDone:false},
   carePackage:{nextAt:0,active:null,opened:0,missed:0},
   offline:{pending:null,totalClaims:0,totalSeconds:0},
