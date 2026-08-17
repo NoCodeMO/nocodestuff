@@ -19,33 +19,40 @@
       ],results=[];
       const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
       const finish=()=>{
-        if(results.length!==cases.length)return;
         const passed=results.every(result=>result.passed);
         document.body.dataset.hitAnimation=passed?'passed':'failed';
         document.getElementById('hitReport').textContent='BUNKR_HIT_ANIMATION_'+(passed?'PASS ':'FAIL ')+JSON.stringify(results);
       };
-      for(const test of cases){
-        const frame=document.createElement('iframe'),params=new URLSearchParams({v:'hit-probe-'+test.id,enemy:test.id,crit:'0'});
-        if(test.horde)params.set('horde','1');
-        frame.width=390;frame.height=844;frame.style.width='390px';frame.style.height='844px';frame.src='../index.html?'+params;
-        frame.addEventListener('load',async()=>{
-          await pause(900);
+      const frame=document.createElement('iframe');
+      frame.width=390;frame.height=844;frame.style.width='390px';frame.style.height='844px';frame.src='../index.html?v=hit-probe&enemy=common&crit=0';
+      frame.addEventListener('load',async()=>{
+        await pause(900);
+        const win=frame.contentWindow,doc=frame.contentDocument;
+        const keyframeTransforms=name=>{
+          for(const sheet of doc.styleSheets){
+            try{
+              const rule=[...sheet.cssRules].find(entry=>entry.name===name);
+              if(rule)return[...rule.cssRules].map(entry=>entry.style.transform).filter(Boolean);
+            }catch(error){}
+          }
+          return[];
+        };
+        for(const test of cases){
           try{
-            const win=frame.contentWindow,doc=frame.contentDocument,unit=doc.querySelector('.enemyUnit'),sprites=[...doc.querySelectorAll('.enemyUnit .enemySprite')],framePlayers=[...doc.querySelectorAll('.'+test.frames)],expectedCount=test.horde?3:1;
+            const configured=win.BunkrConfig.ENEMIES.find(entry=>entry.id===test.id),expectedCount=test.horde?3:1;
+            win.BunkrVisuals.renderEnemy({detail:{...configured,horde:test.horde,visualCount:expectedCount}});
+            await pause(20);
+            const unit=doc.querySelector('.enemyUnit'),sprites=[...doc.querySelectorAll('.enemyUnit .enemySprite')],framePlayers=[...doc.querySelectorAll('.'+test.frames)];
             win.BunkrVisuals.shotFeedback({detail:{damage:1,critical:false,enemy:{id:test.id}}});
-            const active=unit.classList.contains('hit'),names=framePlayers.map(node=>getComputedStyle(node).animationName),bases=[...doc.querySelectorAll('.infectedBaseSprite')].map(node=>getComputedStyle(node).opacity),animations=framePlayers.map(node=>node.getAnimations().find(animation=>animation.animationName===test.animation));
-            animations.forEach(animation=>animation?.pause());
-            const sample=progress=>{animations.forEach(animation=>{if(animation)animation.currentTime=test.duration*progress});return framePlayers.map(node=>getComputedStyle(node).transform)};
-            const starts=sample(.1),middles=sample(.5),ends=sample(.85),advanced=animations.every(Boolean)&&starts.every((value,index)=>value!==middles[index]&&middles[index]!==ends[index]);
-            animations.forEach(animation=>animation?.play());
+            const active=unit.classList.contains('hit'),styles=framePlayers.map(node=>getComputedStyle(node)),names=styles.map(style=>style.animationName),durations=styles.map(style=>Math.round(parseFloat(style.animationDuration)*1000)),bases=[...doc.querySelectorAll('.infectedBaseSprite')].map(node=>getComputedStyle(node).opacity),transforms=keyframeTransforms(test.animation),advanced=new Set(transforms).size===3;
             await pause(test.duration+75);
             const restored=!unit.classList.contains('hit')&&[...doc.querySelectorAll('.infectedBaseSprite')].every(node=>getComputedStyle(node).opacity==='1');
-            results.push({id:test.id,passed:sprites.length===expectedCount&&framePlayers.length===expectedCount&&active&&names.every(name=>name===test.animation)&&(!bases.length||bases.every(value=>value==='0'))&&advanced&&restored,count:sprites.length,players:framePlayers.length,active,names,advanced,restored});
+            results.push({id:test.id,passed:sprites.length===expectedCount&&framePlayers.length===expectedCount&&active&&names.every(name=>name===test.animation)&&durations.every(duration=>duration===test.duration)&&(!bases.length||bases.every(value=>value==='0'))&&advanced&&restored,count:sprites.length,players:framePlayers.length,active,names,durations,transforms,advanced,restored});
           }catch(error){results.push({id:test.id,passed:false,error:String(error)})}
-          finish();
-        });
-        document.body.append(frame);
-      }
+        }
+        finish();
+      });
+      document.body.append(frame);
     })();
   </script>
 </body>
