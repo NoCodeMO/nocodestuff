@@ -37,6 +37,6 @@ assert(/roomCostMultiplier/.test(special),'Knox must also reduce specialist room
 assert(/tabButton\('prestige','✦','PRESTIGE'\)/.test(command)&&/BunkrPrestige\?\.panel/.test(command),'Command Center needs the complete Prestige panel');
 assert(/bunkr:prestige-complete',prestigeSound/.test(audio),'Prestige completion needs its dedicated fanfare');
 for(const selector of ['.prestigePanel','.prestigeAscend','.prestigeRoomGrid','.cycleContracts','.prestigeConfirm','.prestigeReveal'])assert(css.includes(selector),`missing Prestige styling: ${selector}`);
-for(const marker of ['js/systems/prestige.js?build=4','app.css?build=61','js/core/state.js?build=28','js/systems/operations.js?build=3','js/core/game.js?build=29'])assert(html.includes(marker),`cache marker missing: ${marker}`);
+for(const marker of ['js/systems/prestige.js?build=4','app.css?build=62','js/core/state.js?build=28','js/systems/operations.js?build=3','js/core/game.js?build=29'])assert(html.includes(marker),`cache marker missing: ${marker}`);
 assert(fs.existsSync(path.join(root,'scripts','prestige-probe.html'))&&/data-prestige-probe="passed"/.test(read('scripts/smoke.sh')),'real-browser transactional reset probe is missing');
 console.log(`Bunkr Prestige balance passed: five cycles, ${skins.length} survivors, ${p.rooms.length} rooms, capped Cores and ×${economy(5).toFixed(2)} Prestige-V economy.`);

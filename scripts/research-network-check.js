@@ -1,7 +1,7 @@
 'use strict';
 const fs=require('fs'),path=require('path'),vm=require('vm');
 const root=path.resolve(__dirname,'..'),read=file=>fs.readFileSync(path.join(root,file),'utf8'),assert=(value,message)=>{if(!value)throw new Error(`Research network: ${message}`)};
-const configSource=read('js/core/config.js'),researchSource=read('js/systems/research.js'),stateSource=read('js/core/state.js'),gameSource=read('js/core/game.js'),expeditionSource=read('js/systems/expeditions.js'),css=read('app.css'),html=read('index.html'),smoke=read('scripts/smoke.sh');
+const configSource=read('js/core/config.js'),researchSource=read('js/systems/research.js'),stateSource=read('js/core/state.js'),gameSource=read('js/core/game.js'),expeditionSource=read('js/systems/expeditions.js'),css=read('app.css'),html=read('index.html'),smoke=read('scripts/smoke.sh'),probe=read('scripts/research-network-probe.html');
 const sandbox={window:{},console};
 vm.runInNewContext(configSource,sandbox,{filename:'config.js'});
 const config=sandbox.window.BunkrConfig,branches=config.RESEARCH_BRANCHES,nodes=config.RESEARCH;
@@ -64,6 +64,7 @@ for(const [pattern,message] of [
   [/@media\(max-width:820px\)/,'phone layout breakpoint is missing'],
   [/\.researchBranch\.mobileActive\{display:block/,'portrait branch focus mode is missing'],
   [/border-left:2px solid #4c553d/,'portrait vertical research route is missing'],
+  [/scroll-padding-bottom:max\(56px,calc\(env\(safe-area-inset-bottom\) \+ 20px\)\)/,'phone Research actions need safe scroll clearance'],
   [/@media\(orientation:landscape\) and \(min-width:560px\) and \(max-height:600px\)/,'phone landscape layout is missing'],
   [/grid-template-columns:repeat\(auto-fit,minmax\(90px,1fr\)\)/,'landscape branch fitting is missing'],
   [/@media\(prefers-reduced-motion:reduce\)/,'reduced-motion support is missing']
@@ -73,4 +74,5 @@ assert(/BunkrResearch\?\.productionBonus/.test(gameSource)&&/BunkrResearch\?\.ho
 assert(/BunkrResearch\?\.expeditionTimeMultiplier/.test(expeditionSource)&&/BunkrResearch\?\.companionChanceAdd/.test(expeditionSource),'expeditions must consume Field Operations research');
 assert(/data-tab="research"/.test(html)&&/id="researchBadge"/.test(html),'Research navigation and completion badge must remain available');
 assert(/research-network-probe\.html/.test(smoke)&&/landscape=1/.test(smoke)&&/data-research-network-probe="passed"/.test(smoke),'real-browser smoke must verify portrait and landscape lifecycle geometry');
+assert(/actionAccess\(doc,root\)/.test(probe)&&/bottomGap/.test(probe),'browser probe must verify the Research action can scroll fully above the phone edge');
 console.log('Bunkr Research Network passed: 17 projects, 97 levels, coherent prerequisites, Prestige gates, economy effects and responsive fullscreen UI.');

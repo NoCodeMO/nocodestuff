@@ -11227,7 +11227,8 @@ html.reducedEffects #spriteStage.bruteDeathImpact .survivorUnit,html.reducedEffe
 #drawer.researchDrawer {
   z-index:111;
   inset:0;
-  max-height:none;
+  height:100%;
+  max-height:100%;
   overflow:hidden;
   border:0;
   background:#080b09;
@@ -11251,10 +11252,14 @@ html.reducedEffects #spriteStage.bruteDeathImpact .survivorUnit,html.reducedEffe
 }
 #drawer.researchDrawer #drawerBody {
   height:calc(100% - 46px);
+  min-height:0;
   overflow:auto;
   background:#080b09;
   scrollbar-color:#806a37 #0d110d;
-  overscroll-behavior:contain
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  scroll-padding-bottom:max(56px,calc(env(safe-area-inset-bottom) + 20px))
 }
 #drawerBody[data-research-command="ready"] {
   min-height:100%;
@@ -11912,7 +11917,8 @@ html.reducedEffects #spriteStage.bruteDeathImpact .survivorUnit,html.reducedEffe
 @media(max-width:820px) {
   .researchCommand {
     display:flex;
-    flex-direction:column
+    flex-direction:column;
+    padding-bottom:max(56px,calc(env(safe-area-inset-bottom) + 20px))
   }
   .researchCommandHeader {
     order:1;
@@ -12078,6 +12084,7 @@ html.reducedEffects #spriteStage.bruteDeathImpact .survivorUnit,html.reducedEffe
   }
   .researchInspector {
     max-height:none;
+    overflow:visible;
     border-left:0;
     border-top:1px solid #4b4d38
   }
@@ -12136,7 +12143,8 @@ html.reducedEffects #spriteStage.bruteDeathImpact .survivorUnit,html.reducedEffe
     display:flex;
     flex-direction:column;
     height:100%;
-    min-height:0
+    min-height:0;
+    padding-bottom:0
   }
   .researchCommandHeader {
     order:1;
